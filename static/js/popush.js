@@ -50,8 +50,32 @@ var s;
 (s = ua.match(/version\/([\d.]+).*safari/)) ? Browser.safari = s[1] : 0;
 
 var novoice = false;
+//string: language pack
+var strings;
+
+if(document.cookie.split(";")[0] != undefined && document.cookie.split(";")[0].indexOf("english")>=0)
+{
+	strings = strings_en;
+}
+else
+{
+	strings = strings_cn;
+}
 
 //////////////////////// function //////////////////////////////
+function changeEng()
+{
+	document.cookie = "language = english";
+	//alert('english test');
+	window.location.reload();
+}
+
+function changeChn()
+{
+	document.cookie = "language = chinese";
+	//alert('chinese test');
+	window.location.reload();
+}
 
 function loading(id) {
 	if(loadings[id])
