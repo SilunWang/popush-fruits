@@ -1,10 +1,10 @@
-* {font-family:"ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei","WenQuanYi Micro Hei", sans-serif;word-break:break-all;word-wrap:break-word;}
+* {font-family:'Droid Sans Fallback','TakaoPGothic','SimHei',"SimSun",'Eras ITC','Goudy Old Style',"ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei","WenQuanYi Micro Hei";word-break:break-all;word-wrap:break-word;}
 h1, h2, h3, h4, h5, h6 {font-weight:normal;}
-input, button {font-family:"ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei","WenQuanYi Micro Hei", sans-serif;}
+input, button {font-family:'Droid Sans Fallback',"ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei","WenQuanYi Micro Hei", sans-serif;}
 
 .switch-rel {margin:5px 0 0 120px;}
 
-.hero-unit {background-image:url(../images/back.png);color:#ddd;overflow:hidden;}
+.hero-unit {background-image:url(../images/head-reverse.png);color:#ddd;overflow:hidden;}
 .hero-unit {-webkit-border-radius:0;-moz-border-radius:0;border-radius:0;}
 .hero-unit a {text-decoration:none;}
 .hero-unit a:hover {text-decoration:none;}
@@ -100,3 +100,45 @@ textarea {resize:none;}
 #fullscreentip {display:none;position:absolute;z-index:10000;left:0px;top:10px;}
 
 .userlistimg {min-width:32px;min-height:32px;}
+
+#file-list-table .head{  
+    background-image:linear-gradient(to bottom,rgb(250,250,250),rgb(200,210,230));
+}
+#file-list-table .head>th{
+    font-weight:300;
+}
+.table tbody tr:hover>td{
+    background-image:linear-gradient(to bottom,rgb(250,250,250),rgb(200,210,230));
+    border-bottom-width:2px;
+    border-color:rgb(132,151,238); 
+}
+.navbar-inner{
+    background-image:linear-gradient(to bottom,rgb(250,250,250),rgb(200,210,230));
+    border-color:rgb(147,162,237);
+    border-width:0px 0px 2px 0px;
+}
+.CodeMirror{
+    background-color:rgb(240,240,255);
+    border-color:rgb(96,122,239);
+}
+#console-title{
+    background-color:rgb(255,255,255);
+}
+.well{
+    background-color: rgb(255, 255, 255);
+}
+.btn{
+    background-image:linear-gradient(to bottom,rgb(250,250,250),rgb(210,220,240));
+}
+.btn.disabled{
+    background-color:rgb(255,255,255);
+}
+.pull-right .dropdown-toggle{
+    background-image:linear-gradient(to bottom,rgb(250,250,250),rgb(200,210,230));
+}
+.navbar .brand{
+    color:rgb(51,51,51);
+}
+.navbar .nav > li > a{
+    color:rgb(51,51,51);
+}
