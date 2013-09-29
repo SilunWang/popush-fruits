@@ -145,6 +145,17 @@ function showmessagebox(title, content, timeout) {
 
 function pressenter(e, func) {
 	e = e || event;
+	var name = $('#register-inputName').val();
+	if(!/^[A-Za-z0-9]*$/.test(name)) {
+		showmessage('register-name-message', 'name invalid');
+		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+		return;
+	}
+	else{
+		$('#register-name-message').slideUp();
+		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
+		return;
+	}
 	if(e.keyCode == 13 && loadDone)
 		func();
 }

@@ -103,11 +103,15 @@
 					<span>Nothing here</span>
 				</div>
 				<hr />
-				<div id="register-box" class="form-horizontal" style="min-width:420px;position:relative;">
+				<div id="register-box" class="form-horizontal" style="min-width:720px;position:relative;">
 					<div class="control-group">
 						<label class="control-label" for="register-inputName" localization>username</label>
+						<div class="alert hide" id="register-name-message" style="float:left;margin-left: 440px;position: absolute;margin-top: -4px;">
+							<button type="button" class="close" onclick="$('#register-name-message').slideUp()">&times;</button>
+							<span>Nothing here</span>
+						</div>
 						<div class="controls">
-							<input type="text" id="register-inputName" onkeydown="pressenter(arguments[0],register)" />
+							<input type="text" id="register-inputName" onkeyup="pressenter(arguments[0],register)" />
 						</div>
 					</div>
 					<div class="control-group">
