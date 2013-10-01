@@ -144,7 +144,12 @@ function showmessagebox(title, content, timeout) {
 }
 
 function pressenter(e, func) {
-	e = e || event;
+	e = e || event;	
+	if(e.keyCode == 13 && loadDone)
+		func();
+}
+
+function checkusername() {
 	var name = $('#register-inputName').val();
 	if(!/^[A-Za-z0-9]*$/.test(name)) {
 		showmessage('register-name-message', 'name invalid');
@@ -156,8 +161,6 @@ function pressenter(e, func) {
 		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
 		return;
 	}
-	if(e.keyCode == 13 && loadDone)
-		func();
 }
 
 function loadfailed() {
