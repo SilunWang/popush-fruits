@@ -163,6 +163,27 @@ function checkusername() {
 	}
 }
 
+function EnterLUsername(e){
+	e = e || event;	
+	if (e.keyCode == 13) {
+        $('#login-inputPassword').focus();
+    }
+}
+
+function EnterRUsername(e){
+	e = e || event;	
+	if (e.keyCode == 13) {
+        $('#register-inputPassword').focus();
+    }
+}
+
+function EnterRPassword(e){
+	e = e || event;	
+	if (e.keyCode == 13) {
+        $('#register-confirmPassword').focus();
+    }
+}
+
 function loadfailed() {
 	if(loadDone)
 		return;

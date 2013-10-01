@@ -61,8 +61,6 @@
 		<div class="row-fluid" id="login">
 			<div class="span4 offset4">
 				<h2 style="text-align:center" class="blink" localization>login</h2>
-				<input type="button" value="English" onclick="changeEng()"/>
-				<input type="button" value="中文" onclick="changeChn()"/>
 				<div class="alert hide" id="login-message">
 					<button type="button" class="close" onclick="$('#login-message').slideUp()">&times;</button>
 					<span>Nothing here</span>
@@ -72,7 +70,7 @@
 					<div class="control-group">
 						<label class="control-label" for="login-inputName" localization>username</label>
 						<div class="controls">
-							<input type="text" id="login-inputName" onkeydown="pressenter(arguments[0],login)" />
+							<input type="text" id="login-inputName" onkeydown="EnterLUsername(arguments[0])" />
 						</div>
 					</div>
 					<div class="control-group">
@@ -111,13 +109,13 @@
 							<span>Nothing here</span>
 						</div>
 						<div class="controls">
-							<input type="text" id="register-inputName" onkeydown="pressenter(arguments[0],register)" onkeyup="checkusername()"/>
+							<input type="text" id="register-inputName" onkeydown="EnterRUsername(arguments[0])" onkeyup="checkusername()"/>
 						</div>
 					</div>
 					<div class="control-group">
 						<label class="control-label" for="register-inputPassword" localization>password</label>
 						<div class="controls">
-							<input type="password" id="register-inputPassword" onkeydown="pressenter(arguments[0],register)" />
+							<input type="password" id="register-inputPassword" onkeydown="EnterRPassword(arguments[0])" />
 						</div>
 					</div>
 					<div class="control-group hide" id="register-padding">
@@ -252,8 +250,10 @@
 			<hr />
 			<div class="span11">
 				<p style="text-align:right" localization>popushteam</p>
-				<p> &nbsp; </p>
-			</div>
+				<p style="text-align:right" localization>
+					<a onclick="changeEng()" style="cursor:pointer">English</a>|<a onclick="changeChn()" style="cursor:pointer">中文</a>
+				</p>
+			</div>		
 		</div>
 		
 		<!-- popover -->
