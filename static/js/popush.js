@@ -50,30 +50,81 @@ var s;
 (s = ua.match(/version\/([\d.]+).*safari/)) ? Browser.safari = s[1] : 0;
 
 var novoice = false;
-//string: language pack
-var strings;
 
-if(document.cookie.split(";")[0] != undefined && document.cookie.split(";")[0].indexOf("english")>=0)
-{
-	strings = strings_en;
-}
-else
-{
-	strings = strings_cn;
-}
+//strings: choose language pack initially
+var strings = getCookie('language') == 'english' ? strings_en : strings_cn;
 
 //////////////////////// function //////////////////////////////
+
+/************************************************************************
+|    函数名称： setCookie                                                
+|    函数功能： 设置cookie函数                                            
+|    入口参数： name：cookie名称；value：cookie值     
+|	 Author: SilunWang              
+*************************************************************************/
+
+function setCookie(name, value) 
+{
+    var argv = setCookie.arguments; 
+    var argc = setCookie.arguments.length; 
+    var expires = (argc > 2) ? argv[2] : null; 
+    if(expires != null)
+    { 
+        var LargeExpDate = new Date (); 
+        LargeExpDate.setTime(LargeExpDate.getTime() + (expires*1000*3600*24));         
+    } 
+    document.cookie = name + "=" + escape (value)+((expires == null) ? "" : ("; expires=" +LargeExpDate.toGMTString())); 
+}
+
+/************************************************************************
+|    函数名称： getCookie                                                
+|    函数功能： 读取cookie函数                                            
+|    入口参数： Name：cookie名称   
+|	 Author: SilunWang                                         
+*************************************************************************/
+
+function getCookie(name) 
+{ 
+    var search = name + "=" 
+    if(document.cookie.length > 0) 
+    { 
+        offset = document.cookie.indexOf(search) 
+        if(offset != -1)
+        { 
+            offset += search.length 
+            end = document.cookie.indexOf(";", offset) 
+            if(end == -1) end = document.cookie.length 
+            return unescape(document.cookie.substring(offset, end)) 
+        } 
+        else return "" 
+    } 
+} 
+
+/************************************************************************
+|    函数名称： deleteCookie                                            
+|    函数功能： 删除cookie函数                                            
+|    入口参数： Name：cookie名称 
+|	 Author: SilunWang                                         
+*************************************************************************/    
+
+function deleteCookie(name) 
+{ 
+    var expdate = new Date(); 
+    expdate.setTime(expdate.getTime() - (86400 * 1000 * 1)); 
+    setCookie(name, "", expdate);
+}
+
+//更改语言为English
 function changeEng()
 {
-	document.cookie = "language = english";
-	//alert('english test');
+	setCookie('language', 'english');
 	window.location.reload();
 }
 
+//更改语言为中文
 function changeChn()
 {
-	document.cookie = "language = chinese";
-	//alert('chinese test');
+	setCookie('language', 'chinese');
 	window.location.reload();
 }
 
