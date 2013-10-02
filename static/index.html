@@ -34,16 +34,22 @@
 		</div>
 	</div>
 
+	<!--登录后 进入文件列表界面上方的导航栏-->
 	<div class="navbar navbar-fixed-top hide" id="nav-head">
 		<div class="navbar-inner">
 			<div class="container" style="width: auto; padding: 0 20px;">
+				<!--左侧的Popush图标-->
 				<a class="brand" href="#">Popush</a>
+				<!--右侧的头像-->
 				<ul class="nav pull-right">
 					<li class="dropdown">
 						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-						<span id="nav-user-name">Your Name</span>
-						<img height="32" width="32" src="#" id="nav-avatar" />
+							<!--用户名-->
+							<span id="nav-user-name">Your Name</span>
+							<!--用户头像-->
+							<img height="32" width="32" src="#" id="nav-avatar" />
 						</a>
+						<!--下拉菜单-->
 						<ul class="dropdown-menu">
 							<li><a href="#changepassword" data-toggle="modal" onclick="changepasswordopen()" localization>changepassword</a></li>
 							<li><a href="#changeavatar" data-toggle="modal" onclick="changeavataropen()" localization>changeavatar</a></li>
@@ -135,6 +141,7 @@
 		</div>
 
 		<div id="filecontrol" class="hide">
+			<!--拥有文件/共享文件 标签栏-->
 			<div class="row-fluid">
 				<div class="span12">
 					<ul class="nav nav-tabs">
@@ -153,12 +160,15 @@
 				</div>
 			</div>
 			
+			<!--文件列表主体-->
 			<div class="row-fluid" id="file-list">
+				<!--左侧table-->
 				<div class="span10">
 					<p><span localization>currentdir:</span><span id="current-dir"></span></p>
 					<table class="table table-hover" id="file-list-table">
 					</table>
 				</div>
+				<!--右侧共享用户-->
 				<div class="span2">
 					<span localization>shareduser</span>：
 					<div id="member-list">
@@ -168,7 +178,9 @@
 			</div>
 		</div>
 		
+		<!--点击文件进入编辑界面 编辑器-->
 		<div id="editor" class="row-fluid hide">
+			<!--编辑器主体-->
 			<div class="span9">
 				<div class="tooltip top in" id="fullscreentip">
 					<div class="tooltip-inner" localization>esctoexit</div>
@@ -231,13 +243,18 @@
 					</div>
 				</div>
 			</div>
+
+			<!--右侧带有头像和聊天的边栏-->
 			<div class="span3" id="chatbox">
+				<!--上方一条 带有头像的成员列表-->
 				<div id="member-list-doc">
 					<img src="images/character.png" width="40" height="40" class="pull-left shared-character" />
 				</div>
+				<!--聊天主体框-->
 				<div id="chat-show" style="height:284px;">
 					<div id="chat-show-inner"></div>
 				</div>
+				<!--输入框-->
 				<div class="input-append" style="margin-bottom:0">
 					<input type="text" id="chat-input" onkeydown="pressenter(arguments[0],chat)">
 					<button class="btn" type="button" onclick="chat()" title="send"><i class="icon-comment"></i></button>
@@ -246,6 +263,7 @@
 			</div>
 		</div>
 		
+		<!--Footer-->
 		<div id="footer" class="row-fluid">
 			<hr />
 			<div class="span11">
