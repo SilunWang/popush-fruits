@@ -437,6 +437,8 @@ function backtologin() {
 	$('#filecontrol').hide();
 	$('#editor').hide();
 	$('#login').fadeIn('fast');
+	//SilunWang fix a bug(footer disappear)
+	$('#footer').fadeIn('fast');
 	$('.modal').modal('hide');
 }
 
