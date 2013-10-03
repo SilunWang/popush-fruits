@@ -33,9 +33,9 @@ function fileList(table) {
 
 	var obj = $(table);
 
-	var header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2">' + strings['filename'] + '</th><th class="col3">' + strings['state'] + '</th>' +
-		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
+	var header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
+		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
+		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
 	
 	var elements = [];
 	
@@ -87,13 +87,13 @@ function fileList(table) {
 		setmode: function(newmode) {
 			mode = newmode;
 			if(mode & 2)
-				header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2">' + strings['filename'] + '</th><th class="col3">' + strings['state'] + '</th>' +
-		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
+				header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
+		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
+		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
 			else
 				header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2">' + strings['filename'] + '</th><th class="col3 owner">' + strings['owner'] + '</th>' +
-		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
+		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3 owner" localization>' + strings['owner'] + '</th>' +
+		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
 		},
 	
 		add: function(o) {

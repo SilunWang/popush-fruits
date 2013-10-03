@@ -51,7 +51,7 @@ var s;
 
 var novoice = false;
 
-//strings: choose language pack initially
+//strings: choose language pack initially By SilunWang
 var strings = getCookie('language') == 'english' ? strings_en : strings_cn;
 
 //////////////////////// function //////////////////////////////
@@ -72,7 +72,7 @@ function setCookie(name, value)
     { 
         var LargeExpDate = new Date (); 
         LargeExpDate.setTime(LargeExpDate.getTime() + (expires*1000*3600*24));         
-    } 
+    }
     document.cookie = name + "=" + escape (value)+((expires == null) ? "" : ("; expires=" +LargeExpDate.toGMTString())); 
 }
 
@@ -118,14 +118,46 @@ function deleteCookie(name)
 function changeEng()
 {
 	setCookie('language', 'english');
-	window.location.reload();
+	strings = strings_en;
+	$('[localization]').html(function(index, oldcontent) {
+		for(var iter in strings_cn)
+		{
+			if(oldcontent == strings_cn[iter])
+				return strings_en[iter];
+		}
+		return oldcontent;
+	});
+	$('[title]').attr('title', function(index, oldcontent) {
+		for(var iter in strings_cn)
+		{
+			if(oldcontent == strings_cn[iter])
+				return strings_en[iter];
+		}
+		return oldcontent;
+	});
 }
 
 //更改语言为中文
 function changeChn()
 {
 	setCookie('language', 'chinese');
-	window.location.reload();
+	strings = strings_cn;
+	$('[localization]').html(function(index, oldcontent) {
+		for(var iter in strings_en)
+		{
+			if(oldcontent == strings_en[iter])
+				return strings_cn[iter];
+		}
+		return oldcontent;
+	});
+	$('[title]').attr('title', function(index, oldcontent) {
+		for(var iter in strings_en)
+		{
+			if(oldcontent == strings_en[iter])
+				return strings_cn[iter];
+		}
+		return oldcontent;
+	});
 }
 
 function loading(id) {
