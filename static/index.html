@@ -17,6 +17,7 @@
 	<script type="text/javascript" src="js/codemirror.js"></script>
 	<script type="text/javascript" src="js/loadmode.js"></script>
 	<script type="text/javascript" src="js/localization/zh-cn.js"></script>
+	<script type="text/javascript" src="js/localization/zh-en.js"></script>
 	<script type="text/javascript" src="js/ie.js"></script>
 	<script type="text/javascript" src="js/filelist.js"></script>
 	<script type="text/javascript" src="js/userlist.js"></script>
@@ -24,7 +25,10 @@
 	<script type="text/javascript" src="js/popush.js"></script>
 	<script type="text/javascript" src="js/room.js"></script>
 </head>
+
 <body style="display:none;">
+
+	<!--Popush大logo-->
 	<div class="hero-unit" id="big-one">
 		<div class="container">
 			<div class="row">
@@ -63,13 +67,13 @@
 	</div>
 	
 	<div class="container-fluid">
-
+		<!--登录界面-->
 		<div class="row-fluid" id="login">
 			<div class="span4 offset4">
 				<h2 style="text-align:center" class="blink" localization>login</h2>
 				<div class="alert hide" id="login-message">
 					<button type="button" class="close" onclick="$('#login-message').slideUp()">&times;</button>
-					<span>Nothing here</span>
+					<span localization>Nothing here</span>
 				</div>
 				<hr />
 				<div id="login-box" class="form-horizontal" style="min-width:420px;position:relative;">
@@ -99,12 +103,13 @@
 			</div>
 		</div>
 		
+		<!--注册界面-->
 		<div class="row-fluid hide" id="register">
 			<div class="span4 offset4">
 				<h2 style="text-align:center" class="blink" localization>register</h2>
 				<div class="alert hide" id="register-message">
 					<button type="button" class="close" onclick="$('#register-message').slideUp()">&times;</button>
-					<span>Nothing here</span>
+					<span localization>Nothing here</span>
 				</div>
 				<hr />
 				<div id="register-box" class="form-horizontal" style="min-width:720px;position:relative;">
@@ -112,7 +117,7 @@
 						<label class="control-label" for="register-inputName" localization>username</label>
 						<div class="alert hide" id="register-name-message" style="float:left;margin-left: 440px;position: absolute;margin-top: -4px;">
 							<button type="button" class="close" onclick="$('#register-name-message').slideUp()">&times;</button>
-							<span>Nothing here</span>
+							<span localization>Nothing here</span>
 						</div>
 						<div class="controls">
 							<input type="text" id="register-inputName" onkeydown="EnterRUsername(arguments[0])" onkeyup="checkusername()"/>
@@ -274,7 +279,7 @@
 			</div>		
 		</div>
 		
-		<!-- popover -->
+		<!-- popover 新建文件/新建文件夹-->
 		<div id="newfile" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newfileLabel" aria-hidden="true" data-backdrop="static">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -297,7 +302,7 @@
 			</div>
 		</div>
 		
-		<!-- popover -->
+		<!-- popover 修改头像弹出框-->
 		<div id="changeavatar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="changeavatarLabel" aria-hidden="true" data-backdrop="static">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -306,7 +311,7 @@
 			<div class="modal-body">
 				<div class="alert hide" id="changeavatar-message">
 					<button type="button" class="close" onclick="$('#changeavatar-message').slideUp()">&times;</button>
-					<span>Nothing here</span>
+					<span localization>Nothing here</span>
 				</div>
 				<p localization>clicktochange</p>
 				<p align="center">
@@ -321,7 +326,7 @@
 			</div>
 		</div>
 
-		<!-- popover -->
+		<!-- popover 修改密码弹出框-->
 		<div id="changepassword" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="changepasswordLabel" aria-hidden="true" data-backdrop="static">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -358,7 +363,7 @@
 			</div>
 		</div>
 
-		<!-- popover -->
+		<!-- popover 删除文件确认框-->
 		<div id="delete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true" data-backdrop="static">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -375,7 +380,7 @@
 			</div>
 		</div>
 
-		<!-- popover -->
+		<!-- popover 重命名文件弹出框-->
 		<div id="rename" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="renameLabel" aria-hidden="true" data-backdrop="static">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -398,7 +403,7 @@
 			</div>
 		</div>
 
-		<!-- popover -->
+		<!-- popover 共享文件确认框-->
 		<div id="share" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="shareLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
 			<div class="modal-header">
 				<button type="button" onclick="closeshare()" class="close">&times;</button>
@@ -412,7 +417,7 @@
 				</div>
 				<div class="alert hide" id="share-message">
 					<button type="button" class="close" onclick="$('#share-message').slideUp()">&times;</button>
-					<span>Nothing here</span>
+					<span localization>Nothing here</span>
 				</div>
 				<div class="form-inline" id="share-buttons">
 					<span localization>newuser:</span>
