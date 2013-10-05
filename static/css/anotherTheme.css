@@ -1,0 +1,107 @@
+body{
+    background-image:url("../images/wood.png");
+}
+.hero-unit{
+    background-image:url("../images/popush1.png");
+    background-color:transparent;
+    box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.4);
+}
+#login-box{
+    padding-top:20px;
+}
+hr{
+    border-color: rgb(51, 51, 51);
+    border-width:1px;
+}
+#console-inner{
+    background-color:rgb(255,255,215);
+    border:1px solid rgb(155,155,155);
+}
+.CodeMirror{
+    background-color:rgb(255,255,215);
+    border-color:rgb(155,155,155);
+}
+#varlistreal{
+    background-color:rgb(255,255,215);
+    border:1px solid rgb(155,155,155);
+}
+#chat-show{
+    background-color:rgb(255,255,215);
+    border:1px solid rgb(155,155,155);
+}
+#chat-input{
+    background-color:rgb(255,255,215);
+    border:1px solid rgb(155,155,155);
+}
+.CodeMirror-gutters{
+    background-color:rgb(255,255,255);
+    border-right:1px solid rgb(155,155,155);
+}
+.new{
+    border-bottom:1px solid rgb(155,155,155);
+}
+#file-list-table{  
+    background-color:rgb(255,255,255);
+    box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.5);
+}
+
+#file-list-table .head:hover{
+    background-color:rgb(255,255,200);
+    background-image:none;
+}
+#file-list-table .head{  
+    background-image:none;
+    background-color:rgb(255,255,255);
+    
+}
+#file-list-table .head>th{
+    font-weight:300;
+}
+.table tbody tr:hover>td{
+    background-image:none;
+    background-color:rgb(255,255,200);
+    border-bottom-width:1px;
+    border-color:rgb(255,230,114);  
+}
+.navbar-inner{
+    background-image:url("../images/wood.png");
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.35);
+    border: none;
+}
+.navbar-fixed-top .navbar-inner, .navbar-static-top .navbar-inner {
+    box-shadow: 0px 3px 4px rgba(0, 0, 0, 0.4);
+}
+.nav-tabs {
+    border-bottom: 1px solid rgb(51, 51, 51);
+}
+.nav-tabs > .active > a, .nav-tabs > .active > a:hover, .nav-tabs > .active > a:focus {
+    border-top-color:rgb(51, 51, 51);
+    border-left-color:rgb(51, 51, 51);
+    border-right-color:rgb(51, 51, 51);
+    background:none;
+}
+#console-title{
+    background-color:rgb(255,255,255);
+}
+.well{
+    background-color: rgb(255, 255, 255);
+}
+.btn{
+    background-image:none;
+    background-color:rgb(255,255,215);
+}
+.btn:hover{
+    background-color:rgb(255,255,255);
+}
+.btn.disabled{
+    background-color:rgb(255,255,255);
+}
+.navbar .brand{
+    color:rgb(51,51,51);
+}
+.navbar .nav > li > a{
+    color:rgb(51,51,51);
+}
+.pull-right .dropdown-toggle{
+    background-image:url("../images/wood.png");
+}

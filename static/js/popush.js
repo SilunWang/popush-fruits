@@ -160,6 +160,17 @@ function changeChn()
 	});
 }
 
+//更改主题为第一个主题
+function changetheme1(){
+	removejscssfile("css/anotherTheme.css", "css");
+	loadjscssfile("css/changebootstrap.css", "css");
+}
+
+function changetheme2(){
+	removejscssfile("css/changebootstrap.css", "css");
+	loadjscssfile("css/anotherTheme.css", "css");
+}
+
 function loading(id) {
 	if(loadings[id])
 		return;
