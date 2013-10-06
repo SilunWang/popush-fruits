@@ -81,13 +81,13 @@
 					<div class="control-group">
 						<label class="control-label" for="login-inputName" localization>username</label>
 						<div class="controls">
-							<input type="text" id="login-inputName" onkeydown="EnterLUsername(arguments[0])" />
+							<input type="text" id="login-inputName" onkeydown="EnterLUsername(arguments[0],login)" />
 						</div>
 					</div>
 					<div class="control-group">
 						<label class="control-label" for="login-inputPassword" localization>password</label>
 						<div class="controls">
-							<input type="password" id="login-inputPassword" onkeydown="pressenter(arguments[0],login)" />
+							<input type="password" id="login-inputPassword" onkeydown="EnterLPassword(arguments[0],login)" />
 						</div>
 					</div>
 					<div class="control-group hide" id="login-padding">
@@ -116,24 +116,22 @@
 				<div id="register-box" class="form-horizontal" style="min-width:720px;position:relative;">
 					<div class="control-group">
 						<label class="control-label" for="register-inputName" localization>username</label>
-						<div class="alert hide" id="register-name-message" style="float:left;margin-left: 440px;position: absolute;margin-top: -4px;">
-							<button type="button" class="close" onclick="$('#register-name-message').slideUp()">&times;</button>
-							<span localization>Nothing here</span>
-						</div>
+						<div style="float:left;margin-left: 425px;position: absolute;top:4px;" localization>name invalid</div>
 						<div class="controls">
-							<input type="text" id="register-inputName" onkeydown="EnterRUsername(arguments[0])" onkeyup="checkusername()"/>
+							<input type="text" id="register-inputName" onkeydown="EnterRUsername(arguments[0],register)" onkeyup="checkusername()"/>
+							<li id="register-check"style="display: inline;position: absolute;top: 6px;margin-left: 10px;width: 16px;height: 16px;background: url('images/check.png') no-repeat scroll 0px -160px transparent;"></li>
 						</div>
 					</div>
 					<div class="control-group">
 						<label class="control-label" for="register-inputPassword" localization>password</label>
 						<div class="controls">
-							<input type="password" id="register-inputPassword" onkeydown="EnterRPassword(arguments[0])" />
+							<input type="password" id="register-inputPassword" onkeydown="EnterRPassword(arguments[0],register)" />
 						</div>
 					</div>
 					<div class="control-group hide" id="register-padding">
 						<label class="control-label" for="register-inputPassword" localization>confirm</label>
 						<div class="controls">
-							<input type="password" id="register-confirmPassword" onkeydown="pressenter(arguments[0],register)" />
+							<input type="password" id="register-confirmPassword" onkeydown="EnterRConfrim(arguments[0],register)" />
 						</div>
 					</div>
 					<div class="control-group">

@@ -245,37 +245,74 @@ function pressenter(e, func) {
 
 function checkusername() {
 	var name = $('#register-inputName').val();
-	if(!/^[A-Za-z0-9]*$/.test(name)) {
-		showmessage('register-name-message', 'name invalid');
+	if(name == ''){
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+	}
+	else if(!/^[A-Za-z0-9]*$/.test(name)) {
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
 		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
 		return;
 	}
 	else{
-		$('#register-name-message').slideUp();
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
 		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
 		return;
 	}
 }
 
-function EnterLUsername(e){
+
+function EnterLUsername(e, func){
 	e = e || event;	
-	if (e.keyCode == 13) {
-        $('#login-inputPassword').focus();
-    }
+	if (e.keyCode == 40) {
+        	$('#login-inputPassword').focus();
+	}
+	else if(e.keyCode == 13 && loadDone){
+		func();	
+	}
 }
 
-function EnterRUsername(e){
+function EnterLPassword(e, func){
 	e = e || event;	
-	if (e.keyCode == 13) {
-        $('#register-inputPassword').focus();
-    }
+	if (e.keyCode == 38) {
+        	$('#login-inputName').focus();
+	}
+	else if(e.keyCode == 13 && loadDone){
+		func();	
+	}
 }
 
-function EnterRPassword(e){
+function EnterRUsername(e, func){
 	e = e || event;	
-	if (e.keyCode == 13) {
-        $('#register-confirmPassword').focus();
-    }
+	if (e.keyCode == 40) {
+        	$('#register-inputPassword').focus();
+	}
+	else if(e.keyCode == 13 && loadDone){
+		func();	
+	}
+}
+
+function EnterRPassword(e, func){
+	e = e || event;	
+	if (e.keyCode == 40) {
+        	$('#register-confirmPassword').focus();
+	}
+	else if (e.keyCode == 38) {
+        	$('#register-inputName').focus();
+	}
+	else if(e.keyCode == 13 && loadDone){
+		func();	
+	}
+}
+
+function EnterRConfrim(e, func){
+	e = e || event;	
+	if (e.keyCode == 38) {
+        	$('#register-inputPassword').focus();
+	}
+	else if(e.keyCode == 13 && loadDone){
+		func();	
+	}
 }
 
 function loadfailed() {
