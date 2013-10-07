@@ -96,13 +96,13 @@ function fileList(table) {
 		setmode: function(newmode) {
 			mode = newmode;
 			if(mode & 2)
-				header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2">' + strings['filename'] + '</th><th class="col3">' + strings['state'] + '</th>' +
-		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
+				header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
+		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
+		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
 			else
-				header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2">' + strings['filename'] + '</th><th class="col3 owner">' + strings['owner'] + '</th>' +
-		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
+				header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
+		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3 owner" localization>' + strings['owner'] + '</th>' +
+		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
 		},
 		
 		//增加一个文件，o:已经格式化好的文件相关信息，包括path,name,showname,type,shared
@@ -120,13 +120,13 @@ function fileList(table) {
 				ext = 'unknown';
 
 			var toAppend = '<tr>' +
-				'<td class="col1"><img src="' + getpic(o.type, o.shared, ext) + '" height="32" width="32" /></td>' +
-				'<td class="col2"><a href="javascript:;" onclick="allFileLists['+n+'].onname(allFileLists['+n+'].elements['+i+'])">' + 
+				'<td class="col1" localization><img src="' + getpic(o.type, o.shared, ext) + '" height="32" width="32" /></td>' +
+				'<td class="col2" localization><a href="javascript:;" onclick="allFileLists['+n+'].onname(allFileLists['+n+'].elements['+i+'])">' + 
 				htmlescape(o.showname) + '</a></td>' +
 				(mode & 2?('<td class="col3" localization>' + (o.shared?strings['shared']:'') + '</td>'):
-				'<td class="col3 owner"><img class="user-' + o.owner.name + '" src="' + o.owner.avatar + '" width="32" height="32"/>' + o.owner.name + '</td>') +
-				'<td class="col4">' + o.time + '</td>' +
-				'<td class="col5"><div class="dropdown">' +
+				'<td class="col3 owner" localization><img class="user-' + o.owner.name + '" src="' + o.owner.avatar + '" width="32" height="32"/>' + o.owner.name + '</td>') +
+				'<td class="col4" localization>' + o.time + '</td>' +
+				'<td class="col5" localization><div class="dropdown">' +
 				'<a href="javascript:;" class="dropdown-toggle' + (mode?'':' disabled') + ' opreation" data-toggle="dropdown">&nbsp;</a>' +
 				'<ul class="dropdown-menu">' +
 				(mode & 1?
