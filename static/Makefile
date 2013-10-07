@@ -7,7 +7,7 @@ static:split
 	@mv split.html index.html
 
 inline:inline.html
-	@rm -rf indexx.html index.css anotherTheme.css changebootstrap.css index.js jquery.wheelmenu.js split.html
+	@rm -rf indexx.html index.css anotherTheme.css changebootstrap.css index.js split.html
 
 split:split.html
 	@rm -rf indexx.html inline.html
@@ -30,7 +30,7 @@ index.css:$(wildcard css/*.css)
 
 index.js:$(wildcard js/*.js)
 	@echo ">  make index.js"
-	@cd js && ../lib/uglify-js/bin/uglifyjs conf.js jquery.min.js jquery.cookie.js socket.io.min.js firebase.js newMultiConnection.js bootstrap.min.js codemirror.js loadmode.js localization/zh-cn.js localization/zh-en.js ie.js filelist.js userlist.js expressionlist.js loadtheme.js popush.js room.js > ../index.js 2>/dev/null
+	@cd js && ../lib/uglify-js/bin/uglifyjs conf.js jquery.min.js jquery.wheelmenu.js jquery.cookie.js socket.io.min.js firebase.js newMultiConnection.js bootstrap.min.js codemirror.js loadmode.js localization/zh-cn.js localization/zh-en.js ie.js filelist.js userlist.js expressionlist.js loadtheme.js popush.js room.js > ../index.js 2>/dev/null
 
 clean:
 	@rm -rf indexx.html index.css index.js inline.html split.html
