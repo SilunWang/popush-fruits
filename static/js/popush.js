@@ -1247,7 +1247,7 @@ $(document).ready(function() {
 	});
 	$(window).resize(function() {
 		var width = $(document).width() * 0.915;
-		var margin_left = (width/2 - 330) + "px";
+		var margin_left = (width/2 - 108) + "px";
 		$("#foot-information").css("margin-left",margin_left);	
 	});
 });
