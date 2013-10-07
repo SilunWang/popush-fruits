@@ -37,8 +37,8 @@ function fileList(table) {
 	var obj = $(table);
 
 	var header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2">' + strings['filename'] + '</th><th class="col3">' + strings['state'] + '</th>' +
-		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
+		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
+		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
 	
 	//一个用户的文件列表
 	var elements = [];
