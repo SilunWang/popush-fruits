@@ -1,4 +1,9 @@
 var strings_en = {
+	'language'						:'Language: ',
+	'theme'							:'Theme',
+	'defaultTheme'					:'White',
+	'classicSky'					:'Sky',
+	'elegantLife'					:'Wood',
 	'hide-title'                    :'hide title',
 	'show-title'                    :'show title',
 	'pleaseinput'                   :'please input username',
@@ -60,7 +65,7 @@ var strings_en = {
 	'timestamp'                     :'time-stamp',
 	'nofile'                        :'no file',
 	'owner'                         :'owner',
-	'shared'                        :'sharing',
+	'shared'                        :'shared',
 	'sharemanage'                   :'sharing manage',
 	'export'                        :'export',
 	'import'                        :'import',

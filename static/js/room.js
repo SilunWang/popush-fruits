@@ -1,13 +1,20 @@
+//标记是否处于运行状态
 var runLock = false;
+//标记是否处于调试状态
 var debugLock = false;
+//标记是否处于“正在保存状态”
 var waiting = false;
 
+//标记代码是否可以运行
 var runable = true;
+//记录可以运行的扩展名
 var runableext = [
 	'c', 'cpp', 'js', 'py', 'pl', 'rb', 'lua', 'java'
 ];
 
+//标记代码是否可以调试
 var debugable = true;
+//记录可以调试的扩展名
 var debugableext = [
 	'c', 'cpp'
 ];
@@ -21,53 +28,72 @@ var doc;
 var q = [];
 var timer = null;
 
+//扩展名
 var ext;
-
+//?breakpoints queue?
 var bq = [];
+//一个字符串，描述这个文件每一行的断点信息，1表示有断点，0表示没有断点
 var bps = "";
+//标记刚刚运行的语句所在行数
 var runningline = -1;
 
+//标记控制台是否处于打开状态
 var consoleopen = false;
 
+//?
 var old_text;
+//?
 var old_bps;
 
+//将修改加入队列
 q._push = q.push;
 q.push = function(element) {
 	this._push(element);
 	setsaving();
 }
 
+//将修改出队
 q._shift = q.shift;
 q.shift = function() {
 	var r = this._shift();
 	if(this.length == 0 && bufferfrom == -1){ // buffertext == "") {
+		//如果本地的修改已经处理完毕，则标记已保存
 		setsaved();
 	}
 	return r;
 }
 
+//根据各种状态判断现在是否可运行
 function runenabled(){
 	return (runable && !debugLock && (!issaving || runLock));
 }
 
+//根据各种状态判断现在是否可调试
 function debugenabled(){
 	return (debugable && !runLock && (!issaving || debugLock));
 }
 
+//控制页面上的运行、调试按钮的可用性
 function setrunanddebugstate(){
+	//解除禁止状态
 	$('#editor-run').removeClass('disabled');
 	$('#editor-debug').removeClass('disabled');
+	//如果不可运行，则禁用运行按钮
 	if(!runenabled())
 		$('#editor-run').addClass('disabled');
+	//如果不可调试，则禁用调试按钮
 	if(!debugenabled())
 		$('#editor-debug').addClass('disabled');
 }
 
+//记录保存的时间
 var savetimestamp;
+//标记当前是否正在保存
 var issaving = false;
+//从本地完全出队到更新视图的延时，用途待定
 var savetimeout = 500;
 
+//在页面上标记正在保存
 function setsaving(){
 	$('#current-doc-state').addClass('red');
 	$('#current-doc-state').text(strings['saving...']);
@@ -84,12 +110,14 @@ function setsaving(){
 	setrunanddebugstate();
 }
 
+//标记已经保存，逻辑层面的
 function setsaved(){
 	savetimestamp = new Date().getTime();
 	setTimeout('setsavedthen(' + savetimestamp + ')', savetimeout);
 	savetimeout = 500;
 }
 
+//在页面上标记已经保存
 function setsavedthen(timestamp){
 	if(savetimestamp == timestamp) {
 		$('#current-doc-state').removeClass('red');
@@ -101,6 +129,7 @@ function setsavedthen(timestamp){
 	}
 }
 
+//根据扩展名（参数ext）判断代码是否可被运行
 function isrunable(ext) {
 	for(var i=0; i<runableext.length; i++) {
 		if(runableext[i] == ext)
@@ -109,6 +138,7 @@ function isrunable(ext) {
 	return false;
 }
 
+//根据扩展名（参数ext）判断代码是否可被调试
 function isdebugable(ext) {
 	for(var i=0; i<debugableext.length; i++) {
 		if(debugableext[i] == ext)
@@ -117,6 +147,7 @@ function isdebugable(ext) {
 	return false;
 }
 
+//新建一个光标，content：对方的用户名
 function newcursor(content) {
 	var cursor = $(
 		'<div class="cursor">' +
@@ -137,7 +168,11 @@ function newcursor(content) {
 	return cursor;
 }
 
-function sendbreak(from, to, text){
+//向服务器发送设置的断点信息
+//from:断点之前一行
+//to:断点所在的一行
+//text:增加断点=1,取消断点=0
+function sendbreak(from, to, text) {
 	var req = {version:doc.version, from:from, to:to, text:text};
 	if(bq.length == 0){
 		socket.emit('bps', req);
@@ -145,8 +180,12 @@ function sendbreak(from, to, text){
 	bq.push(req);
 }
 
-function addbreakpointat(cm, n){
+//增加一个断点
+//cm:一个codeMirror对象
+//n:断点上一行行号
+function addbreakpointat(cm, n) {
 	var addlen = n - bps.length;
+	//在一个人编辑的情况下，addlen始终为负数
 	if (addlen > 0){
 		var addtext = "";
 		for (var i = bps.length; i < n-1; i++){
@@ -165,7 +204,11 @@ function addbreakpointat(cm, n){
 	cm.setGutterMarker(n, 'breakpoints', element);
 }
 
-function removebreakpointat(cm, n){
+//删除一个断点，在增加断点时也会被调用
+//cm:一个codeMirror对象
+//n:断点上一行行号
+//返回值：删除成功则返回1，断点不存在则返回0
+function removebreakpointat(cm, n) {
 	var info = cm.lineInfo(n);
 	if (info.gutterMarkers && info.gutterMarkers["breakpoints"]) {
 		cm.setGutterMarker(n, 'breakpoints', null);
@@ -176,6 +219,7 @@ function removebreakpointat(cm, n){
 	return false;
 }
 
+//检查这一行是否有断点
 function havebreakat (cm, n) {
 	var info = cm.lineInfo(n);
 	if (info && info.gutterMarkers && info.gutterMarkers["breakpoints"]) {
@@ -184,6 +228,9 @@ function havebreakat (cm, n) {
 	return "0";
 }
 
+//根据扩展名（ext）设置代码编辑器左边边栏的点击事件
+//如果代码可以被调试，则点击左边栏会增加/删除断点
+//该函数在每次进入代码编辑器时调用
 function checkrunanddebug(ext) {
 	if(ENABLE_RUN) {
 		runable = isrunable(ext);
@@ -194,6 +241,7 @@ function checkrunanddebug(ext) {
 			gutterclick = function(cm, n) {
 				if(debugLock && !waiting)
 					return;
+				//如果断点删除失败（本身不存在），则增加断点，否则删除断点
 				if (!removebreakpointat(cm, n)){
 					addbreakpointat(cm, n);
 				}
@@ -206,6 +254,7 @@ function checkrunanddebug(ext) {
 	setrunanddebugstate();
 }
 
+//调试的时候，在界面标注当前进行在第几行，n：行数
 function runtoline(n) {
 	if(runningline >= 0) {
 		editor.removeLineClass(runningline, '*', 'running');
@@ -219,6 +268,7 @@ function runtoline(n) {
 	runningline = n;
 }
 
+//删除所有断点
 function removeallbreakpoints() {
 	for (var i = 0; i < bps.length; i++){
 		if (bps[i] == "1"){
@@ -231,13 +281,14 @@ function removeallbreakpoints() {
 	bps.replace("1", "0");
 }
 
+//根据断点的信息初始化网页断点,bpsstr:传入的断点信息
 function initbreakpoints(bpsstr) {
 	bps = bpsstr;
-	for (var i = bpsstr.length; i < editor.lineCount(); i++){
+	for (var i = bpsstr.length; i < editor.lineCount(); i++) {
 		bps += "0";
 	}
 	for (var i = 0; i < bps.length; i++){
-		if (bps[i] == "1"){
+		if (bps[i] == "1") {
 			var element = $('<div><img src="images/breakpoint.png" /></div>').get(0);
 			editor.setGutterMarker(i, 'breakpoints', element);
 		}
@@ -246,6 +297,7 @@ function initbreakpoints(bpsstr) {
 
 var oldscrolltop = 0;
 
+//打开编辑界面的时候会调用，o：关于打开的文件的信息
 function openeditor(o) {
 	if(operationLock)
 		return;
@@ -257,8 +309,8 @@ function openeditor(o) {
 	});
 }
 
+//关闭编辑界面后的相关操作
 function closeeditor() {
-
 	$('#editor').hide();
 	$('#filecontrol').show();
 	$('#footer').show();
@@ -273,6 +325,7 @@ function closeeditor() {
 	leaveVoiceRoom();
 }
 
+//向服务器发送聊天的数据
 function chat() {
 	var text = $('#chat-input').val();
 	if(text == '')
@@ -284,16 +337,19 @@ function chat() {
 	$('#chat-input').val('');
 }
 
+//处理控制台的输入
 function stdin() {
 	if(debugLock && waiting)
 		return;
 
 	var text = $('#console-input').val();
 
+	//当处于运行等待状态时，发送输入框数据到服务器
 	if(runLock || debugLock) {
 		socket.emit('stdin', {
 			data: text + '\n'
 		});
+		//在发送之后，也在控制台输出了内容，应当是别的函数调用了appendtoconsole
 	} else {
 		appendtoconsole(text + '\n', 'stdin');
 	}
@@ -301,12 +357,17 @@ function stdin() {
 	$('#console-input').val('');
 }
 
+//在按下ctrl+s之后调用的处理函数
 function saveevent(cm) {
 	if(savetimestamp != 0)
 		setsavedthen(savetimestamp);
 	savetimestamp = 0;
 }
 
+//将聊天的内容显示到屏幕上
+//name:发送消息的人，可能是“系统消息”
+//type:自己-“self”，系统-“system”，其它人-“”
+//time:消息的时间
 function appendtochatbox(name, type, content, time) {
 	$('#chat-show-inner').append(
 		'<p class="chat-element"><span class="chat-name ' + type +
@@ -316,6 +377,9 @@ function appendtochatbox(name, type, content, time) {
 	o.scrollTop = o.scrollHeight;
 }
 
+//将文字内容放到控制台
+//content:文字内容
+//type:类型，输入为stdin，错误stderr，其它undefined
 function appendtoconsole(content, type) {
 	if(type) {
 		type = ' class="' + type + '"';
@@ -331,6 +395,7 @@ function appendtoconsole(content, type) {
 
 $(function() {
 
+	//重设监视变量，在点击监视变量时发生，id：描述点击的位置
 	expressionlist.renameExpression = function(id) {
 		this.doneall();
 		if(debugLock && !waiting)
@@ -346,6 +411,7 @@ $(function() {
 		this.seteditingelem(id);
 	};
 
+	//修改监视列表完成时的处理工作，在按下回车或者点击空白时发生
 	expressionlist.renameExpressionDone = function(id) {
 		var input = this.elements[id].elem.find('input');
 		var span = this.elements[id].elem.find('span');
@@ -378,6 +444,7 @@ $(function() {
 		this.seteditingelem(null);
 	};
 
+	//删除监视的变量
 	expressionlist.removeExpression = function(id) {
 		this.doneall();
 		socket.emit('rm-expr', {
@@ -387,6 +454,7 @@ $(function() {
 
 });
 
+//接收服务器发送过来的添加监视的信息
 socket.on('add-expr', function(data) {
 	if(data.expr) {
 		expressionlist.addExpression(data.expr);
@@ -394,11 +462,14 @@ socket.on('add-expr', function(data) {
 	}
 });
 
+//接收服务器发送过来的移除监视的信息，data:监视的变量名-变量值
 socket.on('rm-expr', function(data) {
 	expressionlist.removeElementByExpression(data.expr);
 });
 
+//接收聊天消息，并显示在屏幕上，data：包含信息内容，发送者，时间
 socket.on('chat', function(data) {
+	
 	var text = htmlescape(data.text);
 
 	var time = new Date(data.time);
@@ -406,11 +477,13 @@ socket.on('chat', function(data) {
 	appendtochatbox(data.name, (data.name == currentUser.name?'self':''), text, time);
 });
 
+//当文件的拥有着删除这个文件时，给编辑的人的提示处理，data=undefined？
 socket.on('deleted', function(data) {
 	closeeditor();
 	showmessagebox('info', 'deleted', 1);
 });
 
+//当文件的拥有者更改共享管理时，给编辑的人的提示处理，data存有被取消权限的用户
 socket.on('unshared', function(data) {
 	if(data.name == currentUser.name) {
 		closeeditor();
@@ -421,6 +494,7 @@ socket.on('unshared', function(data) {
 	}
 });
 
+//当文件的拥有者更改共享管理时，给编辑的人的提示处理，调用时机待确认?
 socket.on('shared', function(data) {
 	memberlistdoc.add(data);
 	memberlistdoc.setonline(data.name, false);
@@ -428,7 +502,9 @@ socket.on('shared', function(data) {
 	appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
 });
 
+//?移动文件？没看到这个功能啊
 socket.on('moved', function(data) {
+	alert("room.js - moved");
 	var thepath = data.newPath.split('/');
 	thepath.shift();
 	var thename;
@@ -459,11 +535,14 @@ socket.on('moved', function(data) {
 	$('#current-doc').html(htmlescape(thename));
 });
 
-function leaveVoiceRoom(){
-	while(window.userArray.length > 0){
+//在每次离开房间时调用
+function leaveVoiceRoom() {
+
+	//?length在什么时候不为0?	
+	while(window.userArray.length > 0) {
 		$(window.audioArray[window.userArray.shift()]).remove();
 	}
-	while(window.peerUserArray.length > 0){
+	while(window.peerUserArray.length > 0) {
 		var peerUName = window.peerUserArray.shift();
 		if(window.peerArray[peerUName]){
 			window.peerArray[peerUName].myOnRemoteStream = function (stream){
@@ -481,7 +560,9 @@ function leaveVoiceRoom(){
 	delete window.voiceConnection;
 }
 
+//语音控制
 function voice() {
+
 	if(novoice)
 		return;
 	if(window.voiceLock){
@@ -489,7 +570,12 @@ function voice() {
 	}
 	window.voiceLock = true;
 	window.voiceon = !window.voiceon;
+
+	//此时window.voiceon记录了语音是否开始
+
 	if(window.voiceon) {
+
+		//进入语音聊天时，window.joinedARoom = true
 		if(window.joinedARoom){
 			return;
 		}
@@ -505,6 +591,8 @@ function voice() {
 					connection.session = "audio-only";
 					connection.autoCloseEntireSession = true;
 
+					//接收到流之后播放对方的话，stream：语音流，一个持续的连接
+					//具体内容：{stream: MediaStream, mediaElement: audio, blobURL: "blob:略", type: "local/remote"}
 					connection.onstream = function (stream) {
 						if ((stream.type == 'remote') && (stream.extra.username != username)) {
 							stream.mediaElement.style.display = "none";
@@ -515,6 +603,9 @@ function voice() {
 							window.audioArray[stream.extra.username] = stream.mediaElement;
 						}
 					};
+					
+					//用户断开连接的响应函数
+					//参数例子：DP958MPF-5YZXGVI, Object {username: "hongyu"}(对方断开：object是我的名字), true(我主动断开是false，对方断开是true)
 					connection.onUserLeft = function(userid, extra, ejected) {
 						$(window.audioArray[extra.username]).remove();
 						if(window.peerArray[extra.username]){
@@ -534,11 +625,13 @@ function voice() {
 					});
 				}
 				else{
+					//?什么时候调用的？snapShot为何不为空
 					var connection = new RTCMultiConnection(doc.id);
 					window.voiceConnection = connection;
 					connection.session = "audio-only";
 					connection.autoCloseEntireSession = true;
 					
+					//?新建连接
 					connection.onNewSession = function (session){
 						if(window.joinedARoom){
 							return;
@@ -547,6 +640,8 @@ function voice() {
 							username: username
 						});
 					};
+
+					//?同上一个
 					connection.onstream = function (stream) {
 						if ((stream.type == 'remote') && (stream.extra.username != username)) {
 							stream.mediaElement.style.display = "none";
@@ -557,6 +652,8 @@ function voice() {
 							document.body.appendChild(stream.mediaElement);
 						}
 					};
+
+					//?同上一个
 					connection.onUserLeft = function(userid, extra, ejected) {
 						if(ejected){
 							$('#voice-on').removeClass('active');
@@ -597,12 +694,14 @@ function voice() {
 	}
 }
 
+//要运行一个程序时调用，向服务器传送相应数据
 function run() {
 	if(!runenabled())
 		return;
 	if(operationLock)
 		return;
 	operationLock = true;
+	//runLock：如果正在运行，则为true
 	if(runLock) {
 		socket.emit('kill');
 	} else {
@@ -613,6 +712,7 @@ function run() {
 	}
 }
 
+//点击运行时的界面控制
 function setrun() {
 	runLock = true;
 	$('#editor-run').html('<i class="icon-stop"></i>');
@@ -624,6 +724,7 @@ function setrun() {
 	openconsole();
 }
 
+//要调试一个程序时调用，向服务器传送相应数据
 function debug() {
 	if(!debugenabled())
 		return;
@@ -640,6 +741,7 @@ function debug() {
 	}
 }
 
+//调试一个程序时的界面控制
 function setdebug() {
 	debugLock = true;
 	$('#editor-debug').html('<i class="icon-eye-close"></i>');
@@ -651,6 +753,7 @@ function setdebug() {
 	openconsole();
 }
 
+//调试-逐语句
 function debugstep() {
 	if(debugLock && waiting) {
 		socket.emit('step', {
@@ -658,6 +761,7 @@ function debugstep() {
 	}
 }
 
+//调试-逐过程
 function debugnext() {
 	if(debugLock && waiting) {
 		socket.emit('next', {
@@ -665,6 +769,7 @@ function debugnext() {
 	}
 }
 
+//调试-跳出过程
 function debugfinish() {
 	if(debugLock && waiting) {
 		socket.emit('finish', {
@@ -672,6 +777,7 @@ function debugfinish() {
 	}
 }
 
+//调试-继续
 function debugcontinue() {
 	if(debugLock && waiting) {
 		socket.emit('resume', {
@@ -679,6 +785,7 @@ function debugcontinue() {
 	}
 }
 
+//点击“控制台”按钮时触发的响应函数，变更控制台的开关状态
 function toggleconsole() {
 	if(consoleopen) {
 		closeconsole();
@@ -687,6 +794,7 @@ function toggleconsole() {
 	}
 }
 
+//关闭控制台显示，不清除控制台内容
 function closeconsole() {
 	if(!consoleopen)
 		return;
@@ -696,6 +804,7 @@ function closeconsole() {
 	resize();
 }
 
+//打开控制台显示，不清除控制台内容
 function openconsole() {
 	if(!consoleopen) {
 		consoleopen = true;
@@ -706,12 +815,17 @@ function openconsole() {
 	$('#console-input').focus();
 }
 
+//调整代码编辑页面各个元素的大小以供合理显示
+//cbh : chat box height
+//$('#member-list-doc') : 共享用户头像列表
+//$('#under-editor') : 调试和控制台
 function resize() {
 	var w;
 	var h = $(window).height();
 	if(h < 100)
 		h = 100;
 	var cbh = h-$('#member-list-doc').height()-138;
+	//保证chat box有一定的宽度
 	var cbhexp = cbh > 100 ? 0 : 100 - cbh;
 	if(cbh < 100)
 		cbh = 100;
@@ -750,12 +864,16 @@ function resize() {
 	editor.refresh();
 }
 
+//接收到服务器发送的运行消息
+//data : {(uesr)name, time};
 socket.on('run', function(data){
 	appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['runsaprogram'], new Date(data.time));
 	setrun();
 	operationLock = false;
 });
 
+//接收到服务器发送的运行消息
+//data : {(uesr)name, time, text（程序）, bps(断点信息字符串)};
 socket.on('debug', function(data){
 	appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['startdebug'], new Date(data.time));
 	
@@ -776,6 +894,8 @@ socket.on('debug', function(data){
 	operationLock = false;
 });
 
+//处理服务器发送的“正在运行”消息
+//?data : 一直是null?
 socket.on('running', function(data){
 	if(!debugLock)
 		return;
@@ -785,6 +905,9 @@ socket.on('running', function(data){
 	$('#console-title').text(strings['console']);
 });
 
+//"等待"消息的处理函数
+//在debug条件下出现
+//data : {line, exprs}
 socket.on('waiting', function(data){
 	if(!debugLock)
 		return;
@@ -794,6 +917,7 @@ socket.on('waiting', function(data){
 	}else{
 		runtoline(-1);
 	}
+	//依次设定表达式的值
 	for(var k in data.exprs) {
 		expressionlist.setValue(k, data.exprs[k]);
 	}
@@ -806,19 +930,24 @@ socket.on('waiting', function(data){
 		$('#console-title').text(strings['console'] + strings['waiting'] + strings['nosource']);
 });
 
+//处理输出
 socket.on('stdout', function(data){
 	appendtoconsole(data.data);
 });
 
+//处理输入
 socket.on('stdin', function(data){
 	appendtoconsole(data.data, 'stdin');
 });
 
+//处理错误流
 socket.on('stderr', function(data){
 	appendtoconsole(data.data, 'stderr');
 });
 
+//处理程序退出
 socket.on('exit', function(data){
+
 	operationLock = false;
 
 	if(data.err.code !== undefined)
@@ -826,11 +955,13 @@ socket.on('exit', function(data){
 	else
 		appendtochatbox(strings['systemmessage'], 'system', strings['programkilledby'] + '&nbsp;' + data.err.signal, new Date(data.time));
 
+	//运行时退出
 	if(runLock) {
 		$('#editor-run').html('<i class="icon-play"></i>');
 		$('#editor-run').attr('title', strings['run-title']);
 		runLock = false;
 	}
+	//调试时退出
 	if(debugLock) {
 		editor.setValue(old_text);
 		removeallbreakpoints();
@@ -857,6 +988,8 @@ socket.on('exit', function(data){
 	$('#console-title').text(strings['console'] + strings['finished']);
 });
 
+//有人进入了房间
+//data : {name, time}
 socket.on('join', function(data){
 	if(data.err) {
 		showmessageindialog('openeditor', data.err);
@@ -873,6 +1006,8 @@ socket.on('join', function(data){
 	}
 });
 
+//有人离开了房间
+//data : {name, time}
 socket.on('leave', function(data){
 	memberlistdoc.setonline(data.name, false);
 	memberlistdoc.sort();
@@ -884,8 +1019,10 @@ socket.on('leave', function(data){
 	}
 });
 
+//进入编辑界面时，显示各种数据
+//data : {id, users(hongyu:true, hongdashen:true), version, text, bps, exprs(监视列表的表达式{变量：值})}
 socket.on('set', function(data){
-	
+
 	savetimestamp = 1;
 	setsavedthen(1);
 
@@ -994,6 +1131,8 @@ socket.on('set', function(data){
 	delete data.state;
 });
 
+//当对代码的修改已保存时对应的响应函数，用于版本控制
+//?data : undefined , 貌似没用
 socket.on('ok', function(data){
 	var chg = q.shift();
 	if(!chg)
@@ -1017,8 +1156,13 @@ socket.on('ok', function(data){
 	}
 });
 
+//设置一个断点时的响应函数 breakpoints_ok
+//?data : undefined , 貌似没用
+//本函数在自己设置断点时被调用
 socket.on('bpsok', function(data){
 	var chg = bq.shift();
+	//chg例子 : Object {version: 2, from: 7, to: 8, text: "1"} 
+	//text == 1 表示增加断点, text == 0 表示删除断点
 	if (!chg)
 		return;
 	bps = bps.substr(0, chg.from) + chg.text + bps.substr(chg.to);
@@ -1042,6 +1186,9 @@ socket.on('bpsok', function(data){
 	}
 });
 
+//设置一个断点时的响应函数 breakpoints
+//data例子 : Object {version: 5, from: 7, to: 8, text: "1", name: "hongshaoyu2008"}
+//本函数在他人设置断点时被调用
 socket.on('bps', function(data){
 	var tfrom = data.from;
 	var tto = data.to;
@@ -1103,13 +1250,16 @@ socket.on('bps', function(data){
 			}
 		}
 	}
-	doc.version++;
+	doc.version++
 	doc.version = doc.version % 65536;
 	if(bq.length > 0){
 		socket.emit('bps', bq[0]);
 	}
 });
 
+//协同编辑算法
+//object : {version: 57, from: 150, to: 150, text: "fdfd", name: "hongshaoyu2008"}
+//别人更改代码时才会调用
 socket.on('change', function(data){
 	lock = true;
 	var tfrom = data.from;
@@ -1329,6 +1479,13 @@ var bufferfrom = -1;
 var bufferto = -1;
 var buffertimeout = SAVE_TIME_OUT;
 
+//将自己修改的一段文字发送给服务器
+//buffertimeout = 1000
+//buffertext : 输入的内容，删除为”“
+//bufferfrom != -1 && bufferto != -1 -- 用backspace删除
+//bufferfrom != -1 && bufferto == -1 -- 普通的输入
+//bufferfrom == -1 && bufferto == -1 -- 选中一段文字删除
+//选中一段文字修改 : 输入多个字母的话，同普通的输入
 function sendbuffer(){
 	if (bufferfrom != -1) {
 		if (bufferto == -1){
@@ -1353,6 +1510,8 @@ function sendbuffer(){
 	}
 }
 
+//设置保存
+//?没找到什么时候调用
 function save(){
 	setsaving();
 	if (timer != null){
@@ -1361,12 +1520,17 @@ function save(){
 	timer = setTimeout("sendbuffer()", buffertimeout);
 }
 
+//给CodeMirror添加监听者
+//即，在代码编辑器上的变动能够被对应函数响应
+//在网页启动的时候调用
 function registereditorevent() {
-	
+
+	//chg（例子） : Object {from: Pos, to: Pos, text: Array[5], origin: "setValue", removed: Array[7]}
+	//text : 新打开的文档内容
+	//removed : 上次打开的文档内容
+	//editorDoc(例子) : window.CodeMirror.CodeMirror.Doc {children: Array[1], size: 5, height: 2352, parent: null, first: 0…}
 	CodeMirror.on(editor.getDoc(), 'change', function(editorDoc, chg){
-
-		//console.log(chg);
-
+		
 		if(debugLock){
 			return true;
 		}
@@ -1513,4 +1677,5 @@ function registereditorevent() {
 		q.push(req);
 		
 	});
+
 }

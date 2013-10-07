@@ -54,6 +54,21 @@ var novoice = false;
 //strings: choose language pack initially By SilunWang
 var strings = getCookie('language') == 'english' ? strings_en : strings_cn;
 
+var myTheme = getCookie('theme');
+switch(myTheme)
+{	
+	case '':
+		changeStaticTheme();
+	case 'theme_static':
+		changeStaticTheme();
+		break;
+	case 'theme_1':
+		changetheme1();
+		break;
+	case 'theme_2':
+		changetheme2();
+		break;
+}
 //////////////////////// function //////////////////////////////
 
 /************************************************************************
@@ -162,13 +177,20 @@ function changeChn()
 
 //更改主题为第一个主题
 function changetheme1(){
-	removejscssfile("css/anotherTheme.css", "css");
+	setCookie('theme', 'theme_1');
+	removejscssfile("anotherTheme.css", "css");
 	loadjscssfile("css/changebootstrap.css", "css");
 }
 
 function changetheme2(){
-	removejscssfile("css/changebootstrap.css", "css");
+	setCookie('theme', 'theme_2');
+	removejscssfile("changebootstrap.css", "css");
 	loadjscssfile("css/anotherTheme.css", "css");
+}
+function changeStaticTheme(){
+	setCookie('theme', 'theme_static');
+	removejscssfile("anotherTheme.css", "css");
+	removejscssfile("changebootstrap.css", "css");
 }
 
 function loading(id) {
@@ -1261,5 +1283,10 @@ $(document).ready(function() {
 	$(window).resize(resize);
 	$(window).scroll(function() {
 		$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
+	});
+	$(window).resize(function() {
+		var width = $(document).width() * 0.915;
+		var margin_left = (width/2 - 108) + "px";
+		$("#foot-information").css("margin-left",margin_left);	
 	});
 });
