@@ -52,7 +52,7 @@ var s;
 var novoice = false;
 
 //strings: choose language pack initially By SilunWang
-var strings = getCookie('language') == 'english' ? strings_en : strings_cn;
+var strings = getCookie('fruits-language-selection') == 'fruits-english-selection' ? strings_en : strings_cn;
 
 var myTheme = getCookie('theme');
 switch(myTheme)
@@ -132,7 +132,7 @@ function deleteCookie(name)
 //更改语言为English
 function changeEng()
 {
-	setCookie('language', 'english');
+	setCookie('fruits-language-selection', 'fruits-english-selection');
 	strings = strings_en;
 	$('[localization]').html(function(index, oldcontent) {
 		for(var iter in strings_cn)
@@ -155,7 +155,7 @@ function changeEng()
 //更改语言为中文
 function changeChn()
 {
-	setCookie('language', 'chinese');
+	setCookie('fruits-language-selection', 'fruits-chinese-selection');
 	strings = strings_cn;
 	$('[localization]').html(function(index, oldcontent) {
 		for(var iter in strings_en)
