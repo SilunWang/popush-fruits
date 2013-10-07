@@ -245,20 +245,28 @@ function pressenter(e, func) {
 
 function checkusername() {
 	var name = $('#register-inputName').val();
-	if(name == ''){
+	if(name.length < 6) {
+		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
 		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
 		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+		return;
 	}
-	else if(!/^[A-Za-z0-9]*$/.test(name)) {
+	if(!/^[A-Za-z0-9]*$/.test(name)) {
+		$("#msg-username").html(strings['name invalid']);
 		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
 		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
 		return;
 	}
-	else{
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
-		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
+	if(name.length > 20) {
+		$("#msg-username").html(strings['namelength']);
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
 		return;
 	}
+	$("#msg-username").html("");
+	$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
+	$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
+	return;
 }
 
 
@@ -1240,6 +1248,44 @@ $(document).ready(function() {
 	
 	$('body').show();
 	$('#login-inputName').focus();
+
+	$('#register-inputName').focus(function(){
+		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+	});
+
+	$('#register-inputPassword').focus(function(){
+		var name = $('#register-inputName').val();
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			$("#msg-username").html(strings['name invalid']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		if(name == "" || name.length < 6 || name.length > 20) {
+			$("#msg-username").html(strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		return;
+	});
+
+	$("#register-confirmPassword").focus(function(){
+		var name = $('#register-inputName').val();
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			$("#msg-username").html(strings['name invalid']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		if(name.length < 6 || name.length > 20) {
+			$("#msg-username").html(strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		return;
+	});
 	
 	if((!Browser.chrome || parseInt(Browser.chrome) < 18) &&
 		(!Browser.opera || parseInt(Browser.opera) < 12)) {
