@@ -7,7 +7,7 @@ static:split
 	@mv split.html index.html
 
 inline:inline.html
-	@rm -rf indexx.html index.css index.js split.html
+	@rm -rf indexx.html index.css anotherTheme.css changebootstrap.css index.js split.html
 
 split:split.html
 	@rm -rf indexx.html inline.html
@@ -25,7 +25,7 @@ indexx.html:index.html
 
 index.css:$(wildcard css/*.css)
 	@echo ">  make index.css"
-	@cd css && ../lib/uglifycss/uglifycss --ugly-comments bootstrap.min.css codemirror.css popush.css anotherTheme.css changebootstrap.css > ../index.css
+	@cd css && ../lib/uglifycss/uglifycss --ugly-comments bootstrap.min.css codemirror.css popush.css  > ../index.css
 
 index.js:$(wildcard js/*.js)
 	@echo ">  make index.js"
