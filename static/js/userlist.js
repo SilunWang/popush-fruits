@@ -1,19 +1,24 @@
 var allUserLists = [];
 
+//共享用户列表相关的东西
+//div：共享用户管理的列表
 function userList(div) {
 
 	var obj = $(div);
 	
+	//当前共享用户列表
 	var elements = [];
 	
 	var n = allUserLists.length;
 	
 	var selected;
 	
+	//某一个共享用户管理列表
 	r = {
 		
 		elements: elements,
-		
+
+		//重置共享用户列表，在共享管理页面和文件管理页面上调用
 		clear: function() {
 			obj.html('');
 			elements = [];
@@ -21,6 +26,7 @@ function userList(div) {
 			selected = null;
 		},
 		
+		//增加一个共享用户user，包括用户名和头像位置
 		add: function(user) {
 			var i = elements.length;
 			obj.append(
@@ -30,16 +36,19 @@ function userList(div) {
 			return elements.push(user);
 		},
 		
+		//返回共享管理列表中选中的用户
 		getselection: function() {
 			return selected;
 		},
 		
+		//更改选中用户的样式，标记选中的用户
 		onselect: function(i) {
 			obj.find('li').removeClass('active');
 			obj.find('li:eq('+i+')').addClass('active');
 			selected = elements[i];
 		},
 		
+		//获取所有的共享用户，调用add函数将其添加到共享用户列表中
 		fromusers: function(users) {
 			this.clear();
 			users.sort(function(a,b) {
@@ -60,6 +69,8 @@ function userList(div) {
 
 function userListAvatar(div) {
 
+	//1、文件管理界面右侧的共享用户
+	//2、打开文件后，右边出现的共享用户列表
 	var obj = $(div);
 	
 	var elements = {};
@@ -70,12 +81,14 @@ function userListAvatar(div) {
 	
 		elements: elements,
 		
+		//清空用户列表(小头像)
 		clear: function() {
 			obj.html('');
 			elements = {};
 			this.elements = elements;
 		},
 		
+		//增加一个共享用户
 		add: function(user, owner) {
 			var userobj = $(
 				'<img id="avatar' + n + '-' + user.name + '" src="' + user.avatar + '" width="40" height="40"' +
@@ -97,12 +110,14 @@ function userListAvatar(div) {
 			elements[user.name] = user;
 		},
 		
+		//移除一个共享用户
 		remove: function(username) {
 			$('#avatar' + n + '-' + username).remove();
 			if(elements[username])
 				delete elements[username];
 		},
 		
+		//给共享用户排序，并显示小头像
 		fromdoc: function(doc) {
 			this.clear();
 			doc.members.sort(function(a,b) {
@@ -115,6 +130,7 @@ function userListAvatar(div) {
 			}
 		},
 		
+		//当一个用户更换头像时会调用
 		refreshpopover: function(user) {
 			$('#avatar' + n + '-' + user.name).popover('destroy');
 			$('#avatar' + n + '-' + user.name).popover({
@@ -126,6 +142,7 @@ function userListAvatar(div) {
 			});
 		},
 		
+		//标记共享用户是否在线，在进入编辑文件界面时调用，文件管理处不调用
 		setonline: function(username, online) {
 			if(online)
 				$('#avatar' + n + '-' + username).addClass('online');
@@ -134,6 +151,7 @@ function userListAvatar(div) {
 			elements[username].online = online;
 		},
 		
+		//标记所有用户不在线
 		setalloffline: function() {
 			for(var i in elements) {
 				var user = elements[i];
@@ -142,6 +160,7 @@ function userListAvatar(div) {
 			}
 		},
 		
+		//给共享用户的头像排序
 		sort: function() {
 			var arr = [];
 			for(var i in elements) {

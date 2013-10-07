@@ -1,5 +1,7 @@
+//全局变量，所有的文件链表，猜测与数据库有关
 var allFileLists = [];
 
+//支持高亮显示的文件列表
 var exttoicon = {
 	'c':		'c',
 	'clj':		'clj',
@@ -29,18 +31,21 @@ var exttoicon = {
 	'xml':		'xml'
 }
 
+//在index初始化的时候调用，创建fileList对象，table:网页上的文件列表
 function fileList(table) {
 
 	var obj = $(table);
 
-	var header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
-		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
-		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
+	var header = '<tr class="head"><th class="col1">&nbsp;</th>' +
+		'<th class="col2">' + strings['filename'] + '</th><th class="col3">' + strings['state'] + '</th>' +
+		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
 	
+	//一个用户的文件列表
 	var elements = [];
 	
 	var mode = 3;
 	
+	//根据扩展名获取对应的图标，type:文件类型，shard:是否共享?貌似没用，ext:扩展名
 	var getpic = function(type, shared, ext) {
 		var s = 'images/ext/';
 		if(type == 'dir') {
@@ -55,12 +60,14 @@ function fileList(table) {
 		return s;
 	};
 	
+	//文件列表的个数
 	var n = allFileLists.length;
 	
 	var oldhtml = '';
 	
 	var haveloading = false;
-	
+
+	//处理时间格式
 	function formatDate(t) {
 		var o = t.getMonth() + 1;
 		var h = t.getHours();
@@ -74,6 +81,7 @@ function fileList(table) {
 
 		elements: elements,
 
+		//重置，在每次登入之后
 		clear: function() {
 			obj.html(header + '<tr class="no-file"><td></td><td>' + strings['nofile'] + '</td><td></td><td></td><td></td></tr>');
 			elements = [];
@@ -84,22 +92,26 @@ function fileList(table) {
 			return mode;
 		},
 		
+		//设定模式，当进入共享的文件时，newmode=0，当进入拥有的文件时，newmode=2
 		setmode: function(newmode) {
 			mode = newmode;
 			if(mode & 2)
-				header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
-		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
-		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
+				header = '<tr class="head"><th class="col1">&nbsp;</th>' +
+		'<th class="col2">' + strings['filename'] + '</th><th class="col3">' + strings['state'] + '</th>' +
+		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
 			else
 				header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3 owner" localization>' + strings['owner'] + '</th>' +
-		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
+		'<th class="col2">' + strings['filename'] + '</th><th class="col3 owner">' + strings['owner'] + '</th>' +
+		'<th class="col4">' + strings['timestamp'] + '</th><th class="col5">&nbsp;</th></tr>';
 		},
-	
+		
+		//增加一个文件，o:已经格式化好的文件相关信息，包括path,name,showname,type,shared
 		add: function(o) {
+			//移除没有文件这几个字
 			obj.find('.no-file').remove();
 			var i = elements.length;
-			
+
+			//分解文件名
 			var namesplit = o.name.split('/');
 			namesplit = namesplit[namesplit.length - 1];
 			namesplit = namesplit.split('.');
@@ -132,6 +144,11 @@ function fileList(table) {
 			return elements.push(o);
 		},
 		
+		//将原始的文档信息数据格式化成可显示的格式并显示
+		//docs：原始的文档信息
+		//filter：一个函数，返回文档是不是自己的
+		//alwaysshard：描述一个文件夹是否被共享，根目录下为undefined
+		//parent：描述这个目录
 		formdocs: function(docs, filter, alwaysshared, parent) {
 			this.clear();
 			var all = [];
@@ -186,22 +203,27 @@ function fileList(table) {
 			}
 		},
 		
+		//加载文件
 		loading: function() {
 			oldhtml = obj.html();
 			haveloading = true;
 			setTimeout('allFileLists['+n+'].loadingthen();', 300);
 		},
 		
+		//如果加载比较慢，haveloading变量会仍然保持true，此时出现加载中的图标
 		loadingthen: function() {
-			if(haveloading)
+			if(haveloading) 
 				obj.html(header + '<tr class="loading"><td></td><td><img src="images/loading.gif"/></td><td></td><td></td><td></td></tr>');
 		},
 		
+		//加载列表，标记加载完成？??
 		removeloading: function() {
 			obj.html(oldhtml);
 			haveloading = false;
 		},
 		
+		//以下的内容像是没写完的代码或者是测试代码
+
 		onname: function(o) {
 			alert('onname');
 		},
@@ -223,6 +245,7 @@ function fileList(table) {
 		}
 	};
 	
+	//向所有文件列表中添加当前文件列表
 	allFileLists.push(r);
 	
 	return r;
