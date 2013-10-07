@@ -111,7 +111,7 @@ function fileList(table) {
 				'<td class="col1"><img src="' + getpic(o.type, o.shared, ext) + '" height="32" width="32" /></td>' +
 				'<td class="col2"><a href="javascript:;" onclick="allFileLists['+n+'].onname(allFileLists['+n+'].elements['+i+'])">' + 
 				htmlescape(o.showname) + '</a></td>' +
-				(mode & 2?('<td class="col3">' + (o.shared?strings['shared']:'') + '</td>'):
+				(mode & 2?('<td class="col3" localization>' + (o.shared?strings['shared']:'') + '</td>'):
 				'<td class="col3 owner"><img class="user-' + o.owner.name + '" src="' + o.owner.avatar + '" width="32" height="32"/>' + o.owner.name + '</td>') +
 				'<td class="col4">' + o.time + '</td>' +
 				'<td class="col5"><div class="dropdown">' +
