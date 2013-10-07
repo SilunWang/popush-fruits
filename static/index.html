@@ -6,7 +6,6 @@
 	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen" />
 	<link href="css/codemirror.css" rel="stylesheet" media="screen" />
 	<link href="css/popush.css" rel="stylesheet" media="screen" />
-	<link href="css/changebootstrap.css" rel="stylesheet" media="screen" />
 	<script type="text/javascript" src="js/conf.js"></script>
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/jquery.cookie.js"></script>
@@ -273,12 +272,12 @@
 		<div id="footer" class="row-fluid">
 			<hr />
 			<div class="span11">
-				<div style="float:left;width:179px" localization>
-					theme: <a onclick="changetheme1()" style="cursor:pointer">经典蔚蓝</a> | <a onclick="changetheme2()" style="cursor:pointer">典致生活</a></div>
-				<div id = "foot-information" style="float:left; " localization>popushteam</div>
+				<div style="float:left;width:250px" localization>
+					theme: <a onclick="changeStaticTheme()" style="cursor:pointer">默认主题</a> | <a onclick="changetheme1()" style="cursor:pointer">经典蔚蓝</a> | <a onclick="changetheme2()" style="cursor:pointer">典致生活</a></div>
+				<div id = "foot-information" style="float:left; width:160px;" localization>popushteam</div>
 				<script>
 					var width = $(document).width() * 0.915;
-					var margin_left = (width/2 - 270) + "px";
+					var margin_left = (width/2 - 330) + "px";
 					$("#foot-information").css("margin-left",margin_left);				
 				</script>
 				<div style="float:right" localization>
@@ -440,7 +439,7 @@
 				</div>
 			</div>
 		</div>
-
+		
 		<!-- popover -->
 		<div id="messagedialog" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="messagedialogLabel" aria-hidden="true" data-backdrop="static">
 			<div class="modal-header">
