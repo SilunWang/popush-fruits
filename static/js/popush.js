@@ -245,7 +245,7 @@ function pressenter(e, func) {
 
 function checkusername() {
 	var name = $('#register-inputName').val();
-	if(name.length < 6) {
+	if(name.length == "") {
 		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
 		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
 		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
@@ -255,6 +255,12 @@ function checkusername() {
 		$("#msg-username").html(strings['name invalid']);
 		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
 		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+		return;
+	}
+	if(name.length < 6) {
+		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
 		return;
 	}
 	if(name.length > 20) {
