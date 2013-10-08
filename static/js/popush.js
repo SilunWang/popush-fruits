@@ -54,19 +54,21 @@ var novoice = false;
 //strings: choose language pack initially By SilunWang
 var strings = getCookie('fruits-language-selection') == 'fruits-english-selection' ? strings_en : strings_cn;
 
-var myTheme = getCookie('theme');
+var myTheme = getCookie('fruits-theme-selection');
+
 switch(myTheme)
 {	
-	case '':
-		changeStaticTheme();
-	case 'theme_static':
+	case 'fruits_theme_static':
 		changeStaticTheme();
 		break;
-	case 'theme_1':
+	case 'fruits_theme_1':
 		changetheme1();
 		break;
-	case 'theme_2':
+	case 'fruits_theme_2':
 		changetheme2();
+		break;
+	default:
+		changeStaticTheme();
 		break;
 }
 //////////////////////// function //////////////////////////////
@@ -177,18 +179,18 @@ function changeChn()
 
 //更改主题为第一个主题
 function changetheme1(){
-	setCookie('theme', 'theme_1');
+	setCookie('fruits-theme-selection', 'fruits_theme_1');
 	removejscssfile("anotherTheme.css", "css");
 	loadjscssfile("css/changebootstrap.css", "css");
 }
 
 function changetheme2(){
-	setCookie('theme', 'theme_2');
+	setCookie('fruits-theme-selection', 'fruits_theme_2');
 	removejscssfile("changebootstrap.css", "css");
 	loadjscssfile("css/anotherTheme.css", "css");
 }
 function changeStaticTheme(){
-	setCookie('theme', 'theme_static');
+	setCookie('fruits-theme-selection', 'fruits_theme_static');
 	removejscssfile("anotherTheme.css", "css");
 	removejscssfile("changebootstrap.css", "css");
 }
