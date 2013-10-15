@@ -11,6 +11,7 @@
 	<script type="text/javascript" src="js/jquery.min.js"></script>
 	<script type="text/javascript" src="js/jquery.wheelmenu.js"></script>
 	<script type="text/javascript" src="js/jquery.cookie.js"></script>
+	<script type="text/javascript" src="js/can.jquery.js"></script>
 	<script type="text/javascript" src="js/socket.io.min.js"></script>
 	<script type="text/javascript" src='js/firebase.js'></script>
 	<script type="text/javascript" src="js/newMultiConnection.js"></script>
@@ -81,34 +82,34 @@
 				<h2 style="text-align:center" class="blink" localization>login</h2>
 				<div class="alert hide" id="login-message">
 					<button type="button" class="close" onclick="$('#login-message').slideUp()">&times;</button>
-					<span localization>Nothing here</span>
+					<span>Nothing here</span>
 				</div>
 				<hr />
 				<div id="login-box" class="form-horizontal" style="min-width:420px;position:relative;">
-					<div class="control-group">
-						<label class="control-label" for="login-inputName" localization>username</label>
-						<div class="controls">
-							<input type="text" id="login-inputName" onkeydown="pressenter(arguments[0],login, '', 'login-inputPassword')" />
-						</div>
-					</div>
-					<div class="control-group">
-						<label class="control-label" for="login-inputPassword" localization>password</label>
-						<div class="controls">
-							<input type="password" id="login-inputPassword" onkeydown="pressenter(arguments[0],login, 'login-inputName', '')" />
-						</div>
-					</div>
-					<div class="control-group hide" id="login-padding">
-						<label class="control-label">&nbsp;</label>
-					</div>
-					<div class="control-group">
-						<p align="center" id="loading-init" style="margin:1px 0 2px 0">
-							<img src="images/init.gif"/>
-						</p>
-						<div class="controls hide" id="login-control" style="display:none;">
-							<button type="submit" class="btn" onclick="login();" localization>login</button>
-							<a class="switch-rel" href="javascript:;" onclick="registerview()" localization>register</a>
-						</div>
-					</div>
+					<script type="text/ejs" id="login-ejs">
+				<div class ="control-group">
+				<label class ="control-label" for="login-inputName" localization>username</label>
+				<div class ="controls">
+				<input type="text" id="login-inputName" onkeydown="pressenter(arguments[0],login, '', 'login-inputPassword')" <%= control_login_information.attr('login_name')? "value='" + control_login_information.login_name + "'":"class='empty'" %>/></div>
+				</div>
+				<div class="control-group">
+				<label class="control-label" for="login-inputPassword" localization>password</label>
+				<div class="controls">
+				<input type="password" id="login-inputPassword" onkeydown="pressenter(arguments[0],login, 'login-inputName', '')" <%= control_login_information.attr('login_password')? "value='" + control_login_information.login_password + "'":"class='empty'" %>/></div>
+				</div>
+				<div class="control-group hide" id="login-padding">
+				<label class="control-label">&nbsp;</label>
+				</div>
+				<div class="control-group">
+				<p align="center" id="loading-init" style="margin:1px 0 2px 0">
+				<img src="images/init.gif"/>
+				</p>
+				<div class="controls hide" id="login-control" style="display:none;">
+				<button id="login-submit" type="submit" class="btn" localization>login</button>
+				<a class="switch-rel" href="javascript:;" onclick="registerview()" localization>register</a>
+				</div>
+				</div>
+				</script>
 				</div>
 			</div>
 		</div>

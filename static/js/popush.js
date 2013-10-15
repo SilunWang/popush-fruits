@@ -177,6 +177,61 @@ function changeChn()
 	});
 }
 
+/***************************测试Canjs*************************/
+LoginInformation = can.Model.extend({}, {});
+var login_information = new LoginInformation({
+	login_name: '',
+	login_password: ''
+});
+//login_information.save();
+
+var LoginControl = can.Control.extend({
+	m_login_information: '',
+	m_socket: '',
+	self: this,
+	init: function(element, options) {
+		self.m_login_information = this.options.m_login_information;
+		self.m_socket = this.options.m_socket;
+		this.element.append(can.view("login-ejs", {
+			control_login_information: self.m_login_information
+		}));
+	},
+
+	//reaction area
+	'#login-submit click': function() {
+		self.m_login_information.attr('login_name', $('#login-inputName').val());
+		self.m_login_information.attr('login_password', $('#login-inputPassword').val());
+		//self.m_login_information.save();
+		this.login();
+	},
+
+	//business
+	login: function() {
+		console.log("a");
+		//获取输入框的数据
+		var login_name = self.m_login_information.login_name;
+		var login_pass = self.m_login_information.login_password;
+		//名字输入为空
+		if (login_name == '') {
+			showmessage('login-message', 'pleaseinput', 'error');
+			return;
+		}
+		//如果
+		if (loginLock)
+			return;
+		loginLock = true;
+		loading('login-control');
+		//socket请求，发送用户名和密码，待服务器端接收。
+		self.m_socket.emit('login', {
+			name: login_name,
+			password: login_pass
+		});
+	}
+});
+
+
+/****************************************************/
+
 //更改主题为第一个主题
 function changetheme1(){
 	setCookie('fruits-theme-selection', 'fruits_theme_1');
@@ -1291,4 +1346,5 @@ $(document).ready(function() {
 		var margin_left = (width/2 - 108) + "px";
 		$("#foot-information").css("margin-left",margin_left);	
 	});
+	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_socket:socket}); 
 });
