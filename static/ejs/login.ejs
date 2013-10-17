@@ -1,12 +1,12 @@
 <div class ="control-group">
 	<label class ="control-label" for="login-inputName" localization>username</label>
 	<div class ="controls">
-		<input type="text" id="login-inputName" onkeydown="pressenter(arguments[0],login, '', 'login-inputPassword')" <%= loginInfoCtrl.attr('username')? "value='" + loginInfoCtrl.username + "'":"class='empty'" %>/></div>
+		<input type="text" id="login-inputName" <%= loginInfoCtrl.attr('username')? "value='" + loginInfoCtrl.username + "'":"class='empty'" %>/></div>
 </div>
 <div class="control-group">
 	<label class="control-label" for="login-inputPassword" localization>password</label>
 	<div class="controls">
-		<input type="password" id="login-inputPassword" onkeydown="pressenter(arguments[0],login, 'login-inputName', '')" <%= loginInfoCtrl.attr('password')? "value='" + loginInfoCtrl.password + "'":"class='empty'" %>/></div>
+		<input type="password" id="login-inputPassword" <%= loginInfoCtrl.attr('password')? "value='" + loginInfoCtrl.password + "'":"class='empty'" %>/></div>
 </div>
 <div class="control-group hide" id="login-padding">
 	<label class="control-label">&nbsp;</label>
