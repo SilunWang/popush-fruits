@@ -177,40 +177,52 @@ function changeChn()
 	});
 }
 
-/***************************测试Canjs*************************/
+/************************************************************************
+|    MVC模块： login                                            
+|	 Author: 江林楠 欧阳方昕                                       
+*************************************************************************/ 
+//Login Model
 LoginInformation = can.Model.extend({}, {});
-var login_information = new LoginInformation({
-	login_name: '',
-	login_password: ''
-});
-//login_information.save();
 
+//Login 实例化
+var login_information = new LoginInformation({
+
+	username: '',
+	password: ''
+});
+
+//Login Control
 var LoginControl = can.Control.extend({
-	m_login_information: '',
+
+	m_loginModel: '',
 	m_socket: '',
 	self: this,
+
 	init: function(element, options) {
-		self.m_login_information = this.options.m_login_information;
+
+		self.m_loginModel = this.options.m_loginModel;
 		self.m_socket = this.options.m_socket;
-		this.element.append(can.view("login-ejs", {
-			control_login_information: self.m_login_information
+		//can.EJS模块渲染
+		this.element.append(can.view("../ejs/login.ejs", {
+			loginInfoCtrl: self.m_loginModel
 		}));
 	},
 
-	//reaction area
+	//reaction area: 点击登录按钮
 	'#login-submit click': function() {
-		self.m_login_information.attr('login_name', $('#login-inputName').val());
-		self.m_login_information.attr('login_password', $('#login-inputPassword').val());
-		//self.m_login_information.save();
+
+		self.m_loginModel.attr('name', $('#login-inputName').val());
+		self.m_loginModel.attr('password', $('#login-inputPassword').val());
 		this.login();
 	},
 
 	//business
 	login: function() {
+
 		console.log("a");
 		//获取输入框的数据
-		var login_name = self.m_login_information.login_name;
-		var login_pass = self.m_login_information.login_password;
+		var login_name = self.m_loginModel.username;
+		var login_pass = self.m_loginModel.password;
 		//名字输入为空
 		if (login_name == '') {
 			showmessage('login-message', 'pleaseinput', 'error');
@@ -229,8 +241,10 @@ var LoginControl = can.Control.extend({
 	}
 });
 
-
-/****************************************************/
+/************************************************************************
+|    函数名称: 更改主题皮肤                                             
+|	 Author:  江林楠                                         
+*************************************************************************/  
 
 //更改主题为第一个主题
 function changetheme1(){
@@ -239,11 +253,14 @@ function changetheme1(){
 	loadjscssfile("css/changebootstrap.css", "css");
 }
 
+//更改主题为第二个主题
 function changetheme2(){
 	setCookie('fruits-theme-selection', 'fruits_theme_2');
 	removejscssfile("changebootstrap.css", "css");
 	loadjscssfile("css/anotherTheme.css", "css");
 }
+
+//更改主题为默认主题
 function changeStaticTheme(){
 	setCookie('fruits-theme-selection', 'fruits_theme_static');
 	removejscssfile("anotherTheme.css", "css");
@@ -1258,7 +1275,7 @@ $(document).ready(function() {
 		$('#share-inputName').focus();
 	});
 
-	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_socket:socket}); 
+	var login_control = new LoginControl('#login-box',{m_loginModel:login_information,m_socket:socket}); 
 	
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
