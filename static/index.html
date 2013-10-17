@@ -86,7 +86,7 @@
 				</div>
 				<hr />
 				<div id="login-box" class="form-horizontal" style="min-width:420px;position:relative;">
-					<script type="text/ejs" id="login-ejs">
+				<script type="text/ejs" id="login-ejs">
 				<div class ="control-group">
 				<label class ="control-label" for="login-inputName" localization>username</label>
 				<div class ="controls">
@@ -165,7 +165,7 @@
 							</a>
 							<ul class="dropdown-menu">
 								<li>
-									<a href="#newfile" data-toggle="modal" onclick="newfileopen()" localization>newfile</a>
+									<a href="#newfile" id = "new-file" data-toggle="modal" onclick="newfileopen()" localization>newfile</a>
 								</li>
 								<li>
 									<a href="#newfile" data-toggle="modal" onclick="newfolderopen()" localization>newfolder</a>
@@ -354,6 +354,8 @@
 	
 		<!-- popover 新建文件/新建文件夹-->
 		<div id="newfile" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="newfileLabel" aria-hidden="true" data-backdrop="static">
+		</div>
+		<script type="text/ejs"  id = "NewFile">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 				<h3 id="newfileLabel" localization>newfile</h3>
@@ -369,11 +371,11 @@
 			</div>
 			<div class="modal-footer">
 				<div id="newfile-buttons">
-					<button class="btn" onclick="newfile()" localization>ok</button>
+					<button class="btn" id = "newfile-submit" onclick="newfile()" localization>ok</button>
 					<button class="btn" data-dismiss="modal" aria-hidden="true" localization>cancel</button>
 				</div>
 			</div>
-		</div>
+		</script>
 	
 		<!-- popover 修改头像弹出框-->
 		<div id="changeavatar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="changeavatarLabel" aria-hidden="true" data-backdrop="static">
