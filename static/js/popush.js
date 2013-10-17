@@ -1257,6 +1257,8 @@ $(document).ready(function() {
 	$('#share').on('shown', function() {
 		$('#share-inputName').focus();
 	});
+
+	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_socket:socket}); 
 	
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
@@ -1346,5 +1348,5 @@ $(document).ready(function() {
 		var margin_left = (width/2 - 108) + "px";
 		$("#foot-information").css("margin-left",margin_left);	
 	});
-	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_socket:socket}); 
+	
 });
