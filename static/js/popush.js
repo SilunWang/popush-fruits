@@ -1257,8 +1257,6 @@ $(document).ready(function() {
 	$('#share').on('shown', function() {
 		$('#share-inputName').focus();
 	});
-
-	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_socket:socket}); 
 	
 	
 	
