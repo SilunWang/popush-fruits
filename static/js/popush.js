@@ -168,10 +168,10 @@ function changeChn()
 		return oldcontent;
 	});
 	$('[title]').attr('title', function(index, oldcontent) {
-		for(var iter in strings_en)
+		for(var iter in strings_cn)
 		{
-			if(oldcontent == strings_en[iter])
-				return strings_cn[iter];
+			if(oldcontent == strings_cn[iter])
+				return strings_en[iter];
 		}
 		return oldcontent;
 	});
@@ -1258,17 +1258,7 @@ $(document).ready(function() {
 		$('#share-inputName').focus();
 	});
 	
-	$('[localization]').html(function(index, old) {
-		if(strings[old])
-			return strings[old];
-		return old;
-	});
 	
-	$('[title]').attr('title', function(index, old) {
-		if(strings[old])
-			return strings[old];
-		return old;
-	});
 	
 	if(!ENABLE_RUN) {
 		$('#editor-run').remove();
@@ -1346,5 +1336,17 @@ $(document).ready(function() {
 		var margin_left = (width/2 - 108) + "px";
 		$("#foot-information").css("margin-left",margin_left);	
 	});
+
+
 	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_socket:socket}); 
+	$('[localization]').html(function(index, old) {
+		if(strings[old])
+			return strings[old];
+		return old;
+	});	
+	$('[title]').attr('title', function(index, old) {
+		if(strings[old])
+			return strings[old];
+		return old;
+	});
 });
