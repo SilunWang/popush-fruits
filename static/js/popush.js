@@ -210,16 +210,30 @@ var LoginControl = can.Control.extend({
 
 	//reaction area: 点击登录按钮
 	'#login-submit click': function() {
-
-		self.m_loginModel.attr('name', $('#login-inputName').val());
+		self.m_loginModel.attr('username', $('#login-inputName').val());
 		self.m_loginModel.attr('password', $('#login-inputPassword').val());
 		this.login();
 	},
 
+	'#login-inputName keydown' : function() {
+		if (event.keyCode == 13 || event.keyCode == 40) {
+			$('#login-inputPassword').focus();
+		}
+	},
+
+	'#login-inputPassword keydown' : function() {
+		if (event.keyCode == 13) {
+			self.m_loginModel.attr('username', $('#login-inputName').val());
+			self.m_loginModel.attr('password', $('#login-inputPassword').val());
+			this.login();
+		}
+		if (event.keyCode == 38) {
+			$('#login-inputName').focus();
+		}
+	},
+
 	//business
 	login: function() {
-
-		console.log("a");
 		//获取输入框的数据
 		var login_name = self.m_loginModel.username;
 		var login_pass = self.m_loginModel.password;
@@ -333,6 +347,8 @@ function showmessagebox(title, content, timeout) {
 	t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout*1000);
 }
 
+/******************************原有的按下回车的响应函数****************************/
+/*
 function pressenter(e, func, idUp, idDown) {
 	e = e || event;	
 	if(e.keyCode == 13 && loadDone)
@@ -342,38 +358,7 @@ function pressenter(e, func, idUp, idDown) {
 	else if(e.keyCode == 40)
 		$('#' + idDown).focus();
 }
-
-function checkusername() {
-	var name = $('#register-inputName').val();
-	if(name.length == "") {
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
-		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
-		return;
-	}
-	if(!/^[A-Za-z0-9]*$/.test(name)) {
-		$("#msg-username").html(strings['name invalid']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-		return;
-	}
-	if(name.length < 6) {
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
-		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
-		return;
-	}
-	if(name.length > 20) {
-		$("#msg-username").html(strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-		return;
-	}
-	$("#msg-username").html("");
-	$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
-	$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
-	return;
-}
+*/
 
 function loadfailed() {
 	if(loadDone)
@@ -836,6 +821,8 @@ function registerview() {
 	});
 }
 
+/***************************原有的登录代码*******************************/
+/*
 function login() {
 	var name = $('#login-inputName').val();
 	var pass = $('#login-inputPassword').val();
@@ -852,6 +839,7 @@ function login() {
 		password:$('#login-inputPassword').val()
 	});
 }
+*/
 
 function logout() {
 	socket.emit('logout', {
@@ -860,6 +848,9 @@ function logout() {
 	backtologin();
 }
 
+
+/*****************************原有的注册代码***********************/
+/*
 function register() {
 	var name = $('#register-inputName').val();
 	var pass = $('#register-inputPassword').val();
@@ -885,11 +876,167 @@ function register() {
 	registerLock = true;
 	loading('register-control');
 	socket.emit('register', {
-		name:name,
-		password:pass,
-		avatar:'images/character.png'
+		name : name,
+		password : pass,
+		avatar : 'images/character.png'
 	});
 }
+*/
+
+/*****************************注册部分*******************************/
+
+//注册模型
+RegisterModel = can.Model.extend({}, {});
+//模型对应的对象
+registerModel = new RegisterModel({
+	username : '',
+	password : '',
+	confirm : ''
+});
+
+//注册控制器
+var RegisterController = can.Control.extend({
+	m_registerModel : null,
+	m_socket : null,
+	self : this,
+	init : function (element, options) {
+		// body...
+		self.m_registerModel = this.options.m_registerModel;
+		self.m_socket = this.options.m_socket;
+		this.element.append(can.view("../ejs/register.ejs",{
+			RegisterInfoCtrl: self.m_registerModel
+		}));
+	},
+	setUsername : function (username) {
+		// body...
+		self.m_registerModel.attr('username', username);
+	},
+	setPassword : function (password) {
+		// body...
+		self.m_registerModel.attr('password', password);
+	},
+	setConfirm : function (confirm) {
+		// body...
+		self.m_registerModel.attr('confirm', confirm);
+	},
+	//设定所有注册信息
+	setRegisterInformation : function(information) {
+		// body...
+		this.setUsername(information.username);
+		this.setPassword(information.password);
+		this.setConfirm(information.confirm);
+	},
+	//点击注册的响应函数
+	'#register-submit click' : function() {
+		this.setUsername($('#register-inputName').val());
+		this.setPassword($('#register-inputPassword').val());
+		this.setConfirm($('#register-confirmPassword').val());
+		this.register();
+	},
+	//向系统注册
+	register : function() {
+		var name = self.m_registerModel.attr('username');
+		var pass = self.m_registerModel.attr('password');
+		var confirm = self.m_registerModel.attr('confirm');
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			showmessage('register-message', 'name invalid');
+			return;
+		}
+		if(name.length < 6 || name.length > 20) {
+			showmessage('register-message', 'namelength');
+			return;
+		}
+		if(pass.length > 32){
+			showmessage('register-message', 'passlength');
+			return;
+		}
+		if(pass != confirm) {
+			showmessage('register-message', 'doesntmatch');
+			return;
+		}
+		if(registerLock)
+			return;
+		registerLock = true;
+		loading('register-control');
+		socket.emit('register', {
+			name : name,
+			password : pass,
+			avatar : 'images/character.png'
+		});
+	},
+	//输入内容时的响应函数
+	'#register-inputName keyup' : function() {
+		this.setUsername($('#register-inputName').val());
+		this.checkUsername();
+	},
+	//检查用户名的合法性
+	checkUsername : function () {
+		var name = self.m_registerModel.attr('username');
+		if(name.length == "") {
+			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+			return;
+		}
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			$("#msg-username").html(strings['name invalid']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		if(name.length < 6) {
+			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+			return;
+		}
+		if(name.length > 20) {
+			$("#msg-username").html(strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		$("#msg-username").html("");
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
+		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
+		return;
+	},
+	'#register-inputName keydown' : function() {
+		if (event.keyCode == 13 || event.keyCode == 40) {
+			this.focusPasswordInput();
+		}
+	},
+	'#register-inputPassword keydown' : function() {
+		if (event.keyCode == 13 || event.keyCode == 40) {
+			this.focusConfirmInput();
+		}
+		if (event.keyCode == 38) {
+			this.focusNameInput();
+		}
+	},
+	'#register-confirmPassword keydown' : function () {
+		if (event.keyCode == 13) {
+			this.setUsername($('#register-inputName').val())
+			this.setPassword($('#register-inputPassword').val());
+			this.setConfirm($('#register-confirmPassword').val());
+			this.register();
+		}
+		if (event.keyCode == 38) {
+			this.focusPasswordInput();
+		}
+	},
+	focusNameInput : function () {
+		$('#register-inputName').focus();
+	},
+	focusPasswordInput : function() {
+		$('#register-inputPassword').focus();
+	},
+	focusConfirmInput : function () {
+		$('#register-confirmPassword').focus();
+	}
+});
+
+/****************************注册部分代码结束***********************/
 
 function newfileopen() {
 	$('#newfile-inputName').val('');
@@ -1275,7 +1422,8 @@ $(document).ready(function() {
 		$('#share-inputName').focus();
 	});
 
-	var login_control = new LoginControl('#login-box',{m_loginModel:login_information,m_socket:socket}); 
+	var login_control = new LoginControl('#login-box',{m_loginModel:login_information,m_socket:socket});
+	var register_controller = new RegisterController('#register-box', {m_registerModel : registerModel, m_socket : socket}); 
 	
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
@@ -1365,5 +1513,4 @@ $(document).ready(function() {
 		var margin_left = (width/2 - 108) + "px";
 		$("#foot-information").css("margin-left",margin_left);	
 	});
-	
 });
