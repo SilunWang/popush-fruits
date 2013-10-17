@@ -51,6 +51,10 @@ var s;
 
 var novoice = false;
 
+
+////////////////////////Socket//////////////////////
+var socket = io.connect(SOCKET_IO);
+
 //strings: choose language pack initially By SilunWang
 var strings = getCookie('fruits-language-selection') == 'fruits-english-selection' ? strings_en : strings_cn;
 
@@ -183,7 +187,6 @@ var login_information = new LoginInformation({
 	login_name: '',
 	login_password: ''
 });
-//login_information.save();
 
 var LoginControl = can.Control.extend({
 	m_login_information: '',
@@ -192,7 +195,7 @@ var LoginControl = can.Control.extend({
 	init: function(element, options) {
 		self.m_login_information = this.options.m_login_information;
 		self.m_socket = this.options.m_socket;
-		this.element.append(can.view("login-ejs", {
+		this.element.append(can.view("../ejs/login.ejs", {
 			control_login_information: self.m_login_information
 		}));
 	},
@@ -228,6 +231,86 @@ var LoginControl = can.Control.extend({
 		});
 	}
 });
+
+
+/****************************************************/
+
+/*******************fileTabs*************************/
+
+//new a file
+//Model
+NewFile = can.Model.extend({},{});
+
+//instance of a model
+var new_file = new NewFile({
+	filename:'',
+	filenameId:'#newfile-inputName',
+	socket:socket
+});
+
+//Control
+var NewFileControl = can.Control.extend({
+	m_new_file:'',
+	init: function(element, options) {
+		m_new_file = this.options.m_new_file;
+		this.element.append(can.view("../ejs/newfile.ejs", {
+			control_new_file: m_new_file
+		}));
+	},
+
+	//reaction area
+	'#newfile-submit click':function(){
+		filename = $(m_new_file.filenameId).val();
+		this.newfile();
+	},
+
+	//business
+	newfile:function(){
+		var filename = m_new_file.filename;
+		filename = $.trim(filename);
+		if(filename == '') {
+			showmessageindialog('newfile', 'inputfilename');
+			return;
+		}
+		if(/\/|\\|@/.test(filename)) {
+			showmessageindialog('newfile', 'filenameinvalid');
+			return;
+		}
+		if(filename.length > 32) {
+			showmessageindialog('newfile', 'filenamelength');
+			return;
+		}
+		if(operationLock)
+			return;
+		operationLock = true;
+		loading('newfile-buttons');
+		m_new_file.socket.emit('new', {
+			type: newfiletype,
+			path: currentDirString + '/' + filename
+		});
+	}
+});
+
+
+
+
+FileTabs = can.Model.extend({},{});
+var file_tab = new FileTabs({
+	newfile:new_file	
+});
+var FileTabsContorl = can.Control.extend({	
+	//reaction area	
+	//打开新建文件的窗口
+	'#new-file click': function() {
+		$('#newfile-inputName').val('');
+		$('#newfile .control-group').removeClass('error');
+		$('#newfile .help-inline').text('');
+		$('#newfileLabel').text(strings['newfile']);
+		newfiletype = 'doc';
+	}
+	//business
+});
+
 
 
 /****************************************************/
@@ -535,7 +618,6 @@ function backtologin() {
 
 ///////////////////// websocket & callback //////////////////////
 
-var socket = io.connect(SOCKET_IO);
 
 socket.on('unauthorized', function(){
 	backtologin();
@@ -890,6 +972,7 @@ function newfolderopen() {
 	newfiletype = 'dir';
 }
 
+//****************************new file canjs**********************//
 function newfile() {
 	var name = $('#newfile-inputName').val();
 	name = $.trim(name);
@@ -1339,6 +1422,7 @@ $(document).ready(function() {
 
 
 	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_socket:socket}); 
+	var new_file_control = new NewFileControl('#newfile',{m_new_file:new_file});
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
 			return strings[old];
