@@ -773,5 +773,12 @@ io.sockets.on('connection', function(socket){
 			return _broadcast(room.id, 'rm-expr', {expr:data.expr});
 		}
 	});
+	socket.on('download', function(data){
+		var userID = socket.session.user._id;
+		var path = data.path;
+		docDAO.getnewestRevision(userID, path, function(data, name){
+			return socket.emit('download', {r:data, n:name});
+		});
 
+});
 });
