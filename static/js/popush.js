@@ -1,5 +1,6 @@
 
 ////////////////////////// vars ///////////////////////////////
+//lemon test
 var currentUser;
 var currentDir;
 var currentDirString;
