@@ -1392,9 +1392,12 @@ function downloadfile(data) {
 		}
 		package(zip, files);
 		var pom = document.createElement('a');
-		pom.setAttribute('href', 'data:application/zip;base64,' + zip.generate());
+		pom.setAttribute('style', 'display:none');
+		document.body.appendChild(pom);
+		pom.setAttribute('href', window.URL.createObjectURL(zip.generate({type:"blob"})));
 		pom.setAttribute('download', data.n);
 		pom.click();
+		document.body.removeChild(pom);
 
 
 		}
