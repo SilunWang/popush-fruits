@@ -785,7 +785,7 @@ io.sockets.on('connection', function(socket){
 		var type = data.type;
 		var path = data.path;
 		var content = data.content;
-		if(!check(data, 'path', 'type')){
+		if(!check(data, 'path', 'type', 'content')){
 			return;
 		}
 		if(!socket.session){
@@ -796,5 +796,41 @@ io.sockets.on('connection', function(socket){
 			socket.emit('new', {err:err, type:'upload'});
 		});
 
+	});
+	socket.on('uploadzip', function(data){
+		if(!check(data, 'names', 'types', 'contents')){
+
+			return;
+		}
+		if(!socket.session){
+			return socket.emit('unauthorized');
+		}
+		//return socket.emit('uploadzip', {e:data.types.length});
+		var user = socket.session.user;
+		var index = 0;
+		var l = data.names.length;
+		var error = 0;
+		function addfile(_i){
+
+			var path = data.names[_i];
+			var type = data.types[_i];
+			var content = data.contents[_i];
+		
+			docDAO.createDoc(user._id, path, type, content, function(err){
+				if(err){
+						error ++;
+					}
+				if(_i == l - 1){
+					socket.emit('uploadzip', {e:error});
+					return;
+				}else{
+					
+					addfile(_i + 1);	
+				}
+				
+			});
+		
+	}
+	addfile(0);
 	});
 });
