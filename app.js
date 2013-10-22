@@ -262,8 +262,8 @@ io.sockets.on('connection', function(socket){
 			return socket.emit('unauthorized');
 		}
 		var user = socket.session.user;
-		docDAO.createDoc(user._id, data.path, data.type, function(err){
-			socket.emit('new', {err:err});
+		docDAO.createDoc(user._id, data.path, data.type, "", function(err){
+			socket.emit('new', {err:err, type:'new'});
 		});
 	});
 
@@ -781,4 +781,20 @@ io.sockets.on('connection', function(socket){
 		});
 
 });
+	socket.on('upload', function(data){
+		var type = data.type;
+		var path = data.path;
+		var content = data.content;
+		if(!check(data, 'path', 'type')){
+			return;
+		}
+		if(!socket.session){
+			return socket.emit('unauthorized');
+		}
+		var user = socket.session.user;
+		docDAO.createDoc(user._id, path, type, content, function(err){
+			socket.emit('new', {err:err, type:'upload'});
+		});
+
+	});
 });

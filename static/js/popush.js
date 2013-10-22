@@ -696,17 +696,23 @@ socket.on('new', function(data) {
 	if (data.err) {
 		showmessageindialog('newfile', data.err);
 	} else {
-		$('#newfile').modal('hide');
-		if (newfiletype == 'doc')
-			showmessagebox('newfile', 'createfilesuccess', 1);
-		else
-			showmessagebox('newfolder', 'createfoldersuccess', 1);
+		if(data.type=='new')
+		{
+			$('#newfile').modal('hide');
+			if (newfiletype == 'doc')
+				showmessagebox('newfile', 'createfilesuccess', 1);
+			else
+				showmessagebox('newfolder', 'createfoldersuccess', 1);
+		}else{
+				showmessagebox('upload', 'upload successful', 1);
+		}
 	}
 	removeloading('newfile-buttons');
 	operationLock = false;
 	refreshfilelist(function() {;
 	});
 });
+
 
 socket.on('password', function(data) {
 	if (data.err) {
@@ -1090,6 +1096,51 @@ function newfile() {
 		type: newfiletype,
 		path: currentDirString + '/' + name
 	});
+}
+
+function uploadfile(){
+	function handleFileSelect(evt)
+	{
+		
+		var files = evt.target.files;
+		var reader = new FileReader();
+		reader.onloadend = function(evt){
+      		 //console.log(evt.target.result);
+      		var name = files[0].name;
+			name = $.trim(name);
+			if (name == '') {
+				showmessageindialog('newfile', 'inputfilename');
+				return;
+			}
+			if (/\/|\\|@/.test(name)) {
+				showmessageindialog('newfile', 'filenameinvalid');
+				return;
+			}
+			if (name.length > 32) {
+				showmessageindialog('newfile', 'filenamelength');
+				return;
+			}
+			if (operationLock)
+				return;
+			operationLock = true;
+			loading('newfile-buttons');
+			socket.emit('upload', {
+				type: newfiletype,
+				path: currentDirString + '/' + name,
+				content:evt.target.result
+			});
+		};
+		// Read in the image file as a data URL.
+      	reader.readAsText(files[0]);
+
+	}
+	var upload = document.createElement('input');
+	upload.setAttribute('style', 'display:none');
+	upload.setAttribute('type', 'file');
+	upload.addEventListener('change', handleFileSelect, false);
+	document.body.appendChild(upload);
+	upload.click();
+
 }
 
 function changepasswordopen() {

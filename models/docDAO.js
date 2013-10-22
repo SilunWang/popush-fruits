@@ -35,7 +35,7 @@ function DocDAO() {
 	}
 }
 
-DocDAO.prototype.createDoc = function(userId, path, type, callback) {
+DocDAO.prototype.createDoc = function(userId, path, type, content, callback) {
 	var that = this;
 	var reg = /^\/[a-zA-Z0-9]+((\/[^.\/@\\]+[^@\/\\]*[^.\/@\\]+)|(\/[^.\/@\\]))+$/
 	if ((!reg.test(path) || (path.substring(path.lastIndexOf("/")).length > 33))) {
@@ -146,7 +146,7 @@ DocDAO.prototype.createDoc = function(userId, path, type, callback) {
 												creater: userId,
 												modifyTime: new Date().getTime(),
 												modifier: userId,
-												content: ""
+												content: content
 											}, function(err, revision) {
 												if (err) {
 													lock.release(rootPath);
@@ -250,7 +250,7 @@ DocDAO.prototype.createDoc = function(userId, path, type, callback) {
 														creater: userId,
 														modifyTime: new Date().getTime(),
 														modifier: userId,
-														content: ""
+														content: content
 													}, function(err, revision) {
 														if (err) {
 															lock.release(rootPath);
