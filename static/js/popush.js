@@ -654,6 +654,12 @@ socket.on('download', function(data) {
 	dochandler(data);
 });
 
+socket.on('uploadzip', function(data){
+	showmessagebox('zip', 'upload finished. Error number:' + data.e, 1);
+	refreshfilelist(function() {;
+	});
+});
+
 function refreshlistdone(data) {
 	filelist.removeloading();
 	if (data.err) {
@@ -1101,7 +1107,7 @@ function newfile() {
 function uploadfile(){
 	function handleFileSelect(evt)
 	{
-		
+		newfiletype = 'doc';
 		var files = evt.target.files;
 		var reader = new FileReader();
 		reader.onloadend = function(evt){
@@ -1140,7 +1146,60 @@ function uploadfile(){
 	upload.addEventListener('change', handleFileSelect, false);
 	document.body.appendChild(upload);
 	upload.click();
+	document.body.removeChild(upload);
 
+}
+
+function uploadzip(){
+	function handleFileSelect(evt){
+		 var files = evt.target.files;
+		 var f = files[0];
+	
+		  if (f.type === "application/zip") {
+		  		var l = f.name.length;
+		  		var name = f.name;
+		  		if(f.name[l - 1] == 'p' && f.name[l - 2] == 'i' && f.name[l - 3] == 'z' && f.name[l - 4] == '.'){
+		  			name = name.substr(0, l - 4);
+		  		}
+		  		var names = new Array();
+		  		var types = new Array();
+		  		var contents = new Array();
+		  		names.push(currentDirString + '/' + name);
+		  		types.push('dir');
+		  		contents.push("");
+				var reader = new FileReader();
+			  	reader.onloadend = function(evt){
+			  	var zip = new JSZip(evt.target.result);
+			  	$.each(zip.files, function (index, zipEntry){
+                	if(zipEntry.options.dir == true){
+                		names.push(currentDirString + '/' + name + '/' + zipEntry.name.substr(0, zipEntry.name.length - 1));
+                		types.push('dir');
+                		contents.push('');
+               
+
+                	}else{
+                		names.push(currentDirString + '/' + name + '/' + zipEntry.name);
+                		types.push('doc');
+                		contents.push(zip.file(zipEntry.name).asText());
+                		
+                	}
+              	});
+			  	socket.emit('uploadzip', {names:names, contents:contents, types:types});
+			  	};
+			  	reader.readAsArrayBuffer(f);
+        }
+        else{
+        	showmessagebox('error', 'the file cannot support zip-format', 1);
+        }
+
+	}
+	var upload = document.createElement('input');
+	upload.setAttribute('style', 'display:none');
+	upload.setAttribute('type', 'file');
+	upload.addEventListener('change', handleFileSelect, false);
+	document.body.appendChild(upload);
+	upload.click();
+	document.body.removeChild(upload);
 }
 
 function changepasswordopen() {
