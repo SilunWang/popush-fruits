@@ -220,7 +220,7 @@ function fileList(table) {
 		removeloading: function() {
 			obj.html(oldhtml);
 			haveloading = false;
-		},
+		}
 	};
 	
 	//向所有文件列表中添加当前文件列表
