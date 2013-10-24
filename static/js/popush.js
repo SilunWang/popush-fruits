@@ -844,7 +844,7 @@ var ChangeAvatarControl = can.Control.extend({
 			}
 		}
 		reader.readAsDataURL(file);
-	},
+	}
 });
 /****************************************************/
 
@@ -1148,7 +1148,7 @@ var FileListController = can.Control.extend({
 			$('#delete-name').text(o.name);
 			$('#delete').modal('show');
 			var delete_controller = new DeleteControl('#delete',{m_object:o,m_global_v:self.options.m_global_v});
-			delete delete_controller;
+			//delete delete_controller;
 		};
 	
 		fl.onrename = function(o) {
@@ -2108,6 +2108,7 @@ $(document).ready(function() {
 		$("#foot-information").css("margin-left",margin_left);	
 	});
 
+	var file_list_control = new FileListController('#file-list-table',{m_global_v:global_v});
 	var footer_control = new FooterController('#footer',{m_global_v:global_v});
 	var new_file_control = new NewFileController('#newfile',{m_global_v:global_v});
 	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
