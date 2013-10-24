@@ -1,0 +1,40 @@
+<hr />
+<div class="span11">
+	<div id="themeselect" style="width:36px;float:left">
+		<a href="#wheel2" class="wheel-button ne">
+			<span localization>theme</span>
+		</a>
+		<ul id="wheel2" data-angle="NE" class="wheel">
+			<li class="item">
+				<a style="text-decoration:none; cursor:pointer" id="changeStaticTheme" localization>defaultTheme</a>
+			</li>
+			<li class="item">
+				<a style="text-decoration:none; cursor:pointer" id="changetheme1" localization>classicSky</a>
+			</li>
+			<li class="item">
+				<a style="text-decoration:none; cursor:pointer" id="changetheme2" localization>elegantLife</a>
+			</li>
+		</ul>
+	</div>
+	<div id = "foot-information" style="font-size:14px; width:180px;float:left" localization>popushteam</div>
+	<script>
+  		$(document).ready(function(){
+			$(".wheel-button").wheelmenu({
+    			trigger: "hover",
+    			animation: "fly",
+    			animationSpeed: "fast"
+  			});
+		});
+		var width = $(document).width() * 0.915;
+		var margin_left = (width/2 - 108) + "px";
+		$("#foot-information").css("margin-left",margin_left);
+	</script>
+	<div style="float:right">
+		<div style="float:left" localization>language</div>
+		<div style="float:left" localization>
+			<a id="changeEng" style="cursor:pointer">English</a>
+			|
+			<a id="changeChn" style="cursor:pointer">中文</a>
+		</div>
+	</div>
+</div>
