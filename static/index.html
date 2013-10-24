@@ -62,7 +62,8 @@
 								<a href="#changepassword" data-toggle="modal" onclick="changepasswordopen()" localization>changepassword</a>
 							</li>
 							<li>
-								<a href="#changeavatar" data-toggle="modal" onclick="changeavataropen()" localization>changeavatar</a>
+								<a href="#changeavatar" data-toggle="modal" onclick="changeavataropen()" localization>
+changeavatar</a>
 							</li>
 							<li class="divider"></li>
 							<li>
@@ -144,7 +145,7 @@
 									<a href="#newfile" id = "new-file" data-toggle="modal" onclick="newfileopen()" localization>newfile</a>
 								</li>
 								<li>
-									<a href="#newfile" data-toggle="modal" onclick="newfolderopen()" localization>newfolder</a>
+									<a href="#newfile" id = "new-file-folder" data-toggle="modal" onclick="newfolderopen()" localization>newfolder</a>
 								</li>
 								<!--<li class="divider"></li>
 							<li>
@@ -437,35 +438,6 @@
 	</div>
 	<!-- popover 共享文件确认框-->
 	<div id="share" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="shareLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
-		<div class="modal-header">
-			<button type="button" onclick="closeshare()" class="close">&times;</button>
-			<h3 id="shareLabel" localization>sharemanage</h3>
-		</div>
-		<div class="modal-body">
-			<p>
-				<span localization>file</span>
-				<span id="share-name"></span>
-				<span localization>sshareduser</span>
-			</p>
-			<div id="share-user-box">
-				<ul class="nav nav-pills nav-stacked" id="share-user-list"></ul>
-			</div>
-			<div class="alert hide" id="share-message">
-				<button type="button" class="close" onclick="$('#share-message').slideUp()">&times;</button>
-				<span localization>Nothing here</span>
-			</div>
-			<div class="form-inline" id="share-buttons">
-				<span localization>newuser:</span>
-				<input type="text" id="share-inputName" onkeydown="pressenter(arguments[0],share)" />
-				<button class="btn" type="button" onclick="share()" localization>add</button>
-				<button class="btn pull-right" type="button" onclick="unshare()" localization>delete</button>
-			</div>
-		</div>
-		<div class="modal-footer">
-			<div id="share-buttons">
-				<button class="btn" onclick="closeshare()" localization>back</button>
-			</div>
-		</div>
 	</div>
 
 	<!-- popover -->
