@@ -245,7 +245,7 @@ GlobalVariables = can.Model.extend({},{
 			//否则，删除currentDir中的第一项，复制给name
 			var name = this.currentDir.shift();
 			//
-			var r = '/' + currentDir.join('/');
+			var r = '/' + this.currentDir.join('/');
 			if(this.currentDir.length == 0) {
 				r = '/' + name;
 			}
@@ -265,7 +265,7 @@ GlobalVariables = can.Model.extend({},{
 			var p = t.split('/');
 			if(p.length > 1)
 				t = p[1] + '@' + p[0];
-			if(i == 0 && this.g_dirMode == 'shared')
+			if(i == 0 && this.dirMode == 'shared')
 				s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
 				s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">' + this.htmlescape(t) + '</a>';
@@ -509,11 +509,10 @@ GlobalVariables = can.Model.extend({},{
 		};
 	}
 });
-
 /***********************************************************/
 
 
-/***************************Login part*************************/
+/***************************Login part**********************/
 LoginInformation = can.Model.extend({}, {});
 
 var LoginControl = can.Control.extend({
@@ -610,34 +609,69 @@ var LoginControl = can.Control.extend({
 		m_global_v.loginLock = false;
 	});}
 });
+/****************************************************/
 
+
+/*******************fileTabs*************************/
+var FileTabsContorl = can.Control.extend({
+	m_global_v:'',
+	self: this,
+	init: function(element, options) {
+		self.m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/filetab.ejs", {}));
+	},
+	'#new-file click': function() {
+		$('#newfile-inputName').val('');
+		$('#newfile .control-group').removeClass('error');
+		$('#newfile .help-inline').text('');
+		$('#newfileLabel').text(strings['newfile']);
+		m_global_v.newfiletype = 'doc';
+	},
+	'#new-file-folder click': function() {
+		$('#newfile-inputName').val('');
+		$('#newfile .control-group').removeClass('error');
+		$('#newfile .help-inline').text('');
+		$('#newfileLabel').text(strings['newfolder']);
+		m_global_v.newfiletype = 'dir';
+	},
+	'#ownedfileex click': function() {
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.dirMode = 'owned';
+		m_global_v.docshowfilter = m_global_v.allselffilter;
+		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.currentDirString = m_global_v.getdirstring();
+		$('#current-dir').html(m_global_v.getdirlink());
+		m_global_v.refreshfilelist(function(){;});
+
+		$('#ownedfile').show();
+		$('#ownedfileex').hide();
+		$('#sharedfile').removeClass('active');
+	},
+	'#sharedfile click': function() {
+		if(m_global_v.dirMode == 'shared')
+			return;
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.dirMode = 'shared';
+		m_global_v.docshowfilter = m_global_v.allsharefilter;
+		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.currentDirString = m_global_v.getdirstring();
+		$('#current-dir').html(m_global_v.getdirlink());
+		m_global_v.refreshfilelist(function(){;});
+		
+		$('#ownedfile').hide();
+		$('#ownedfileex').show();
+		$('#sharedfile').addClass('active');
+	}
+});
 
 /****************************************************/
 
-/*******************fileTabs*************************/
 
-Lala = can.Construct.extend({
-},
-{
-	init:function(haha){
-		this.Glele = haha.lela;
-	},
-	print:function(){
-		this.Glele = "a";	
-	},
-	printf:function(){
-		console.log(this.Glele);
-	}
-});
-var lela = "bbbbbb";
-var lala = new Lala({lela:lela});
-lala.print();
-lala.printf();
-
-
-/************************************New File***********************************/
-
-
+/*******************New file*************************/
 //Control
 var NewFileController = can.Control.extend({
 	m_global_v:'',
@@ -701,7 +735,188 @@ var NewFileController = can.Control.extend({
 		});
 	}
 });
+/****************************************************/
 
+
+/*********************rename*************************/
+var ReNameControl = can.Control.extend({
+	m_global_v:'',
+	m_object:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		m_object = this.options.m_object;
+		this.element.append(can.view("../ejs/rename.ejs", {}));
+		this.socket_io();
+	},
+	'#rename-ok click':function(){
+		var name = $('#rename-inputName').val();
+		name = $.trim(name);
+		if(name == '') {
+			m_global_v.showmessageindialog('rename', 'inputfilename');
+			return;
+		}
+		if(/\/|\\|@/.test(name)) {
+			m_global_v.showmessageindialog('rename', 'filenameinvalid');
+			return;
+		}
+		if(name == this.m_object.name) {
+			$('#rename').modal('hide');
+			return;
+		}
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.loading('rename-buttons');
+		m_global_v.movehandler = this.renamedone;
+		m_global_v.socket.emit('move', {
+			path: this.m_object.path,
+			newPath: m_global_v.currentDirString + '/' + name
+		});
+	},
+	renamedone: function(data) {
+		if(data.err){
+			m_global_v.showmessageindialog('rename', data.err, 0);
+			m_global_v.operationLock = false;
+		} else {
+			$('#rename').modal('hide');
+			m_global_v.operationLock = false;
+			m_global_v.refreshfilelist(function() {;});
+		}
+		m_global_v.removeloading('rename-buttons');
+	},
+	socket_io:function(){
+		socket.on('move', function(data){
+			m_global_v.movehandler(data);
+		});
+	}
+});
+/****************************************************/
+
+
+/********************deletefile**********************/
+var DeleteControl = can.Control.extend({
+	m_global_v:'',
+	m_object:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		m_object = this.options.m_object;
+		this.element.append(can.view("../ejs/deletefile.ejs", {}));
+	},
+	'#delete-ok click':function(){
+		if(m_global_v.operationLock)
+				return;
+		m_global_v.operationLock = true;
+		m_global_v.loading('delete-buttons');
+		m_global_v.socket.emit('delete', {
+			path: this.m_object.path
+		});
+	},
+});
+/****************************************************/
+
+
+/**********************navhead***********************/
+var Nav_HeadControl = can.Control.extend({
+	m_global_v:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/navhead.ejs", {}));
+	},
+	'#changepasswordopen click':function(){
+		$('#changepassword-old').val('');
+		$('#changepassword-new').val('');
+		$('#changepassword-confirm').val('');
+		$('#changepassword .control-group').removeClass('error');
+		$('#changepassword .help-inline').text('');
+	},
+	'#changeavataropen click':function(){
+		$('#changeavatar-message').hide();
+		$('#changeavatar-img').attr('src', m_global_v.currentUser.avatar);
+	},
+	'#logout click':function(){
+		m_global_v.socket.emit('logout', {
+		});
+		$.removeCookie('sid');
+		m_global_v.backtologin();
+	},
+});
+/****************************************************/
+
+
+/******************changepassword********************/
+var ChangePassControl = can.Control.extend({
+	m_global_v:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/changepass.ejs", {}));
+	},
+	'#changepass-ok click':function(){
+		var old = $('#changepassword-old').val();
+		var pass = $('#changepassword-new').val();
+		var confirm = $('#changepassword-confirm').val();
+		$('#changepassword .control-group').removeClass('error');
+		$('#changepassword .help-inline').text('');
+		if(pass != confirm) {
+			m_global_v.showmessageindialog('changepassword', 'doesntmatch', 2);
+			return;
+		}
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.loading('changepassword-buttons');
+		m_global_v.socket.emit('password', {
+			password: old,
+			newPassword: pass
+		});
+	},
+});
+/****************************************************/
+
+
+/******************changeavatar********************/
+var ChangeAvatarControl = can.Control.extend({
+	m_global_v:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/changeavatar.ejs", {}));
+	},
+	'#changeavatar-input change': function() {
+		this.changeavatar($('#changeavatar-input')[0]);
+	},
+	changeavatar: function(o) {
+		if(o.files.length < 0) {
+			m_global_v.showmessage('changeavatar-message', 'selectuser', 'error');
+			return;
+		}
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		var file = o.files[0];
+		
+		var reader = new FileReader(); 
+		reader.onloadend = function() {
+			if (reader.error) {
+				m_global_v.showmessage('changeavatar-message', reader.error, 'error');
+				m_global_v.operationLock = false;
+			} else {
+				var s = reader.result;
+				var t = s.substr(s.indexOf('base64') + 7);
+				if(t.length > 0x100000) {
+					m_global_v.showmessage('changeavatar-message', 'too large', 'error');
+				}
+				m_global_v.socket.emit('avatar', {
+					type: file.type,
+					avatar: t
+				});
+			}
+		}
+		reader.readAsDataURL(file);
+	},
+});
+/****************************************************/
+
+
+/*********************Share Files********************/
 
 var ShareController = can.Control.extend({
 	m_global_v:'',
@@ -803,10 +1018,23 @@ var ShareController = can.Control.extend({
 /*********************************************************************/
 
 
-/******************************************Share Files****************************************/
-
-
-
+/***********************test*************************/
+Lala = can.Construct.extend({
+},
+{
+	init:function(haha){
+		this.Glele = haha.lela;
+	},
+	print:function(){
+		this.Glele = "a";
+		console.log(this.Glele);	
+	}	
+});
+var lela = "bbbbbb";
+var lala = new Lala({lela:lela});
+lala.print();
+lala.lela = "a";
+console.log(lela);
 /****************************************************/
 
 //更改主题为第一个主题
@@ -1170,11 +1398,6 @@ socket.on('register', function(data){
 	registerLock = false;
 });
 
-/*
-socket.on('doc', function(data){
-	dochandler(data);
-});*/
-
 function refreshlistdone(data){
 	filelist.removeloading();
 	if(data.err){
@@ -1251,22 +1474,6 @@ socket.on('delete', function(data){
 	}
 	removeloading('delete-buttons');
 });
-
-socket.on('move', function(data){
-	movehandler(data);
-});
-
-function renamedone(data) {
-	if(data.err){
-		showmessageindialog('rename', data.err, 0);
-		operationLock = false;
-	} else {
-		$('#rename').modal('hide');
-		operationLock = false;
-		refreshfilelist(function() {;});
-	}
-	removeloading('rename-buttons');
-}
 
 socket.on('share', function(data){
 	if(data.err){
@@ -1354,13 +1561,6 @@ function registerview() {
 	});
 }
 
-function logout() {
-	socket.emit('logout', {
-	});
-	$.removeCookie('sid');
-	backtologin();
-}
-
 function register() {
 	var name = $('#register-inputName').val();
 	var pass = $('#register-inputPassword').val();
@@ -1392,21 +1592,6 @@ function register() {
 	});
 }
 
-function newfileopen() {
-	$('#newfile-inputName').val('');
-	$('#newfile .control-group').removeClass('error');
-	$('#newfile .help-inline').text('');
-	$('#newfileLabel').text(strings['newfile']);
-	newfiletype = 'doc';
-}
-
-function newfolderopen() {
-	$('#newfile-inputName').val('');
-	$('#newfile .control-group').removeClass('error');
-	$('#newfile .help-inline').text('');
-	$('#newfileLabel').text(strings['newfolder']);
-	newfiletype = 'dir';
-}
 
 //****************************new file canjs**********************//
 function newfile() {
@@ -1432,73 +1617,6 @@ function newfile() {
 		type: newfiletype,
 		path: currentDirString + '/' + name
 	});
-}
-
-function changepasswordopen() {
-	$('#changepassword-old').val('');
-	$('#changepassword-new').val('');
-	$('#changepassword-confirm').val('');
-	$('#changepassword .control-group').removeClass('error');
-	$('#changepassword .help-inline').text('');
-}
-
-function changeavataropen() {
-	$('#changeavatar-message').hide();
-	$('#changeavatar-img').attr('src', currentUser.avatar);
-}
-
-function changepassword() {
-	var old = $('#changepassword-old').val();
-	var pass = $('#changepassword-new').val();
-	var confirm = $('#changepassword-confirm').val();
-	$('#changepassword .control-group').removeClass('error');
-	$('#changepassword .help-inline').text('');
-	if(pass != confirm) {
-		showmessageindialog('changepassword', 'doesntmatch', 2);
-		return;
-	}
-	if(operationLock)
-		return;
-	operationLock = true;
-	loading('changepassword-buttons');
-	socket.emit('password', {
-		password: old,
-		newPassword: pass
-	});
-}
-
-function sharedfilelist() {
-	if(dirMode == 'shared')
-		return;
-	if(operationLock)
-		return;
-	operationLock = true;
-	dirMode = 'shared';
-	docshowfilter = allsharefilter;
-	currentDir = [currentUser.name];
-	currentDirString = getdirstring();
-	$('#current-dir').html(getdirlink());
-	refreshfilelist(function(){;});
-	
-	$('#ownedfile').hide();
-	$('#ownedfileex').show();
-	$('#sharedfile').addClass('active');
-}
-
-function ownedfilelist() {
-	if(operationLock)
-		return;
-	operationLock = true;
-	dirMode = 'owned';
-	docshowfilter = allselffilter;
-	currentDir = [currentUser.name];
-	currentDirString = getdirstring();
-	$('#current-dir').html(getdirlink());
-	refreshfilelist(function(){;});
-
-	$('#ownedfile').show();
-	$('#ownedfileex').hide();
-	$('#sharedfile').removeClass('active');
 }
 
 var editor;
@@ -1582,38 +1700,6 @@ function closeshare() {
 	$('#share').modal('hide');
 }
 
-
-function changeavatar(o) {
-	if(o.files.length < 0) {
-		showmessage('changeavatar-message', 'selectuser', 'error');
-		return;
-	}
-	if(operationLock)
-		return;
-	operationLock = true;
-	var file = o.files[0];
-	
-	var reader = new FileReader(); 
-	
-	reader.onloadend = function() {
-		if (reader.error) {
-			showmessage('changeavatar-message', reader.error, 'error');
-			operationLock = false;
-		} else {
-			var s = reader.result;
-			var t = s.substr(s.indexOf('base64') + 7);
-			if(t.length > 0x100000) {
-				showmessage('changeavatar-message', 'too large', 'error');
-			}
-			socket.emit('avatar', {
-				type: file.type,
-				avatar: t
-			});
-		}
-	}
-
-	reader.readAsDataURL(file);
-}
 
 function initfilelistevent(fl) {
 
@@ -1910,9 +1996,14 @@ $(document).ready(function() {
 		$("#foot-information").css("margin-left",margin_left);	
 	});
 
+
+	var new_file_control = new NewFileControl('#newfile',{m_global_v:global_v});
+	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
+	var change_pass_control = new ChangePassControl('#changepassword',{m_global_v:global_v});
+	var change_avatar_control = new ChangeAvatarControl('#changeavatar',{m_global_v:global_v});
+	var nav_head_control = new Nav_HeadControl('#nav-head',{m_global_v:global_v});
 	var share_control = new ShareController('#share',{m_global_v:global_v});
 	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_global_v:global_v}); 
-	var new_file_control = new NewFileController('#newfile',{m_global_v:global_v});
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
 			return strings[old];
