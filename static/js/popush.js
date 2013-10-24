@@ -231,7 +231,7 @@ GlobalVariables = can.Model.extend({},{
 
 		///////////////////////theme related//////////////////////
 		this.myTheme = global_data.g_myTheme;
-
+		
 		this.doc_on();
 	},
 	//获得当前路径的标准路径名
@@ -366,6 +366,17 @@ GlobalVariables = can.Model.extend({},{
 		$('#loading-init').remove();
 		this.showmessage('login-message', 'loadfailed');
 	},
+
+	pressenter:function(e, func, idUp, idDown) {
+		e = e || event;	
+		if(e.keyCode == 13 && this.loadDone)
+			func();
+		else if(e.keyCode == 38)
+			$('#' + idUp).focus();
+		else if(e.keyCode == 40)
+			$('#' + idDown).focus();
+	},
+
 	refreshfilelist:function(error, callback) {
 		this.operationLock = true;
 		this.filelist.loading();
@@ -404,17 +415,104 @@ GlobalVariables = can.Model.extend({},{
 		}
 		this.operationLock = false;
 	},
+	sharedone:function(data){
+		if(!data.err){
+			userlist.fromusers(data.doc.members);
+		}
+		$('#share-message').hide();
+		removeloading('share-buttons');
+		operationLock = false;
+	},
 	doc_on:function(){
 		var self = this;
-		this.socket.on('doc',function(data){
+		this.socket.on('doc', function(data){
 			self.dochandler(data);
 		});
+	}	
+
+	initfilelistevent:function(fl) {
+
+		fl.onname = function(o) {
+			if(this.operationLock)
+				return;
+			if(o.type == 'dir') {
+				this.currentDir.push(o.name);
+				this.currentDirString = this.getdirstring();
+				this.refreshfilelist(function() {
+					this.currentDir.pop();
+					this.currentDirString = this.getdirstring();
+				});
+			}
+			/* 
+			else if(o.type == 'doc') {
+				openeditor(o);
+			}*/
+		};
+	
+		fl.ondelete = function(o) {
+			if(o.type == 'dir')
+				$('#delete').find('.folder').text(strings['folder']);
+			else
+				$('#delete').find('.folder').text(strings['file']);
+			$('#delete-name').text(o.name);
+			$('#delete').modal('show');
+			deleteconfirm = function() {
+				if(operationLock)
+					return;
+				operationLock = true;
+				loading('delete-buttons');
+				socket.emit('delete', {
+					path: o.path
+				});
+			};
+		};
+	
+		fl.onrename = function(o) {
+			$('#rename-inputName').val(o.name);
+			$('#rename .control-group').removeClass('error');
+			$('#rename .help-inline').text('');
+			$('#rename').modal('show');
+			rename = function() {
+				var name = $('#rename-inputName').val();
+				name = $.trim(name);
+				if(name == '') {
+					showmessageindialog('rename', 'inputfilename');
+					return;
+				}
+				if(/\/|\\|@/.test(name)) {
+					showmessageindialog('rename', 'filenameinvalid');
+					return;
+				}
+				if(name == o.name) {
+					$('#rename').modal('hide');
+					return;
+				}
+				if(operationLock)
+					return;
+				operationLock = true;
+				loading('rename-buttons');
+				movehandler = renamedone;
+				socket.emit('move', {
+					path: o.path,
+					newPath: currentDirString + '/' + name
+				});
+			};
+		};
+	
+		fl.onshare = function(o) {
+			$('#share-name').text(o.name);
+			$('#share-inputName').val('');
+			$('#share-message').hide();
+			userlist.fromusers(o.members);
+			$('#share').modal('show');
+			currentsharedoc = o;
+		};
 	}
 });
 /***********************************************************/
 
 
-/***************************Login part*************************/
+/***************************Login part**********************/
 LoginInformation = can.Model.extend({}, {});
 
 var LoginControl = can.Control.extend({
@@ -573,38 +671,30 @@ var FileTabsContorl = can.Control.extend({
 /****************************************************/
 
 
-/********************newfile*************************/
-NewFile = can.Model.extend({
-},{});
-
-//instance of a model
-var new_file = new NewFile({
-	filename:'',
-	filenameId:'#newfile-inputName',
-});
-
+/*******************New file*************************/
 //Control
-var NewFileControl = can.Control.extend({
+var NewFileController = can.Control.extend({
 	m_global_v:'',
-	m_new_file:'',
+	m_filename:'',
+	m_filenameId:'#newfile-inputName',
 	init: function(element, options) {
 		m_new_file = this.options.m_new_file;
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/newfile.ejs", {
 			control_new_file: m_new_file
 		}));
-	this.socket_io();
+		this.socket_io();
 	},
 
 	//reaction area
 	'#newfile-submit click':function(){
-		m_new_file.filename = $(m_new_file.filenameId).val();
+		this.m_filename = $(this.m_filenameId).val();
 		this.newfile();
 	},
 
 	//business
 	newfile:function(){
-		var filename = m_new_file.filename;
+		var filename = this.m_filename;
 		filename = $.trim(filename);
 		if(filename == '') {
 			showmessageindialog('newfile', 'inputfilename');
@@ -624,7 +714,7 @@ var NewFileControl = can.Control.extend({
 		m_global_v.operationLock = true;
 		loading('newfile-buttons');
 		m_global_v.socket.emit('new', {
-			type: "doc",
+			type: m_global_v.newfiletype,
 			path: m_global_v.currentDirString + '/' + filename
 		});
 	},
@@ -824,6 +914,108 @@ var ChangeAvatarControl = can.Control.extend({
 	},
 });
 /****************************************************/
+
+
+/*********************Share Files********************/
+
+var ShareController = can.Control.extend({
+	m_global_v:'',
+	init: function(element, options) {
+		m_new_file = this.options.m_new_file;
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/share.ejs", {
+			control_new_file: m_new_file
+		}));
+		this.socket_io();
+	},
+
+	//events
+	".close-share click":function(){
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.refreshfilelist(function(){;});
+		$('#share').modal('hide');
+	},
+	
+	"#share-submit click":function(){
+		this.share();
+	},
+	'#unshare-submit click':function(){
+		this.unshare();
+	},
+	'#share-inputName keydown':function(){
+		m_global_v.pressenter(arguments[0],this.share);
+	},
+
+	unshare:function(){
+		//获取选中的的用户名
+		var selected = m_global_v.userlist.getselection();
+		//没有选中的话，显示error
+		//传入当前的对话框
+		if(!selected) {
+			m_global_v.showmessage('share-message', 'selectuser', 'error');
+			return;
+		}
+		//如果当前操作被锁了
+		//返回
+		if(m_global_v.operationLock)
+			return;
+		//否则，上锁
+		m_global_v.operationLock = true;
+		m_global_v.loading('share-buttons');
+		//向服务器发送取消共享的请求
+		m_global_v.socket.emit('unshare', {
+			path: m_global_v.currentsharedoc.path,
+			name: selected.name
+		});
+	},
+
+	share:function(){
+		var share_name = $('#share-inputName').val();
+		if(share_name == '') {
+			m_global_v.showmessage('share-message', 'inputusername', 'error');
+			return;
+		}
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.loading('share-buttons');
+		m_global_v.socket.emit('share', {
+			path: m_global_v.currentsharedoc.path,
+			name: share_name
+		});
+	},
+
+	socket_io:function(){
+		m_global_v.socket.on('share', function(data){
+			if(data.err){
+				m_global_v.showmessage('share-message', data.err, 'error');
+				m_global_v.operationLock = false;
+				m_global_v.removeloading('share-buttons');
+			} else {
+				m_global_v.dochandler = m_global_v.sharedone;
+				m_global_v.socket.emit('doc', {
+					path: m_global_v.currentsharedoc.path
+				});
+			}
+		});
+
+		m_global_v.socket.on('unshare', function(data){
+			if(data.err){
+				m_global_v.showmessage('share-message', data.err, 'error');
+				m_global_v.operationLock = false;
+				m_global_v.removeloading('share-buttons');
+			} else {
+				m_global_v.dochandler = m_global_v.sharedone;
+				m_global_v.socket.emit('doc', {
+					path: m_global_v.currentsharedoc.path
+				});
+			}
+		});
+	}
+});
+
+/*********************************************************************/
 
 
 /***********************test*************************/
@@ -1508,14 +1700,6 @@ function closeshare() {
 	$('#share').modal('hide');
 }
 
-function shareopen(o) {		
-	$('#share-name').text(o.name);
-	$('#share-inputName').val('');
-	$('#share-message').hide();
-	userlist.fromusers(o.members);
-	$('#share').modal('show');
-	currentsharedoc = o;
-}
 
 function initfilelistevent(fl) {
 
@@ -1585,9 +1769,13 @@ function initfilelistevent(fl) {
 	};
 	
 	fl.onshare = function(o) {
-		shareopen(o);
+		$('#share-name').text(o.name);
+		$('#share-inputName').val('');
+		$('#share-message').hide();
+		userlist.fromusers(o.members);
+		$('#share').modal('show');
+		currentsharedoc = o;
 	};
-
 }
 
 function backto(n) {
@@ -1809,11 +1997,12 @@ $(document).ready(function() {
 	});
 
 
-	var new_file_control = new NewFileControl('#newfile',{m_new_file:new_file,m_global_v:global_v});
+	var new_file_control = new NewFileControl('#newfile',{m_global_v:global_v});
 	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
 	var change_pass_control = new ChangePassControl('#changepassword',{m_global_v:global_v});
 	var change_avatar_control = new ChangeAvatarControl('#changeavatar',{m_global_v:global_v});
 	var nav_head_control = new Nav_HeadControl('#nav-head',{m_global_v:global_v});
+	var share_control = new ShareController('#share',{m_global_v:global_v});
 	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_global_v:global_v}); 
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
