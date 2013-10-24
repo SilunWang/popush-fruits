@@ -55,47 +55,9 @@ var novoice = false;
 ////////////////////////Socket//////////////////////
 var socket = io.connect(SOCKET_IO);
 
-//strings: choose language pack initially By SilunWang
 var strings = getCookie('fruits-language-selection') == 'fruits-english-selection' ? strings_en : strings_cn;
 
 var myTheme = getCookie('fruits-theme-selection');
-
-switch(myTheme)
-{	
-	case 'fruits_theme_static':
-		changeStaticTheme();
-		break;
-	case 'fruits_theme_1':
-		changetheme1();
-		break;
-	case 'fruits_theme_2':
-		changetheme2();
-		break;
-	default:
-		changeStaticTheme();
-		break;
-}
-//////////////////////// function //////////////////////////////
-
-/************************************************************************
-|    函数名称： setCookie                                                
-|    函数功能： 设置cookie函数                                            
-|    入口参数： name：cookie名称；value：cookie值     
-|	 Author: SilunWang              
-*************************************************************************/
-
-function setCookie(name, value) 
-{
-    var argv = setCookie.arguments; 
-    var argc = setCookie.arguments.length; 
-    var expires = (argc > 2) ? argv[2] : null; 
-    if(expires != null)
-    { 
-        var LargeExpDate = new Date (); 
-        LargeExpDate.setTime(LargeExpDate.getTime() + (expires*1000*3600*24));         
-    }
-    document.cookie = name + "=" + escape (value)+((expires == null) ? "" : ("; expires=" +LargeExpDate.toGMTString())); 
-}
 
 /************************************************************************
 |    函数名称： getCookie                                                
@@ -121,67 +83,7 @@ function getCookie(name)
     } 
 } 
 
-/************************************************************************
-|    函数名称： deleteCookie                                            
-|    函数功能： 删除cookie函数                                            
-|    入口参数： Name：cookie名称 
-|	 Author: SilunWang                                         
-*************************************************************************/    
-
-function deleteCookie(name) 
-{ 
-    var expdate = new Date(); 
-    expdate.setTime(expdate.getTime() - (86400 * 1000 * 1)); 
-    setCookie(name, "", expdate);
-}
-
-//更改语言为English
-function changeEng()
-{
-	setCookie('fruits-language-selection', 'fruits-english-selection');
-	strings = strings_en;
-	$('[localization]').html(function(index, oldcontent) {
-		for(var iter in strings_cn)
-		{
-			if(oldcontent == strings_cn[iter])
-				return strings_en[iter];
-		}
-		return oldcontent;
-	});
-	$('[title]').attr('title', function(index, oldcontent) {
-		for(var iter in strings_cn)
-		{
-			if(oldcontent == strings_cn[iter])
-				return strings_en[iter];
-		}
-		return oldcontent;
-	});
-}
-
-//更改语言为中文
-function changeChn()
-{
-	setCookie('fruits-language-selection', 'fruits-chinese-selection');
-	strings = strings_cn;
-	$('[localization]').html(function(index, oldcontent) {
-		for(var iter in strings_en)
-		{
-			if(oldcontent == strings_en[iter])
-				return strings_cn[iter];
-		}
-		return oldcontent;
-	});
-	$('[title]').attr('title', function(index, oldcontent) {
-		for(var iter in strings_en)
-		{
-			if(oldcontent == strings_en[iter])
-				return strings_cn[iter];
-		}
-		return oldcontent;
-	});
-}
-
-/***************************全局变量Model*********************/
+/********************全局变量Model*********************/
 GlobalVariables = can.Model.extend({},{
 	init:function(global_data){
 		////////////////////////// vars ///////////////////////////////
@@ -228,7 +130,8 @@ GlobalVariables = can.Model.extend({},{
 
 		///////////////////////language related///////////////////
 		this.strings = global_data.g_strings;
-
+		this.strings_en = global_data.g_strings_en;
+		this.strings_cn = global_data.g_strings_cn;
 		///////////////////////theme related//////////////////////
 		this.myTheme = global_data.g_myTheme;
 		
@@ -525,10 +428,10 @@ GlobalVariables = can.Model.extend({},{
 		};
 	}
 });
-/***********************************************************/
+/****************************************************/
 
 
-/***************************Login part**********************/
+/*********************Login part*********************/
 LoginInformation = can.Model.extend({}, {});
 
 var LoginControl = can.Control.extend({
@@ -832,7 +735,7 @@ var DeleteControl = can.Control.extend({
 
 
 /**********************navhead***********************/
-var Nav_HeadControl = can.Control.extend({
+var NavHeadControl = can.Control.extend({
 	m_global_v:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
@@ -889,7 +792,7 @@ var ChangePassControl = can.Control.extend({
 /****************************************************/
 
 
-/******************changeavatar********************/
+/********************changeavatar********************/
 var ChangeAvatarControl = can.Control.extend({
 	m_global_v:'',
 	init: function(element, options) {
@@ -933,15 +836,11 @@ var ChangeAvatarControl = can.Control.extend({
 
 
 /*********************Share Files********************/
-
 var ShareController = can.Control.extend({
 	m_global_v:'',
 	init: function(element, options) {
-		m_new_file = this.options.m_new_file;
 		m_global_v = this.options.m_global_v;
-		this.element.append(can.view("../ejs/share.ejs", {
-			control_new_file: m_new_file
-		}));
+		this.element.append(can.view("../ejs/share.ejs", {}));
 		this.socket_io();
 	},
 
@@ -1030,8 +929,176 @@ var ShareController = can.Control.extend({
 		});
 	}
 });
+/****************************************************/
 
-/*********************************************************************/
+
+/************************Footer**********************/
+var FooterController = can.Control.extend({
+	m_global_v:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		//strings: choose language pack initially By SilunWang
+		m_global_v.strings = this.getCookie('fruits-language-selection') == 'fruits-english-selection' ? m_global_v.strings_en : m_global_v.strings_cn;
+		m_global_v.myTheme = this.getCookie('fruits-theme-selection');
+		switch(m_global_v.myTheme)
+		{	
+			case 'fruits_theme_static':
+				this.changeStaticTheme();
+				break;
+			case 'fruits_theme_1':
+				this.changetheme1();
+				break;
+			case 'fruits_theme_2':
+				this.changetheme2();
+				break;
+			default:
+				this.changeStaticTheme();
+				break;
+		}
+		this.element.append(can.view("../ejs/footer.ejs", {}));
+	},
+	'#changeStaticTheme click': function() {
+		this.changeStaticTheme();
+	},
+	'#changetheme1 click': function() {
+		this.changetheme1();
+	},
+	'#changetheme2 click': function() {
+		this.changetheme2();
+	},
+	'#changeEng click': function() {
+		this.changeEng();
+	},
+	'#changeChn click': function() {
+		this.changeChn();
+	},
+	//更改主题为第一个主题
+	changetheme1: function() {
+		this.setCookie('fruits-theme-selection', 'fruits_theme_1');
+		this.removejscssfile("anotherTheme.css", "css");
+		this.loadjscssfile("css/changebootstrap.css", "css");
+	},
+	changetheme2: function() {
+		this.setCookie('fruits-theme-selection', 'fruits_theme_2');
+		this.removejscssfile("changebootstrap.css", "css");
+		this.loadjscssfile("css/anotherTheme.css", "css");
+	},
+	changeStaticTheme: function() {
+		this.setCookie('fruits-theme-selection', 'fruits_theme_static');
+		this.removejscssfile("anotherTheme.css", "css");
+		this.removejscssfile("changebootstrap.css", "css");
+	},
+	//更改语言为English
+	changeEng: function() {
+		this.setCookie('fruits-language-selection', 'fruits-english-selection');
+		m_global_v.strings = m_global_v.strings_en;
+		$('[localization]').html(function(index, oldcontent) {
+			for(var iter in m_global_v.strings_cn)
+			{
+				if(oldcontent == m_global_v.strings_cn[iter])
+					return m_global_v.strings_en[iter];
+			}
+			return oldcontent;
+		});
+		$('[title]').attr('title', function(index, oldcontent) {
+			for(var iter in m_global_v.strings_cn)
+			{
+				if(oldcontent == m_global_v.strings_cn[iter])
+					return m_global_v.strings_en[iter];
+			}
+			return oldcontent;
+		});
+	},
+	//更改语言为中文
+	changeChn: function() {
+		this.setCookie('fruits-language-selection', 'fruits-chinese-selection');
+		m_global_v.strings = m_global_v.strings_cn;
+		$('[localization]').html(function(index, oldcontent) {
+			for(var iter in m_global_v.strings_en)
+			{
+				if(oldcontent == m_global_v.strings_en[iter])
+					return m_global_v.strings_cn[iter];
+			}
+			return oldcontent;
+		});
+		$('[title]').attr('title', function(index, oldcontent) {
+			for(var iter in m_global_v.strings_en)
+			{
+				if(oldcontent == m_global_v.strings_en[iter])
+					return m_global_v.strings_cn[iter];
+			}
+			return oldcontent;
+		});
+	},
+	setCookie: function(name, value) {
+	    var argv = this.setCookie.arguments; 
+	    var argc = this.setCookie.arguments.length; 
+	    var expires = (argc > 2) ? argv[2] : null; 
+	    if(expires != null)
+	    { 
+	        var LargeExpDate = new Date (); 
+	        LargeExpDate.setTime(LargeExpDate.getTime() + (expires*1000*3600*24));         
+	    }
+	    document.cookie = name + "=" + escape (value)+((expires == null) ? "" : ("; expires=" +LargeExpDate.toGMTString())); 
+	},
+	getCookie: function(name) { 
+	    var search = name + "=" 
+	    if(document.cookie.length > 0) 
+	    { 
+	        offset = document.cookie.indexOf(search) 
+	        if(offset != -1)
+	        { 
+	            offset += search.length 
+	            end = document.cookie.indexOf(";", offset) 
+	            if(end == -1) end = document.cookie.length 
+	            return unescape(document.cookie.substring(offset, end)) 
+	        } 
+	        else return "" 
+	    } 
+	},
+	deleteCookie: function(name) { 
+	    var expdate = new Date(); 
+	    expdate.setTime(expdate.getTime() - (86400 * 1000 * 1)); 
+	    this.setCookie(name, "", expdate);
+	},
+	loadjscssfile: function(filename, filetype) {
+		if (filetype=="js"){
+			var fileref=document.createElement('script');
+			fileref.setAttribute("type","text/javascript");
+			fileref.setAttribute("src", filename);
+		}
+		else if (filetype=="css"){
+			var fileref=document.createElement("link");
+			fileref.setAttribute("rel", "stylesheet");
+			fileref.setAttribute("type", "text/css");
+			fileref.setAttribute("href", filename);
+		}
+		if (typeof fileref!="undefined")
+			document.getElementsByTagName("head")[0].appendChild(fileref);
+	},
+	removejscssfile: function(filename, filetype){
+		var targetelement;
+		var targetattr;
+		switch(filetype){
+			case 'js':
+				targetelement = 'script';
+				targetattr = 'src';
+				break;
+			case 'css':
+				targetelement = 'link';
+				targetattr = 'href';
+				break;
+			default:
+				break;
+		}
+		var allsuspects=document.getElementsByTagName(targetelement);
+		for (var i=allsuspects.length; i>=0; i--){
+			if (allsuspects[i] && allsuspects[i].getAttribute(targetattr)!=null && allsuspects[i].getAttribute(targetattr).indexOf(filename)!=-1)
+			   allsuspects[i].parentNode.removeChild(allsuspects[i]);
+		}
+	}
+});
+/****************************************************/
 
 
 /***********************test*************************/
@@ -1052,24 +1119,6 @@ lala.print();
 lala.lela = "a";
 console.log(lela);
 /****************************************************/
-
-//更改主题为第一个主题
-function changetheme1(){
-	setCookie('fruits-theme-selection', 'fruits_theme_1');
-	removejscssfile("anotherTheme.css", "css");
-	loadjscssfile("css/changebootstrap.css", "css");
-}
-
-function changetheme2(){
-	setCookie('fruits-theme-selection', 'fruits_theme_2');
-	removejscssfile("changebootstrap.css", "css");
-	loadjscssfile("css/anotherTheme.css", "css");
-}
-function changeStaticTheme(){
-	setCookie('fruits-theme-selection', 'fruits_theme_static');
-	removejscssfile("anotherTheme.css", "css");
-	removejscssfile("changebootstrap.css", "css");
-}
 
 function loading(id) {
 	if(loadings[id])
@@ -1923,7 +1972,8 @@ $(document).ready(function() {
 
 		///////////////////////language related///////////////////
 		g_strings:strings,
-
+		g_strings_en:strings_en,
+		g_strings_cn:strings_cn,
 		///////////////////////theme related//////////////////////
 		g_myTheme:myTheme
 	});
@@ -2012,12 +2062,12 @@ $(document).ready(function() {
 		$("#foot-information").css("margin-left",margin_left);	
 	});
 
-
+	var footer_control = new FooterController('#footer',{m_global_v:global_v});
 	var new_file_control = new NewFileController('#newfile',{m_global_v:global_v});
 	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
 	var change_pass_control = new ChangePassControl('#changepassword',{m_global_v:global_v});
 	var change_avatar_control = new ChangeAvatarControl('#changeavatar',{m_global_v:global_v});
-	var nav_head_control = new Nav_HeadControl('#nav-head',{m_global_v:global_v});
+	var nav_head_control = new NavHeadControl('#nav-head',{m_global_v:global_v});
 	var share_control = new ShareController('#share',{m_global_v:global_v});
 	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_global_v:global_v}); 
 	$('[localization]').html(function(index, old) {
