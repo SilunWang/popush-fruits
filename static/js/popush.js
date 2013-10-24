@@ -445,7 +445,7 @@ GlobalVariables = can.Model.extend({},{
 			self.dochandler(data);
 		});
 	},	
-
+	/*
 	initfilelistevent:function(fl) {
 
 		fl.onname = function(o) {
@@ -459,10 +459,10 @@ GlobalVariables = can.Model.extend({},{
 					this.currentDirString = this.getdirstring();
 				});
 			}
-			/* 
+			
 			else if(o.type == 'doc') {
 				openeditor(o);
-			}*/
+			}
 		};
 	
 		fl.ondelete = function(o) {
@@ -523,7 +523,7 @@ GlobalVariables = can.Model.extend({},{
 			$('#share').modal('show');
 			currentsharedoc = o;
 		};
-	}
+	}*/
 });
 /***********************************************************/
 
@@ -761,7 +761,7 @@ var ReNameControl = can.Control.extend({
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		m_object = this.options.m_object;
-		this.element.append(can.view("../ejs/rename.ejs", {}));
+		this.element.html(can.view("../ejs/rename.ejs", {}));
 		this.socket_io();
 	},
 	'#rename-ok click':function(){
@@ -779,13 +779,13 @@ var ReNameControl = can.Control.extend({
 			$('#rename').modal('hide');
 			return;
 		}
-		if(m_global_v.operationLock)
-			return;
+		//if(m_global_v.operationLock)
+			//return;
 		m_global_v.operationLock = true;
 		m_global_v.loading('rename-buttons');
 		m_global_v.movehandler = this.renamedone;
 		m_global_v.socket.emit('move', {
-			path: this.m_object.path,
+			path: m_object.path,
 			newPath: m_global_v.currentDirString + '/' + name
 		});
 	},
@@ -801,7 +801,7 @@ var ReNameControl = can.Control.extend({
 		m_global_v.removeloading('rename-buttons');
 	},
 	socket_io:function(){
-		socket.on('move', function(data){
+		m_global_v.socket.on('move', function(data){
 			m_global_v.movehandler(data);
 		});
 	}
@@ -816,17 +816,31 @@ var DeleteControl = can.Control.extend({
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		m_object = this.options.m_object;
-		this.element.append(can.view("../ejs/deletefile.ejs", {}));
+		this.element.html(can.view("../ejs/deletefile.ejs", {}));
+		this.socket_io();
 	},
 	'#delete-ok click':function(){
-		if(m_global_v.operationLock)
-				return;
+		//if(m_global_v.operationLock)
+				//return;
 		m_global_v.operationLock = true;
 		m_global_v.loading('delete-buttons');
 		m_global_v.socket.emit('delete', {
-			path: this.m_object.path
+			path: m_object.path
 		});
 	},
+	socket_io:function(){
+		m_global_v.socket.on('delete', function(data){
+				$('#delete').modal('hide');
+				if(data.err){
+					m_global_v.showmessagebox('delete', data.err, 1);
+					m_global_v.operationLock = false;
+				} else {
+					m_global_v.operationLock = false;
+					m_global_v.refreshfilelist(function() {;});
+				}
+				m_global_v.removeloading('delete-buttons');
+		});
+	}
 });
 /****************************************************/
 
@@ -1032,6 +1046,62 @@ var ShareController = can.Control.extend({
 });
 
 /*********************************************************************/
+
+var FileListController = can.Control.extend({
+	m_global_v:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/filelist.ejs", {}));
+		this.initfilelistevent(m_global_v.filelist);
+	},	
+	initfilelistevent:function(fl) {
+		var self = this;
+		fl.onname = function(o) {
+			if(m_global_v.operationLock)
+				return;
+			if(o.type == 'dir') {
+				m_global_v.currentDir.push(o.name);
+				m_global_v.currentDirString = m_global_v.getdirstring();
+				m_global_v.refreshfilelist(function() {
+					m_global_v.currentDir.pop();
+					m_global_v.currentDirString = m_global_v.getdirstring();
+				});
+			}
+			/* 
+			else if(o.type == 'doc') {
+				openeditor(o);
+			}*/
+		};
+	
+		fl.ondelete = function(o) {
+			if(o.type == 'dir')
+				$('#delete').find('.folder').text(strings['folder']);
+			else
+				$('#delete').find('.folder').text(strings['file']);
+			$('#delete-name').text(o.name);
+			$('#delete').modal('show');
+			var delete_controller = new DeleteControl('#delete',{m_object:o,m_global_v:self.options.m_global_v});
+			delete delete_controller;
+		};
+	
+		fl.onrename = function(o) {
+			$('#rename-inputName').val(o.name);
+			$('#rename .control-group').removeClass('error');
+			$('#rename .help-inline').text('');
+			$('#rename').modal('show');
+			var rename_controller = new ReNameControl('#rename',{m_object:o,m_global_v:self.options.m_global_v});
+		};
+	
+		fl.onshare = function(o) {
+			$('#share-name').text(o.name);
+			$('#share-inputName').val('');
+			$('#share-message').hide();
+			m_global_v.userlist.fromusers(o.members);
+			$('#share').modal('show');
+			m_global_v.currentsharedoc = o;
+		};
+	}
+});
 
 
 /***********************test*************************/
@@ -1479,6 +1549,7 @@ socket.on('password', function(data){
 	operationLock = false;
 });
 
+/*
 socket.on('delete', function(data){
 	$('#delete').modal('hide');
 	if(data.err){
@@ -1489,7 +1560,7 @@ socket.on('delete', function(data){
 		refreshfilelist(function() {;});
 	}
 	removeloading('delete-buttons');
-});
+});*/
 
 socket.on('share', function(data){
 	if(data.err){
@@ -1716,7 +1787,7 @@ function closeshare() {
 	$('#share').modal('hide');
 }
 
-
+/*
 function initfilelistevent(fl) {
 
 	fl.onname = function(o) {
@@ -1757,31 +1828,6 @@ function initfilelistevent(fl) {
 		$('#rename .control-group').removeClass('error');
 		$('#rename .help-inline').text('');
 		$('#rename').modal('show');
-		rename = function() {
-			var name = $('#rename-inputName').val();
-			name = $.trim(name);
-			if(name == '') {
-				showmessageindialog('rename', 'inputfilename');
-				return;
-			}
-			if(/\/|\\|@/.test(name)) {
-				showmessageindialog('rename', 'filenameinvalid');
-				return;
-			}
-			if(name == o.name) {
-				$('#rename').modal('hide');
-				return;
-			}
-			if(operationLock)
-				return;
-			operationLock = true;
-			loading('rename-buttons');
-			movehandler = renamedone;
-			socket.emit('move', {
-				path: o.path,
-				newPath: currentDirString + '/' + name
-			});
-		};
 	};
 	
 	fl.onshare = function(o) {
@@ -1792,7 +1838,7 @@ function initfilelistevent(fl) {
 		$('#share').modal('show');
 		currentsharedoc = o;
 	};
-}
+}*/
 
 function backto(n) {
 	if(operationLock)
@@ -1847,7 +1893,7 @@ $(document).ready(function() {
 
 	filelist = fileList('#file-list-table');
 	filelist.clear();
-	initfilelistevent(filelist);
+	//initfilelistevent(filelist);
 	
 	userlist = userList('#share-user-list');
 	userlist.clear();
@@ -2012,7 +2058,7 @@ $(document).ready(function() {
 		$("#foot-information").css("margin-left",margin_left);	
 	});
 
-
+	var file_list_control = new FileListController('#file-list-table',{m_global_v:global_v});
 	var new_file_control = new NewFileController('#newfile',{m_global_v:global_v});
 	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
 	var change_pass_control = new ChangePassControl('#changepassword',{m_global_v:global_v});
