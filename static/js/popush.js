@@ -1,3 +1,4 @@
+
 ////////////////////////// vars ///////////////////////////////
 var currentUser;
 var currentDir;
@@ -5,11 +6,8 @@ var currentDirString;
 var dirMode = 'owned';
 
 var newfiletype = 'doc';
-var filelisterror = function() {;
-};
-var docshowfilter = function(o) {
-	return true;
-};
+var filelisterror = function(){;};
+var docshowfilter = function(o){ return true; };
 var filelist;
 
 var userlist;
@@ -46,10 +44,10 @@ var Browser = {};
 var ua = navigator.userAgent.toLowerCase();
 var s;
 (s = ua.match(/msie ([\d.]+)/)) ? Browser.ie = s[1] :
-	(s = ua.match(/firefox\/([\d.]+)/)) ? Browser.firefox = s[1] :
-	(s = ua.match(/chrome\/([\d.]+)/)) ? Browser.chrome = s[1] :
-	(s = ua.match(/opera.([\d.]+)/)) ? Browser.opera = s[1] :
-	(s = ua.match(/version\/([\d.]+).*safari/)) ? Browser.safari = s[1] : 0;
+(s = ua.match(/firefox\/([\d.]+)/)) ? Browser.firefox = s[1] :
+(s = ua.match(/chrome\/([\d.]+)/)) ? Browser.chrome = s[1] :
+(s = ua.match(/opera.([\d.]+)/)) ? Browser.opera = s[1] :
+(s = ua.match(/version\/([\d.]+).*safari/)) ? Browser.safari = s[1] : 0;
 
 var novoice = false;
 
@@ -62,7 +60,8 @@ var strings = getCookie('fruits-language-selection') == 'fruits-english-selectio
 
 var myTheme = getCookie('fruits-theme-selection');
 
-switch (myTheme) {
+switch(myTheme)
+{	
 	case 'fruits_theme_static':
 		changeStaticTheme();
 		break;
@@ -85,15 +84,17 @@ switch (myTheme) {
 |	 Author: SilunWang              
 *************************************************************************/
 
-function setCookie(name, value) {
-	var argv = setCookie.arguments;
-	var argc = setCookie.arguments.length;
-	var expires = (argc > 2) ? argv[2] : null;
-	if (expires != null) {
-		var LargeExpDate = new Date();
-		LargeExpDate.setTime(LargeExpDate.getTime() + (expires * 1000 * 3600 * 24));
-	}
-	document.cookie = name + "=" + escape(value) + ((expires == null) ? "" : ("; expires=" + LargeExpDate.toGMTString()));
+function setCookie(name, value) 
+{
+    var argv = setCookie.arguments; 
+    var argc = setCookie.arguments.length; 
+    var expires = (argc > 2) ? argv[2] : null; 
+    if(expires != null)
+    { 
+        var LargeExpDate = new Date (); 
+        LargeExpDate.setTime(LargeExpDate.getTime() + (expires*1000*3600*24));         
+    }
+    document.cookie = name + "=" + escape (value)+((expires == null) ? "" : ("; expires=" +LargeExpDate.toGMTString())); 
 }
 
 /************************************************************************
@@ -103,18 +104,22 @@ function setCookie(name, value) {
 |	 Author: SilunWang                                         
 *************************************************************************/
 
-function getCookie(name) {
-	var search = name + "="
-	if (document.cookie.length > 0) {
-		offset = document.cookie.indexOf(search)
-		if (offset != -1) {
-			offset += search.length
-			end = document.cookie.indexOf(";", offset)
-			if (end == -1) end = document.cookie.length
-			return unescape(document.cookie.substring(offset, end))
-		} else return ""
-	}
-}
+function getCookie(name) 
+{ 
+    var search = name + "=" 
+    if(document.cookie.length > 0) 
+    { 
+        offset = document.cookie.indexOf(search) 
+        if(offset != -1)
+        { 
+            offset += search.length 
+            end = document.cookie.indexOf(";", offset) 
+            if(end == -1) end = document.cookie.length 
+            return unescape(document.cookie.substring(offset, end)) 
+        } 
+        else return "" 
+    } 
+} 
 
 /************************************************************************
 |    函数名称： deleteCookie                                            
@@ -131,7 +136,6 @@ function deleteCookie(name)
 }
 
 //更改语言为English
-
 function changeEng()
 {
 	setCookie('fruits-language-selection', 'fruits-english-selection');
@@ -155,7 +159,6 @@ function changeEng()
 }
 
 //更改语言为中文
-
 function changeChn()
 {
 	setCookie('fruits-language-selection', 'fruits-chinese-selection');
@@ -528,12 +531,10 @@ GlobalVariables = can.Model.extend({},{
 /***************************Login part**********************/
 LoginInformation = can.Model.extend({}, {});
 
-//Login Control
 var LoginControl = can.Control.extend({
 	m_global_v:'',
 	m_login_information: '',
 	self: this,
-
 	init: function(element, options) {
 		self.m_login_information = this.options.m_login_information;
 		self.m_global_v = this.options.m_global_v;
@@ -549,10 +550,6 @@ var LoginControl = can.Control.extend({
 		self.m_login_information.attr('login_password', $('#login-inputPassword').val());
 		//self.m_login_information.save();
 		this.login();
-		}
-		if (event.keyCode == 38) {
-			$('#login-inputName').focus();
-		}
 	},
 
 	//business
@@ -1057,43 +1054,34 @@ console.log(lela);
 /****************************************************/
 
 //更改主题为第一个主题
-
-function changetheme1() {
+function changetheme1(){
 	setCookie('fruits-theme-selection', 'fruits_theme_1');
 	removejscssfile("anotherTheme.css", "css");
 	loadjscssfile("css/changebootstrap.css", "css");
 }
 
-//更改主题为第二个主题
-
-function changetheme2() {
+function changetheme2(){
 	setCookie('fruits-theme-selection', 'fruits_theme_2');
 	removejscssfile("changebootstrap.css", "css");
 	loadjscssfile("css/anotherTheme.css", "css");
 }
-
-//更改主题为默认主题
-
-function changeStaticTheme() {
+function changeStaticTheme(){
 	setCookie('fruits-theme-selection', 'fruits_theme_static');
 	removejscssfile("anotherTheme.css", "css");
 	removejscssfile("changebootstrap.css", "css");
 }
 
 function loading(id) {
-	if (loadings[id])
+	if(loadings[id])
 		return;
 	var o = $('#' + id);
 	o.after('<p id="' + id + '-loading" align="center" style="margin:1px 0 2px 0"><img src="images/loading.gif"/></p>');
 	o.hide();
-	loadings[id] = {
-		self: o,
-		loading: $('#' + id + '-loading')
-	};
+	loadings[id] = {self: o, loading: $('#' + id + '-loading')};
 }
 
 function removeloading(id) {
-	if (!loadings[id])
+	if(!loadings[id])
 		return;
 	loadings[id].self.show();
 	loadings[id].loading.remove();
@@ -1101,7 +1089,7 @@ function removeloading(id) {
 }
 
 function cleanloading() {
-	for (var k in loadings) {
+	for(var k in loadings) {
 		removeloading(k);
 	}
 }
@@ -1111,9 +1099,9 @@ function showmessage(id, stringid, type) {
 	o.removeClass('alert-error');
 	o.removeClass('alert-success');
 	o.removeClass('alert-info');
-	if (type && type != '' && type != 'warning')
+	if(type && type != '' && type != 'warning')
 		o.addClass('alert-' + type);
-	if (strings[stringid])
+	if(strings[stringid])
 		$('#' + id + ' span').html(strings[stringid]);
 	else
 		$('#' + id + ' span').html(stringid);
@@ -1121,32 +1109,32 @@ function showmessage(id, stringid, type) {
 }
 
 function showmessageindialog(id, stringid, index) {
-	if (index === undefined) {
+	if(index === undefined) {
 		$('#' + id + ' .control-group').addClass('error');
-		if (strings[stringid])
+		if(strings[stringid])
 			$('#' + id + ' .help-inline').text(strings[stringid]);
 		else
 			$('#' + id + ' .help-inline').text(stringid);
 	} else {
-		$('#' + id + ' .control-group:eq(' + index + ')').addClass('error');
-		if (strings[stringid])
-			$('#' + id + ' .help-inline:eq(' + index + ')').text(strings[stringid]);
+		$('#' + id + ' .control-group:eq('+index+')').addClass('error');
+		if(strings[stringid])
+			$('#' + id + ' .help-inline:eq('+index+')').text(strings[stringid]);
 		else
-			$('#' + id + ' .help-inline:eq(' + index + ')').text(stringid);
+			$('#' + id + ' .help-inline:eq('+index+')').text(stringid);
 	}
 }
 
 function showmessagebox(title, content, timeout) {
-	if (strings[title])
+	if(strings[title])
 		$('#messagedialogLabel').html(strings[title]);
 	else
 		$('#messagedialogLabel').html(title);
-	if (strings[content])
+	if(strings[content])
 		$('#messagedialogContent').html(strings[content]);
 	else
 		$('#messagedialogContent').html(content);
 	$('#messagedialog').modal('show');
-	t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout * 1000);
+	t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout*1000);
 }
 function loadfailed() {
 	if(loadDone)
@@ -1157,8 +1145,6 @@ function loadfailed() {
 }
 
 
-/******************************原有的按下回车的响应函数****************************/
-/*
 function pressenter(e, func, idUp, idDown) {
 	e = e || event;	
 	if(e.keyCode == 13 && loadDone)
@@ -1168,7 +1154,6 @@ function pressenter(e, func, idUp, idDown) {
 	else if(e.keyCode == 40)
 		$('#' + idDown).focus();
 }
-*/
 
 function checkusername() {
 	var name = $('#register-inputName').val();
@@ -1204,12 +1189,12 @@ function checkusername() {
 
 
 function getdirstring() {
-	if (dirMode == 'owned')
+	if(dirMode == 'owned')
 		return '/' + currentDir.join('/');
 	else {
 		var name = currentDir.shift();
 		var r = '/' + currentDir.join('/');
-		if (currentDir.length == 0) {
+		if(currentDir.length == 0) {
 			r = '/' + name;
 		}
 		currentDir.unshift(name);
@@ -1219,15 +1204,15 @@ function getdirstring() {
 
 function getdirlink(before) {
 	var s = '';
-	if (!before) {
+	if(!before) {
 		before = '';
 	}
-	for (var i = 0, j = currentDir.length - 1; i < currentDir.length; i++, j--) {
+	for(var i=0, j=currentDir.length-1; i<currentDir.length; i++, j--) {
 		var t = currentDir[i];
 		var p = t.split('/');
-		if (p.length > 1)
+		if(p.length > 1)
 			t = p[1] + '@' + p[0];
-		if (i == 0 && dirMode == 'shared')
+		if(i == 0 && dirMode == 'shared')
 			s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">shared@' + htmlescape(t) + '</a>';
 		else
 			s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">' + htmlescape(t) + '</a>';
@@ -1235,67 +1220,67 @@ function getdirlink(before) {
 	return s;
 }
 
-var languagemap = {
-	'c': 'clike',
-	'clj': 'clojure',
-	'coffee': 'coffeescript',
-	'cpp': 'clike',
-	'cs': 'clike',
-	'css': 'css',
-	'go': 'go',
-	'h': 'clike',
-	'htm': 'htmlmixed',
-	'html': 'htmlmixed',
-	'hpp': 'clike',
-	'java': 'clike',
-	'js': 'javascript',
-	'json': 'javascript',
-	'lisp': 'commonlisp',
-	'lua': 'lua',
-	'md': 'markdown',
-	'pas': 'pascal',
-	'php': 'php',
-	'pl': 'perl',
-	'py': 'python',
-	'rb': 'ruby',
-	'sql': 'sql',
-	'tex': 'stex',
-	'vbs': 'vb',
-	'xml': 'xml',
-};
+var languagemap = { 
+	'c':		'clike',
+	'clj':		'clojure',
+	'coffee':	'coffeescript',
+	'cpp':		'clike',
+	'cs':		'clike',
+	'css':		'css',
+	'go':		'go',
+	'h':		'clike',
+	'htm':		'htmlmixed',
+	'html':		'htmlmixed',
+	'hpp':		'clike',
+	'java':		'clike',
+	'js':		'javascript',
+	'json':		'javascript',
+	'lisp':		'commonlisp',
+	'lua':		'lua',
+	'md':		'markdown',
+	'pas':		'pascal',
+	'php':		'php',
+	'pl':		'perl',
+	'py':		'python',
+	'rb':		'ruby',
+	'sql':		'sql',
+	'tex':		'stex',
+	'vbs':		'vb',
+	'xml':		'xml',
+	};
 
 var modemap = {
-	'c': 'text/x-csrc',
-	'clj': 'text/x-clojure',
-	'coffee': 'text/x-coffeescript',
-	'cpp': 'text/x-c++src',
-	'cs': 'text/x-csharp',
-	'css': 'text/css',
-	'go': 'text/x-go',
-	'h': 'text/x-csrc',
-	'htm': 'text/html',
-	'html': 'text/html',
-	'hpp': 'text/x-c++src',
-	'java': 'text/x-java',
-	'js': 'text/javascript',
-	'json': 'application/json',
-	'lisp': 'text/x-common-lisp',
-	'lua': 'text/x-lua',
-	'md': 'text/x-markdown',
-	'pas': 'text/x-pascal',
-	'php': 'application/x-httpd-php',
-	'pl': 'text/x-perl',
-	'py': 'text/x-python',
-	'rb': 'text/x-ruby',
-	'sql': 'text/x-sql',
-	'tex': 'text/x-latex',
-	'vbs': 'text/x-vb',
-	'xml': 'application/xml',
-};
+	'c':		'text/x-csrc',
+	'clj':		'text/x-clojure',
+	'coffee':	'text/x-coffeescript',
+	'cpp':		'text/x-c++src',
+	'cs':		'text/x-csharp',
+	'css':		'text/css',
+	'go':		'text/x-go',
+	'h':		'text/x-csrc',
+	'htm':		'text/html',
+	'html':		'text/html',
+	'hpp':		'text/x-c++src',
+	'java':		'text/x-java',
+	'js':		'text/javascript',
+	'json':		'application/json',
+	'lisp':		'text/x-common-lisp',
+	'lua':		'text/x-lua',
+	'md':		'text/x-markdown',
+	'pas':		'text/x-pascal',
+	'php':		'application/x-httpd-php',
+	'pl':		'text/x-perl',
+	'py':		'text/x-python',
+	'rb':		'text/x-ruby',
+	'sql':		'text/x-sql',
+	'tex':		'text/x-latex',
+	'vbs':		'text/x-vb',
+	'xml':		'application/xml',
+	};
 
 function changelanguage(language) {
-	if (languagemap[language]) {
-		if (modemap[language])
+	if(languagemap[language]) {
+		if(modemap[language])
 			editor.setOption('mode', modemap[language]);
 		else
 			editor.setOption('mode', languagemap[language]);
@@ -1346,22 +1331,18 @@ function allsharefilter(o) {
 
 function htmlescape(text) {
 	return text.
-	replace(/&/gm, '&amp;').
-	replace(/</gm, '&lt;').
-	replace(/>/gm, '&gt;').
-	replace(/ /gm, '&nbsp;').
-	replace(/\n/gm, '<br />');
+		replace(/&/gm, '&amp;').
+		replace(/</gm, '&lt;').
+		replace(/>/gm, '&gt;').
+		replace(/ /gm, '&nbsp;').
+		replace(/\n/gm, '<br />');
 }
 
 function backtologin() {
 	$('#big-one .container').removeAttr('style');
-	$('#big-one').animate({
-		height: '120px',
-		padding: '60px',
-		'margin-bottom': '30px'
-	}, 'fast', function() {
+	$('#big-one').animate({height:'120px', padding:'60px', 'margin-bottom':'30px'}, 'fast', function() {
 		$('#big-one').removeAttr('style');
-		$('#big-one .container').css('margin', 'auto');
+		$('#big-one .container').css('margin','auto');
 		$('#login-inputName').focus();
 		resize();
 	});
@@ -1377,11 +1358,11 @@ function backtologin() {
 ///////////////////// websocket & callback //////////////////////
 
 
-socket.on('unauthorized', function() {
+socket.on('unauthorized', function(){
 	backtologin();
 	showmessage('login-message', 'needrelogin', 'error');
 
-	if (!window.joinedARoom) {
+	if(!window.joinedARoom){
 		return;
 	}
 	window.joinedARoom = false;
@@ -1435,17 +1416,17 @@ socket.on('register', function(data){
 
 function refreshlistdone(data){
 	filelist.removeloading();
-	if (data.err) {
+	if(data.err){
 		filelisterror();
 		showmessagebox('error', 'failed', 1);
 	} else {
 		$('#current-dir').html(getdirlink());
-		if (dirMode == 'owned')
+		if(dirMode == 'owned')
 			filelist.setmode(filelist.getmode() | 2);
 		else
 			filelist.setmode(0);
-		if (currentDir.length == 1) {
-			if (dirMode == 'owned')
+		if(currentDir.length == 1) {
+			if(dirMode == 'owned')
 				filelist.setmode(filelist.getmode() | 1);
 			filelist.formdocs(data.doc, docshowfilter);
 			memberlist.clear();
@@ -1456,14 +1437,14 @@ function refreshlistdone(data){
 			memberlist.fromdoc(data.doc);
 			memberlistdoc.fromdoc(data.doc);
 		}
-		if (doccallback)
+		if(doccallback)
 			doccallback();
 	}
 	operationLock = false;
 }
 
-function sharedone(data) {
-	if (!data.err) {
+function sharedone(data){
+	if(!data.err){
 		userlist.fromusers(data.doc.members);
 	}
 	$('#share-message').hide();
@@ -1476,25 +1457,19 @@ socket.on('new', function(data){
 	if(data.err){
 		showmessageindialog('newfile', data.err);
 	} else {
-		if(data.type=='new')
-		{
-			$('#newfile').modal('hide');
-			if (newfiletype == 'doc')
-				showmessagebox('newfile', 'createfilesuccess', 1);
-			else
-				showmessagebox('newfolder', 'createfoldersuccess', 1);
-		}else{
-				showmessagebox('upload', 'upload successful', 1);
-		}
+		$('#newfile').modal('hide');
+		if(newfiletype == 'doc')
+			showmessagebox('newfile', 'createfilesuccess', 1);
+		else
+			showmessagebox('newfolder', 'createfoldersuccess', 1);
 	}
 	removeloading('newfile-buttons');
 	operationLock = false;
 	refreshfilelist(function() {;});
 });*/
 
-
-socket.on('password', function(data) {
-	if (data.err) {
+socket.on('password', function(data){
+	if(data.err){
 		showmessageindialog('changepassword', data.err, 0);
 	} else {
 		$('#changepassword').modal('hide');
@@ -1504,15 +1479,14 @@ socket.on('password', function(data) {
 	operationLock = false;
 });
 
-socket.on('delete', function(data) {
+socket.on('delete', function(data){
 	$('#delete').modal('hide');
-	if (data.err) {
+	if(data.err){
 		showmessagebox('delete', data.err, 1);
 		operationLock = false;
 	} else {
 		operationLock = false;
-		refreshfilelist(function() {;
-		});
+		refreshfilelist(function() {;});
 	}
 	removeloading('delete-buttons');
 });
@@ -1530,8 +1504,8 @@ socket.on('share', function(data){
 	}
 });
 
-socket.on('unshare', function(data) {
-	if (data.err) {
+socket.on('unshare', function(data){
+	if(data.err){
 		showmessage('share-message', data.err, 'error');
 		operationLock = false;
 		removeloading('share-buttons');
@@ -1543,8 +1517,8 @@ socket.on('unshare', function(data) {
 	}
 });
 
-socket.on('avatar', function(data) {
-	if (data.err) {
+socket.on('avatar', function(data){
+	if(data.err){
 		showmessage('changeavatar-message', data.err, 'error');
 	} else {
 		currentUser.avatar = data.url;
@@ -1561,19 +1535,19 @@ socket.on('avatar', function(data) {
 ////////////////////// click event //////////////////////////////
 
 function loginview() {
-	if (viewswitchLock)
+	if(viewswitchLock)
 		return;
 	viewswitchLock = true;
 	$('#register .blink').fadeOut('fast');
 	$('#register-message').slideUp();
-	$('#register-padding').fadeOut('fast', function() {
+	$('#register-padding').fadeOut('fast', function(){
 		$('#login').show();
 		$('#login .blink').fadeIn('fast');
 		$('#register').hide();
 		$('#login-inputName').val('');
 		$('#login-inputPassword').val('');
 		$('#login-message').hide();
-		$('#login-padding').slideUp('fast', function() {
+		$('#login-padding').slideUp('fast', function(){
 			$('#login-inputName').focus();
 			viewswitchLock = false;
 		});
@@ -1582,12 +1556,12 @@ function loginview() {
 }
 
 function registerview() {
-	if (viewswitchLock)
+	if(viewswitchLock)
 		return;
 	viewswitchLock = true;
 	$('#login .blink').fadeOut('fast');
 	$('#login-message').slideUp();
-	$('#login-padding').slideDown('fast', function() {
+	$('#login-padding').slideDown('fast', function(){
 		$('#register').show();
 		$('#register .blink').fadeIn('fast');
 		$('#login').hide();
@@ -1595,7 +1569,7 @@ function registerview() {
 		$('#register-inputPassword').val('');
 		$('#register-confirmPassword').val('');
 		$('#register-message').hide();
-		$('#register-padding').fadeIn('fast', function() {
+		$('#register-padding').fadeIn('fast', function(){
 			$('#register-inputName').focus();
 			viewswitchLock = false;
 		});
@@ -1628,186 +1602,30 @@ function register() {
 	registerLock = true;
 	loading('register-control');
 	socket.emit('register', {
-		name : name,
-		password : pass,
-		avatar : 'images/character.png'
+		name:name,
+		password:pass,
+		avatar:'images/character.png'
 	});
 }
-*/
-
-/*****************************注册部分*******************************/
-
-//注册模型
-RegisterModel = can.Model.extend({}, {});
-//模型对应的对象
-registerModel = new RegisterModel({
-	username: '',
-	password: '',
-	confirm: ''
-});
-
-//注册控制器
-var RegisterController = can.Control.extend({
-	m_registerModel: null,
-	m_socket: null,
-	self: this,
-	init: function(element, options) {
-		// body...
-		self.m_registerModel = this.options.m_registerModel;
-		self.m_socket = this.options.m_socket;
-		this.element.append(can.view("../ejs/register.ejs", {
-			RegisterInfoCtrl: self.m_registerModel
-		}));
-	},
-	setUsername: function(username) {
-		// body...
-		self.m_registerModel.attr('username', username);
-	},
-	setPassword: function(password) {
-		// body...
-		self.m_registerModel.attr('password', password);
-	},
-	setConfirm: function(confirm) {
-		// body...
-		self.m_registerModel.attr('confirm', confirm);
-	},
-	//设定所有注册信息
-	setRegisterInformation: function(information) {
-		// body...
-		this.setUsername(information.username);
-		this.setPassword(information.password);
-		this.setConfirm(information.confirm);
-	},
-	//点击注册的响应函数
-	'#register-submit click': function() {
-		this.setUsername($('#register-inputName').val());
-		this.setPassword($('#register-inputPassword').val());
-		this.setConfirm($('#register-confirmPassword').val());
-		this.register();
-	},
-	//向系统注册
-	register: function() {
-		var name = self.m_registerModel.attr('username');
-		var pass = self.m_registerModel.attr('password');
-		var confirm = self.m_registerModel.attr('confirm');
-		if (!/^[A-Za-z0-9]*$/.test(name)) {
-			showmessage('register-message', 'name invalid');
-			return;
-		}
-		if (name.length < 6 || name.length > 20) {
-			showmessage('register-message', 'namelength');
-			return;
-		}
-		if (pass.length > 32) {
-			showmessage('register-message', 'passlength');
-			return;
-		}
-		if (pass != confirm) {
-			showmessage('register-message', 'doesntmatch');
-			return;
-		}
-		if (registerLock)
-			return;
-		registerLock = true;
-		loading('register-control');
-		socket.emit('register', {
-			name: name,
-			password: pass,
-			avatar: 'images/character.png'
-		});
-	},
-	//输入内容时的响应函数
-	'#register-inputName keyup': function() {
-		this.setUsername($('#register-inputName').val());
-		this.checkUsername();
-	},
-	//检查用户名的合法性
-	checkUsername: function() {
-		var name = self.m_registerModel.attr('username');
-		if (name.length == "") {
-			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-			$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px -160px transparent");
-			$('#register-inputName').css("border-color", "rgba(82,168,236,0.8)");
-			return;
-		}
-		if (!/^[A-Za-z0-9]*$/.test(name)) {
-			$("#msg-username").html(strings['name invalid']);
-			$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color", "rgba(255,0,0,0.8)");
-			return;
-		}
-		if (name.length < 6) {
-			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-			$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px -160px transparent");
-			$('#register-inputName').css("border-color", "rgba(82,168,236,0.8)");
-			return;
-		}
-		if (name.length > 20) {
-			$("#msg-username").html(strings['namelength']);
-			$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color", "rgba(255,0,0,0.8)");
-			return;
-		}
-		$("#msg-username").html("");
-		$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px -200px transparent");
-		$('#register-inputName').css("border-color", "rgba(82,168,236,0.8)");
-		return;
-	},
-	'#register-inputName keydown': function() {
-		if (event.keyCode == 13 || event.keyCode == 40) {
-			this.focusPasswordInput();
-		}
-	},
-	'#register-inputPassword keydown': function() {
-		if (event.keyCode == 13 || event.keyCode == 40) {
-			this.focusConfirmInput();
-		}
-		if (event.keyCode == 38) {
-			this.focusNameInput();
-		}
-	},
-	'#register-confirmPassword keydown': function() {
-		if (event.keyCode == 13) {
-			this.setUsername($('#register-inputName').val())
-			this.setPassword($('#register-inputPassword').val());
-			this.setConfirm($('#register-confirmPassword').val());
-			this.register();
-		}
-		if (event.keyCode == 38) {
-			this.focusPasswordInput();
-		}
-	},
-	focusNameInput: function() {
-		$('#register-inputName').focus();
-	},
-	focusPasswordInput: function() {
-		$('#register-inputPassword').focus();
-	},
-	focusConfirmInput: function() {
-		$('#register-confirmPassword').focus();
-	}
-});
-
-/****************************注册部分代码结束***********************/
 
 
 //****************************new file canjs**********************//
 function newfile() {
 	var name = $('#newfile-inputName').val();
 	name = $.trim(name);
-	if (name == '') {
+	if(name == '') {
 		showmessageindialog('newfile', 'inputfilename');
 		return;
 	}
-	if (/\/|\\|@/.test(name)) {
+	if(/\/|\\|@/.test(name)) {
 		showmessageindialog('newfile', 'filenameinvalid');
 		return;
 	}
-	if (name.length > 32) {
+	if(name.length > 32) {
 		showmessageindialog('newfile', 'filenamelength');
 		return;
 	}
-	if (operationLock)
+	if(operationLock)
 		return;
 	operationLock = true;
 	loading('newfile-buttons');
@@ -1822,9 +1640,9 @@ var chatstate = false;
 var oldwidth;
 
 function togglechat(o) {
-	if (viewswitchLock)
+	if(viewswitchLock)
 		return;
-	if (chatstate) {
+	if(chatstate) {
 		$('#editormain').parent().removeClass('span12');
 		$('#editormain').parent().addClass('span9');
 		$('#chatbox').show();
@@ -1855,19 +1673,17 @@ function refreshfilelist(error, callback) {
 	filelisterror = error;
 }
 
-var deleteconfirm = function() {;
-};
+var deleteconfirm = function(){;};
 
-var rename = function() {;
-};
+var rename = function(){;};
 
-function share() {
+function share(){
 	var name = $('#share-inputName').val();
-	if (name == '') {
+	if(name == '') {
 		showmessage('share-message', 'inputusername', 'error');
 		return;
 	}
-	if (operationLock)
+	if(operationLock)
 		return;
 	operationLock = true;
 	loading('share-buttons');
@@ -1879,11 +1695,11 @@ function share() {
 
 function unshare() {
 	var selected = userlist.getselection();
-	if (!selected) {
+	if(!selected) {
 		showmessage('share-message', 'selectuser', 'error');
 		return;
 	}
-	if (operationLock)
+	if(operationLock)
 		return;
 	operationLock = true;
 	loading('share-buttons');
@@ -1894,10 +1710,9 @@ function unshare() {
 }
 
 function closeshare() {
-	if (operationLock)
+	if(operationLock)
 		return;
-	refreshfilelist(function() {;
-	});
+	refreshfilelist(function(){;});
 	$('#share').modal('hide');
 }
 
@@ -1905,29 +1720,29 @@ function closeshare() {
 function initfilelistevent(fl) {
 
 	fl.onname = function(o) {
-		if (operationLock)
+		if(operationLock)
 			return;
-		if (o.type == 'dir') {
+		if(o.type == 'dir') {
 			currentDir.push(o.name);
 			currentDirString = getdirstring();
 			refreshfilelist(function() {
 				currentDir.pop();
 				currentDirString = getdirstring();
 			});
-		} else if (o.type == 'doc') {
+		} else if(o.type == 'doc') {
 			openeditor(o);
 		}
 	};
-
+	
 	fl.ondelete = function(o) {
-		if (o.type == 'dir')
+		if(o.type == 'dir')
 			$('#delete').find('.folder').text(strings['folder']);
 		else
 			$('#delete').find('.folder').text(strings['file']);
 		$('#delete-name').text(o.name);
 		$('#delete').modal('show');
 		deleteconfirm = function() {
-			if (operationLock)
+			if(operationLock)
 				return;
 			operationLock = true;
 			loading('delete-buttons');
@@ -1936,7 +1751,7 @@ function initfilelistevent(fl) {
 			});
 		};
 	};
-
+	
 	fl.onrename = function(o) {
 		$('#rename-inputName').val(o.name);
 		$('#rename .control-group').removeClass('error');
@@ -1945,19 +1760,19 @@ function initfilelistevent(fl) {
 		rename = function() {
 			var name = $('#rename-inputName').val();
 			name = $.trim(name);
-			if (name == '') {
+			if(name == '') {
 				showmessageindialog('rename', 'inputfilename');
 				return;
 			}
-			if (/\/|\\|@/.test(name)) {
+			if(/\/|\\|@/.test(name)) {
 				showmessageindialog('rename', 'filenameinvalid');
 				return;
 			}
-			if (name == o.name) {
+			if(name == o.name) {
 				$('#rename').modal('hide');
 				return;
 			}
-			if (operationLock)
+			if(operationLock)
 				return;
 			operationLock = true;
 			loading('rename-buttons');
@@ -1968,7 +1783,7 @@ function initfilelistevent(fl) {
 			});
 		};
 	};
-
+	
 	fl.onshare = function(o) {
 		$('#share-name').text(o.name);
 		$('#share-inputName').val('');
@@ -1979,67 +1794,24 @@ function initfilelistevent(fl) {
 	};
 }
 
-function downloadfile(data) {
-	function download(filename, text) {
-		var pom = document.createElement('a');
-		pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-		pom.setAttribute('download', filename);
-		pom.click();
+function backto(n) {
+	if(operationLock)
+		return;
+	operationLock = true;
+	var temp = [];
+	for(var i=0; i<n; i++) {
+		temp.push(currentDir.pop());
 	}
-
-	function downloadzip() {
-		var zip = new JSZip();
-		var files = data.r.result;
-
-		function package(_zip, _files) {
-			for (var key in _files) {
-				if (typeof _files[key] === "object") {
-					var folder = _zip.folder(key);
-					package(folder, _files[key]);
-				} else if (typeof _files[key] == "string") {
-					_zip.file(key, _files[key]);
-				}
-			}
-		}
-		package(zip, files);
-		var pom = document.createElement('a');
-		pom.setAttribute('style', 'display:none');
-		document.body.appendChild(pom);
-		pom.setAttribute('href', window.URL.createObjectURL(zip.generate({type:"blob"})));
-		pom.setAttribute('download', data.n);
-		pom.click();
-		document.body.removeChild(pom);
-
-
-		}
-
-
-		if (data.r.type == "file") {
-			download(data.n, data.r.content);
-		} else if (data.r.type == "dir") {
-			downloadzip();
-
-		}
-	}
-
-	function backto(n) {
-		if (operationLock)
-			return;
-		operationLock = true;
-		var temp = [];
-		for (var i = 0; i < n; i++) {
-			temp.push(currentDir.pop());
+	currentDirString = getdirstring();
+	refreshfilelist(function() {
+		for(var i=0; i<n; i++) {
+			currentDir.push(temp.pop());
 		}
 		currentDirString = getdirstring();
-		refreshfilelist(function() {
-			for (var i = 0; i < n; i++) {
-				currentDir.push(temp.pop());
-			}
-			currentDirString = getdirstring();
-		});
-	}
+	});
+}
 
-	/////////////////////// initialize ///////////////////////////
+/////////////////////// initialize ///////////////////////////
 
 $(document).ready(function() {
     setTimeout('loadfailed()', 10000);
@@ -2061,25 +1833,24 @@ $(document).ready(function() {
 				resize();
 			},
 			"Ctrl-S": saveevent
-			},
-			gutters: ["runat", "CodeMirror-linenumbers", "breakpoints"]
-		});
+		},
+		gutters: ["runat", "CodeMirror-linenumbers", "breakpoints"]
+	});
+	
+	editor.on("gutterClick", function(cm, n) {
+		gutterclick(cm, n);
+	});
+	
+	gutterclick = function(cm, n) {};
+	
+	registereditorevent();
 
-		editor.on("gutterClick", function(cm, n) {
-			gutterclick(cm, n);
-		});
-
-		gutterclick = function(cm, n) {};
-
-		registereditorevent();
-
-		filelist = fileList('#file-list-table');
-		filelist.clear();
-		initfilelistevent(filelist);
-
-		userlist = userList('#share-user-list');
-		userlist.clear();
-
+	filelist = fileList('#file-list-table');
+	filelist.clear();
+	initfilelistevent(filelist);
+	
+	userlist = userList('#share-user-list');
+	userlist.clear();
 	
 	memberlist = userListAvatar('#member-list');
 	memberlistdoc = userListAvatar('#member-list-doc');
@@ -2153,121 +1924,92 @@ $(document).ready(function() {
 		///////////////////////language related///////////////////
 		g_strings:strings,
 
-		docshowfilter = allselffilter;
+		///////////////////////theme related//////////////////////
+		g_myTheme:myTheme
+	});
+	//login
+	var login_information = new LoginInformation({
+		login_name: '',
+		login_password: ''
+	});
+	
+	///******************data init area end**********************///
 
-		$('#newfile').on('shown', function() {
-			$('#newfile-inputName').focus();
-		});
-
-		$('#changepassword').on('shown', function() {
-			$('#changepassword-old').focus();
-		});
-
-		$('#rename').on('shown', function() {
-			$('#rename-inputName').focus();
-		});
-
-		$('#share').on('shown', function() {
-			$('#share-inputName').focus();
-		});
-
-		var login_control = new LoginControl('#login-box', {
-			m_loginModel: login_information,
-			m_socket: socket
-		});
-		var register_controller = new RegisterController('#register-box', {
-			m_registerModel: registerModel,
-			m_socket: socket
-		});
-
-		$('[localization]').html(function(index, old) {
-			if (strings[old])
-				return strings[old];
-			return old;
-		});
-
-		$('[title]').attr('title', function(index, old) {
-			if (strings[old])
-				return strings[old];
-			return old;
-		});
-
-		if (!ENABLE_RUN) {
-			$('#editor-run').remove();
-			if (!ENABLE_DEBUG) {
-				$('#editor-console').remove();
-			}
+	if(!ENABLE_RUN) {
+		$('#editor-run').remove();
+		if(!ENABLE_DEBUG) {
+			$('#editor-console').remove();
 		}
+	}
 
-		if (!ENABLE_DEBUG) {
-			$('#editor-debug').remove();
-		}
+	if(!ENABLE_DEBUG) {
+		$('#editor-debug').remove();
+	}
+	
+	$('body').show();
+	$('#login-inputName').focus();
 
-		$('body').show();
-		$('#login-inputName').focus();
+	$('#register-inputName').focus(function(){
+		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+	});
 
-		$('#register-inputName').focus(function() {
-			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-		});
-
-		$('#register-inputPassword').focus(function() {
-			var name = $('#register-inputName').val();
-			if (!/^[A-Za-z0-9]*$/.test(name)) {
-				$("#msg-username").html(strings['name invalid']);
-				$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px 0px transparent");
-				$('#register-inputName').css("border-color", "rgba(255,0,0,0.8)");
-				return;
-			}
-			if (name == "" || name.length < 6 || name.length > 20) {
-				$("#msg-username").html(strings['namelength']);
-				$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px 0px transparent");
-				$('#register-inputName').css("border-color", "rgba(255,0,0,0.8)");
-				return;
-			}
+	$('#register-inputPassword').focus(function(){
+		var name = $('#register-inputName').val();
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			$("#msg-username").html(strings['name invalid']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
 			return;
-		});
-
-		$("#register-confirmPassword").focus(function() {
-			var name = $('#register-inputName').val();
-			if (!/^[A-Za-z0-9]*$/.test(name)) {
-				$("#msg-username").html(strings['name invalid']);
-				$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px 0px transparent");
-				$('#register-inputName').css("border-color", "rgba(255,0,0,0.8)");
-				return;
-			}
-			if (name.length < 6 || name.length > 20) {
-				$("#msg-username").html(strings['namelength']);
-				$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px 0px transparent");
-				$('#register-inputName').css("border-color", "rgba(255,0,0,0.8)");
-				return;
-			}
-			return;
-		});
-
-		if ((!Browser.chrome || parseInt(Browser.chrome) < 18) &&
-			(!Browser.opera || parseInt(Browser.opera) < 12)) {
-			novoice = true;
-			$('#voice-on').addClass('disabled');
-			$('#voice-on').removeAttr('title');
-			$('#voice-on').popover({
-				html: true,
-				content: strings['novoice'],
-				placement: 'left',
-				trigger: 'hover',
-				container: 'body'
-			});
 		}
+		if(name == "" || name.length < 6 || name.length > 20) {
+			$("#msg-username").html(strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		return;
+	});
 
-		resize();
-		$(window).resize(resize);
-		$(window).scroll(function() {
-			$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
+	$("#register-confirmPassword").focus(function(){
+		var name = $('#register-inputName').val();
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			$("#msg-username").html(strings['name invalid']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		if(name.length < 6 || name.length > 20) {
+			$("#msg-username").html(strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		return;
+	});
+	
+	if((!Browser.chrome || parseInt(Browser.chrome) < 18) &&
+		(!Browser.opera || parseInt(Browser.opera) < 12)) {
+		novoice = true;
+		$('#voice-on').addClass('disabled');
+		$('#voice-on').removeAttr('title');
+		$('#voice-on').popover({
+			html: true,
+			content: strings['novoice'],
+			placement: 'left',
+			trigger: 'hover',
+			container: 'body'
 		});
-		$(window).resize(function() {
-			var width = $(document).width() * 0.915;
-			var margin_left = (width / 2 - 108) + "px";
-			$("#foot-information").css("margin-left", margin_left);
-		});
+	}
+
+	resize();
+	$(window).resize(resize);
+	$(window).scroll(function() {
+		$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
+	});
+	$(window).resize(function() {
+		var width = $(document).width() * 0.915;
+		var margin_left = (width/2 - 108) + "px";
+		$("#foot-information").css("margin-left",margin_left);	
 	});
 
 

@@ -133,8 +133,8 @@ function fileList(table) {
 				'<li><a href="javascript:;" onclick="allFileLists['+n+'].onshare(allFileLists['+n+'].elements['+i+'])">' + strings['sharemanage'] + '</a></li>':'') +
 				(mode & 2?(
 				'<li><a href="javascript:;" onclick="allFileLists['+n+'].ondelete(allFileLists['+n+'].elements['+i+'])">' + strings['delete'] + '</a></li>' +
-				'<li><a href="javascript:;" onclick="allFileLists['+n+'].onrename(allFileLists['+n+'].elements['+i+'])">' + strings['rename'] + '</a></li>' +
-				'<li><a href="javascript:;" onclick="allFileLists['+n+'].ondownload(allFileLists['+n+'].elements['+i+'])">' + strings['export'] + '</a></li>'):'') +
+				'<li><a href="javascript:;" onclick="allFileLists['+n+'].onrename(allFileLists['+n+'].elements['+i+'])">' + strings['rename'] + '</a></li>'/* +
+				'<li><a href="javascript:;" onclick="allFileLists['+n+'].ondownload(allFileLists['+n+'].elements['+i+'])">' + strings['export'] + '</a></li>'*/):'') +
 				'</ul>' +
 				'</div>' +
 				'</td>' +
