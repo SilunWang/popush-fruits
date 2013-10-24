@@ -296,6 +296,22 @@ GlobalVariables = can.Model.extend({},{
 			this.currentDirString = this.getdirstring();
 		});
 	},
+	backtologin:function() {
+		$('#big-one .container').removeAttr('style');
+		$('#big-one').animate({height:'120px', padding:'60px', 'margin-bottom':'30px'}, 'fast', function() {
+			$('#big-one').removeAttr('style');
+			$('#big-one .container').css('margin','auto');
+			$('#login-inputName').focus();
+			resize();
+		});
+		$('#nav-head').fadeOut('fast');
+		$('#filecontrol').hide();
+		$('#editor').hide();
+		$('#login').fadeIn('fast');
+		//SilunWang fix a bug(footer disappear)
+		$('#footer').fadeIn('fast');
+		$('.modal').modal('hide');
+	},
 
 	loading:function(id) {
 		if(this.loadings[id])
@@ -428,7 +444,7 @@ GlobalVariables = can.Model.extend({},{
 		this.socket.on('doc', function(data){
 			self.dochandler(data);
 		});
-	}	
+	},	
 
 	initfilelistevent:function(fl) {
 
@@ -1997,7 +2013,7 @@ $(document).ready(function() {
 	});
 
 
-	var new_file_control = new NewFileControl('#newfile',{m_global_v:global_v});
+	var new_file_control = new NewFileController('#newfile',{m_global_v:global_v});
 	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
 	var change_pass_control = new ChangePassControl('#changepassword',{m_global_v:global_v});
 	var change_avatar_control = new ChangeAvatarControl('#changeavatar',{m_global_v:global_v});
