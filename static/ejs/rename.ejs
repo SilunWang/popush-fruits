@@ -1,0 +1,19 @@
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	<h3 id="renameLabel" localization>rename</h3>
+</div>
+<div class="modal-body form-horizontal">
+	<div class="control-group">
+		<label class="control-label" for="rename-inputName" localization>newname</label>
+		<div class="controls">
+			<input type="text" id="rename-inputName" onkeydown="pressenter(arguments[0],rename)" />
+			<span class="help-inline"></span>
+		</div>
+	</div>
+</div>
+<div class="modal-footer">
+	<div id="rename-buttons">
+		<button class="btn" id="rename-ok" onclick="rename()" localization>ok</button>
+		<button class="btn" data-dismiss="modal" aria-hidden="true" localization>cancel</button>
+	</div>
+</div>

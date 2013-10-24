@@ -43,36 +43,6 @@
 
 	<!--登录后 进入文件列表界面上方的导航栏-->
 	<div class="navbar navbar-fixed-top hide" id="nav-head">
-		<div class="navbar-inner">
-			<div class="container" style="width: auto; padding: 0 20px;">
-				<!--左侧的Popush图标-->
-				<a class="brand" href="#">Popush</a>
-				<!--右侧的头像-->
-				<ul class="nav pull-right">
-					<li class="dropdown">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-							<!--用户名-->
-							<span id="nav-user-name">Your Name</span>
-							<!--用户头像-->
-							<img height="32" width="32" src="#" id="nav-avatar" />
-						</a>
-						<!--下拉菜单-->
-						<ul class="dropdown-menu">
-							<li>
-								<a href="#changepassword" data-toggle="modal" onclick="changepasswordopen()" localization>changepassword</a>
-							</li>
-							<li>
-								<a href="#changeavatar" data-toggle="modal" onclick="changeavataropen()" localization>changeavatar</a>
-							</li>
-							<li class="divider"></li>
-							<li>
-								<a href="javascript:;" onclick="logout()" localization>logout</a>
-							</li>
-						</ul>
-					</li>
-				</ul>
-			</div>
-		</div>
 	</div>
 
 	<div class="container-fluid">
@@ -85,11 +55,9 @@
 					<span>Nothing here</span>
 				</div>
 				<hr />
-				<div id="login-box" class="form-horizontal" style="min-width:420px;position:relative;">
-				</div>
+				<div id="login-box" class="form-horizontal" style="min-width:420px;position:relative;"></div>
 			</div>
 		</div>
-
 		<!--注册界面-->
 		<div class="row-fluid hide" id="register">
 			<div class="span4 offset4">
@@ -133,45 +101,18 @@
 		<div id="filecontrol" class="hide">
 			<!--拥有文件/共享文件 标签栏-->
 			<div class="row-fluid">
-				<div class="span12">
-					<ul class="nav nav-tabs">
-						<li class="active dropdown" id="ownedfile">
-							<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-								<span localization>owningfiles</span> <b class="caret"></b>
-							</a>
-							<ul class="dropdown-menu">
-								<li>
-									<a href="#newfile" id = "new-file" data-toggle="modal" onclick="newfileopen()" localization>newfile</a>
-								</li>
-								<li>
-									<a href="#newfile" data-toggle="modal" onclick="newfolderopen()" localization>newfolder</a>
-								</li>
-								<!--<li class="divider"></li>
-							<li>
-								<a href="javascript:;" localization>import</a>
-							</li>
-							-->
-						</ul>
-					</li>
-					<li id="ownedfileex" class="hide">
-						<a href="javascript:;" onclick="ownedfilelist()" localization>owningfiles</a>
-					</li>
-					<li id="sharedfile">
-						<a href="javascript:;" onclick="sharedfilelist()" localization>sharedfiles</a>
-					</li>
-				</ul>
+				<div id="file-tabs" class="span12"></div>
 			</div>
-		</div>
-
-		<!--文件列表主体-->
-		<div class="row-fluid" id="file-list">
-			<!--左侧table-->
-			<div class="span10">
-				<p>
-					<span localization>currentdir:</span>
-					<span id="current-dir"></span>
-				</p>
-				<table class="table table-hover" id="file-list-table"></table>
+			<!--文件列表主体-->
+			<div class="row-fluid" id="file-list">
+				<!--左侧table-->
+				<div id="file-listtable" class="span10">
+					<p>
+						<span localization>currentdir:</span>
+						<span id="current-dir"></span>
+					</p>
+					<table class="table table-hover" id="file-list-table"></table>
+				</div>
 			</div>
 			<!--右侧共享用户-->
 			<div class="span2">
@@ -333,107 +274,18 @@
 
 	<!-- popover 修改头像弹出框-->
 	<div id="changeavatar" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="changeavatarLabel" aria-hidden="true" data-backdrop="static">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h3 id="changeavatarLabel" localization>changeavatar</h3>
-		</div>
-		<div class="modal-body">
-			<div class="alert hide" id="changeavatar-message">
-				<button type="button" class="close" onclick="$('#changeavatar-message').slideUp()">&times;</button>
-				<span localization>Nothing here</span>
-			</div>
-			<p localization>clicktochange</p>
-			<p align="center">
-				<img id="changeavatar-img" src="#" width="192" height="192" onclick="$('#changeavatar-input').click()" style="cursor:pointer;"/>
-			</p>
-			<div style="overflow:hidden;height:0;max-height:0;">
-				<input type="file" name="upload" id="changeavatar-input" onchange="changeavatar(this)" accept="image/png,image/jpeg"/>
-			</div>
-		</div>
-		<div class="modal-footer">
-			<button class="btn" data-dismiss="modal" aria-hidden="true" localization>back</button>
-		</div>
 	</div>
 
 	<!-- popover 修改密码弹出框-->
 	<div id="changepassword" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="changepasswordLabel" aria-hidden="true" data-backdrop="static">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h3 id="changepasswordLabel" localization>changepassword</h3>
-		</div>
-		<div class="modal-body form-horizontal">
-			<div class="control-group">
-				<label class="control-label" for="changepassword-old" localization>oldpassword</label>
-				<div class="controls">
-					<input type="password" id="changepassword-old" onkeydown="pressenter(arguments[0],changepassword, '', 'changepassword-new')" />
-					<span class="help-inline"></span>
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="changepassword-old" localization>newpassword</label>
-				<div class="controls">
-					<input type="password" id="changepassword-new" onkeydown="pressenter(arguments[0],changepassword, 'changepassword-old', 'changepassword-confirm')" />
-					<span class="help-inline"></span>
-				</div>
-			</div>
-			<div class="control-group">
-				<label class="control-label" for="changepassword-old" localization>confirm</label>
-				<div class="controls">
-					<input type="password" id="changepassword-confirm" onkeydown="pressenter(arguments[0],changepassword, 'changepassword-new', '')" />
-					<span class="help-inline"></span>
-				</div>
-			</div>
-		</div>
-		<div class="modal-footer">
-			<div id="changepassword-buttons">
-				<button class="btn" onclick="changepassword()" localization>ok</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true" localization>cancel</button>
-			</div>
-		</div>
 	</div>
 
 	<!-- popover 删除文件确认框-->
 	<div id="delete" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="deleteLabel" aria-hidden="true" data-backdrop="static">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h3 id="deleteLabel" localization>deleteconfirm</h3>
-		</div>
-		<div class="modal-body">
-			<p>
-				<span localization>suretodelete</span>
-				<span class="folder"></span>
-				<span id="delete-name"></span>
-			</p>
-		</div>
-		<div class="modal-footer">
-			<div id="delete-buttons">
-				<button class="btn" onclick="deleteconfirm()" localization>ok</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true" localization>cancel</button>
-			</div>
-		</div>
 	</div>
 
 	<!-- popover 重命名文件弹出框-->
 	<div id="rename" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="renameLabel" aria-hidden="true" data-backdrop="static">
-		<div class="modal-header">
-			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-			<h3 id="renameLabel" localization>rename</h3>
-		</div>
-		<div class="modal-body form-horizontal">
-			<div class="control-group">
-				<label class="control-label" for="rename-inputName" localization>newname</label>
-				<div class="controls">
-					<input type="text" id="rename-inputName" onkeydown="pressenter(arguments[0],rename)" />
-					<span class="help-inline"></span>
-				</div>
-			</div>
-		</div>
-		<div class="modal-footer">
-			<div id="rename-buttons">
-				<button class="btn" onclick="rename()" localization>ok</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true" localization>cancel</button>
-			</div>
-		</div>
 	</div>
 	<!-- popover 共享文件确认框-->
 	<div id="share" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="shareLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
@@ -481,7 +333,5 @@
 			<button class="btn" data-dismiss="modal" aria-hidden="true" localization>ok</button>
 		</div>
 	</div>
-
-</div>
 </body>
 </html>
