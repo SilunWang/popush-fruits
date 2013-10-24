@@ -221,28 +221,6 @@ function fileList(table) {
 			obj.html(oldhtml);
 			haveloading = false;
 		},
-		
-		//以下的内容像是没写完的代码或者是测试代码
-
-		onname: function(o) {
-			alert('onname');
-		},
-		
-		onshare: function(o) {
-			alert('onshare');
-		},
-		
-		ondelete: function(o) {
-			alert('ondelete');
-		},
-		
-		onrename: function(o) {
-			alert('onrename');
-		},
-		
-		ondownload: function(o) {
-			alert('ondownload');
-		}
 	};
 	
 	//向所有文件列表中添加当前文件列表
