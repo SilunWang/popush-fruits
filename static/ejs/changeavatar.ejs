@@ -1,0 +1,20 @@
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	<h3 id="changeavatarLabel" localization>changeavatar</h3>
+</div>
+<div class="modal-body">
+	<div class="alert hide" id="changeavatar-message">
+		<button type="button" class="close" onclick="$('#changeavatar-message').slideUp()">&times;</button>
+		<span localization>Nothing here</span>
+	</div>
+	<p localization>clicktochange</p>
+	<p align="center">
+		<img id="changeavatar-img" src="#" width="192" height="192" onclick="$('#changeavatar-input').click()" style="cursor:pointer;"/>
+	</p>
+	<div style="overflow:hidden;height:0;max-height:0;">
+		<input type="file" name="upload" id="changeavatar-input" accept="image/png,image/jpeg"/>
+	</div>
+</div>
+<div class="modal-footer">
+	<button class="btn" data-dismiss="modal" aria-hidden="true" localization>back</button>
+</div>
