@@ -1,5 +1,8 @@
 
 ////////////////////////// vars ///////////////////////////////
+var global_v;
+
+
 var currentUser;
 var currentDir;
 var currentDirString;
@@ -85,6 +88,7 @@ function getCookie(name)
 
 /********************全局变量Model*********************/
 GlobalVariables = can.Model.extend({},{
+	self:this,
 	init:function(global_data){
 		////////////////////////// vars ///////////////////////////////
 		this.currentUser = global_data.g_currentUser;
@@ -169,9 +173,9 @@ GlobalVariables = can.Model.extend({},{
 			if(p.length > 1)
 				t = p[1] + '@' + p[0];
 			if(i == 0 && this.dirMode == 'shared')
-				s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
+				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
-				s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">' + this.htmlescape(t) + '</a>';
+				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
 		}
 		return s;
 	},
@@ -347,86 +351,7 @@ GlobalVariables = can.Model.extend({},{
 		this.socket.on('doc', function(data){
 			self.dochandler(data);
 		});
-	},	
-	/*
-	initfilelistevent:function(fl) {
-
-		fl.onname = function(o) {
-			if(this.operationLock)
-				return;
-			if(o.type == 'dir') {
-				this.currentDir.push(o.name);
-				this.currentDirString = this.getdirstring();
-				this.refreshfilelist(function() {
-					this.currentDir.pop();
-					this.currentDirString = this.getdirstring();
-				});
-			}
-			
-			else if(o.type == 'doc') {
-				openeditor(o);
-			}
-		};
-	
-		fl.ondelete = function(o) {
-			if(o.type == 'dir')
-				$('#delete').find('.folder').text(strings['folder']);
-			else
-				$('#delete').find('.folder').text(strings['file']);
-			$('#delete-name').text(o.name);
-			$('#delete').modal('show');
-			deleteconfirm = function() {
-				if(operationLock)
-					return;
-				operationLock = true;
-				loading('delete-buttons');
-				socket.emit('delete', {
-					path: o.path
-				});
-			};
-		};
-	
-		fl.onrename = function(o) {
-			$('#rename-inputName').val(o.name);
-			$('#rename .control-group').removeClass('error');
-			$('#rename .help-inline').text('');
-			$('#rename').modal('show');
-			rename = function() {
-				var name = $('#rename-inputName').val();
-				name = $.trim(name);
-				if(name == '') {
-					showmessageindialog('rename', 'inputfilename');
-					return;
-				}
-				if(/\/|\\|@/.test(name)) {
-					showmessageindialog('rename', 'filenameinvalid');
-					return;
-				}
-				if(name == o.name) {
-					$('#rename').modal('hide');
-					return;
-				}
-				if(operationLock)
-					return;
-				operationLock = true;
-				loading('rename-buttons');
-				movehandler = renamedone;
-				socket.emit('move', {
-					path: o.path,
-					newPath: currentDirString + '/' + name
-				});
-			};
-		};
-	
-		fl.onshare = function(o) {
-			$('#share-name').text(o.name);
-			$('#share-inputName').val('');
-			$('#share-message').hide();
-			userlist.fromusers(o.members);
-			$('#share').modal('show');
-			currentsharedoc = o;
-		};
-	}*/
+	}	
 });
 /****************************************************/
 
@@ -511,15 +436,16 @@ var LoginControl = can.Control.extend({
 			$.cookie('sid', data.sid, {expires:7});
 			//当前的路径模式改为拥有的文件
 			m_global_v.dirMode = 'owned';
-			m_global_v.docshowfilter = m_global_v.allselffilter;
+
 			//currenDir修改为当前user的name
 			m_global_v.currentDir = [data.user.name];
 			m_global_v.currentDirString = m_global_v.getdirstring();
+			m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 			//获取当前的link
 			$('#current-dir').html(m_global_v.getdirlink());
 			//
 			m_global_v.filelist.setmode(3);
-			m_global_v.filelist.formdocs(data.user.docs, m_global_v.docshowfilter);
+			m_global_v.filelist.formdocs(data.user.docs,  m_global_v.docshowfilter);
 		
 			m_global_v.memberlist.clear();
 			m_global_v.memberlist.add(data.user);
@@ -558,7 +484,7 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'owned';
-		m_global_v.docshowfilter = m_global_v.allselffilter;
+		m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		$('#current-dir').html(m_global_v.getdirlink());
@@ -575,7 +501,7 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'shared';
-		m_global_v.docshowfilter = m_global_v.allsharefilter;
+		m_global_v.docshowfilter = {flag:0,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		$('#current-dir').html(m_global_v.getdirlink());
@@ -1440,13 +1366,9 @@ function setFullScreen(cm, full) {
 	cm.focus();
 }
 
-function allselffilter(o) {
-	return currentDir.length > 1 || o.owner.name == currentUser.name;
-}
 
-function allsharefilter(o) {
-	return currentDir.length > 1 || o.owner.name != currentUser.name;
-}
+
+
 
 function htmlescape(text) {
 	return text.
@@ -1888,7 +1810,7 @@ function initfilelistevent(fl) {
 		currentsharedoc = o;
 	};
 }*/
-
+/*
 function backto(n) {
 	if(operationLock)
 		return;
@@ -1904,7 +1826,7 @@ function backto(n) {
 		}
 		currentDirString = getdirstring();
 	});
-}
+}*/
 
 /////////////////////// initialize ///////////////////////////
 
@@ -1942,6 +1864,7 @@ $(document).ready(function() {
 
 	filelist = fileList('#file-list-table');
 	filelist.clear();
+
 	//initfilelistevent(filelist);
 	
 	userlist = userList('#share-user-list');
@@ -1952,7 +1875,7 @@ $(document).ready(function() {
 	
 	expressionlist = expressionList('#varlist-table');
 	
-	docshowfilter = allselffilter;
+	docshowfilter = {};
 
 	$('#newfile').on('shown', function() {
 		$('#newfile-inputName').focus();
@@ -1973,7 +1896,7 @@ $(document).ready(function() {
 	///*********************data init area**********************///
 	
 	//global data
-	var global_v = new GlobalVariables({
+	global_v = new GlobalVariables({
 		////////////////////////// vars ///////////////////////////////
 		g_currentUser:currentUser,
 		g_currentDir:currentDir,
