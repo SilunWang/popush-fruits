@@ -157,7 +157,7 @@ function fileList(table) {
 				filter = function(o){ return true; };
 			for(i=0; i<docs.length; i++) {
 				var o = docs[i];
-				if(!filter(o))
+				if(!((filter.flag == 1)?(filter.currentDir.length > 1 || o.owner.name == filter.currentUser.name):(filter.currentDir.length > 1 || o.owner.name != filter.currentUser.name)))
 					continue;
 				var n = {};
 				n['path'] = o.path;
