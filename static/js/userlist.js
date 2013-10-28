@@ -5,7 +5,7 @@ var allUserLists = [];
 function userList(div) {
 
 	var obj = $(div);
-	
+	var div_id = div;
 	//当前共享用户列表
 	var elements = [];
 	
@@ -20,7 +20,7 @@ function userList(div) {
 
 		//重置共享用户列表，在共享管理页面和文件管理页面上调用
 		clear: function() {
-			obj.html('');
+			$(div_id).html('');
 			elements = [];
 			this.elements = elements;
 			selected = null;
@@ -29,7 +29,7 @@ function userList(div) {
 		//增加一个共享用户user，包括用户名和头像位置
 		add: function(user) {
 			var i = elements.length;
-			obj.append(
+			$(div_id).append(
 				'<li><a href="javascript:;" onclick="allUserLists['+n+'].onselect('+i+')">' +
 				'<img class="userlistimg user-' + user.name + '" height="32" width="32" src="' + user.avatar + '">' + user.name + '</a></li>'
 			);
@@ -43,8 +43,8 @@ function userList(div) {
 		
 		//更改选中用户的样式，标记选中的用户
 		onselect: function(i) {
-			obj.find('li').removeClass('active');
-			obj.find('li:eq('+i+')').addClass('active');
+			$(div_id).find('li').removeClass('active');
+			$(div_id).find('li:eq('+i+')').addClass('active');
 			selected = elements[i];
 		},
 		
