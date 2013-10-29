@@ -1,5 +1,8 @@
 
 ////////////////////////// vars ///////////////////////////////
+var global_v;
+
+
 var currentUser;
 var currentDir;
 var currentDirString;
@@ -85,6 +88,7 @@ function getCookie(name)
 
 /********************全局变量Model*********************/
 GlobalVariables = can.Model.extend({},{
+	self:this,
 	init:function(global_data){
 		////////////////////////// vars ///////////////////////////////
 		this.currentUser = global_data.g_currentUser;
@@ -136,6 +140,8 @@ GlobalVariables = can.Model.extend({},{
 		this.myTheme = global_data.g_myTheme;
 		
 		this.doc_on();
+		this.delete_obj = '';
+		this.rename_obj = '';
 	},
 	//获得当前路径的标准路径名
 	//拆分成路径的标准格式
@@ -169,9 +175,9 @@ GlobalVariables = can.Model.extend({},{
 			if(p.length > 1)
 				t = p[1] + '@' + p[0];
 			if(i == 0 && this.dirMode == 'shared')
-				s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
+				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
-				s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">' + this.htmlescape(t) + '</a>';
+				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
 		}
 		return s;
 	},
@@ -334,99 +340,12 @@ GlobalVariables = can.Model.extend({},{
 		}
 		this.operationLock = false;
 	},
-	sharedone:function(data){
-		if(!data.err){
-			userlist.fromusers(data.doc.members);
-		}
-		$('#share-message').hide();
-		removeloading('share-buttons');
-		operationLock = false;
-	},
 	doc_on:function(){
 		var self = this;
 		this.socket.on('doc', function(data){
 			self.dochandler(data);
 		});
-	},	
-	/*
-	initfilelistevent:function(fl) {
-
-		fl.onname = function(o) {
-			if(this.operationLock)
-				return;
-			if(o.type == 'dir') {
-				this.currentDir.push(o.name);
-				this.currentDirString = this.getdirstring();
-				this.refreshfilelist(function() {
-					this.currentDir.pop();
-					this.currentDirString = this.getdirstring();
-				});
-			}
-			
-			else if(o.type == 'doc') {
-				openeditor(o);
-			}
-		};
-	
-		fl.ondelete = function(o) {
-			if(o.type == 'dir')
-				$('#delete').find('.folder').text(strings['folder']);
-			else
-				$('#delete').find('.folder').text(strings['file']);
-			$('#delete-name').text(o.name);
-			$('#delete').modal('show');
-			deleteconfirm = function() {
-				if(operationLock)
-					return;
-				operationLock = true;
-				loading('delete-buttons');
-				socket.emit('delete', {
-					path: o.path
-				});
-			};
-		};
-	
-		fl.onrename = function(o) {
-			$('#rename-inputName').val(o.name);
-			$('#rename .control-group').removeClass('error');
-			$('#rename .help-inline').text('');
-			$('#rename').modal('show');
-			rename = function() {
-				var name = $('#rename-inputName').val();
-				name = $.trim(name);
-				if(name == '') {
-					showmessageindialog('rename', 'inputfilename');
-					return;
-				}
-				if(/\/|\\|@/.test(name)) {
-					showmessageindialog('rename', 'filenameinvalid');
-					return;
-				}
-				if(name == o.name) {
-					$('#rename').modal('hide');
-					return;
-				}
-				if(operationLock)
-					return;
-				operationLock = true;
-				loading('rename-buttons');
-				movehandler = renamedone;
-				socket.emit('move', {
-					path: o.path,
-					newPath: currentDirString + '/' + name
-				});
-			};
-		};
-	
-		fl.onshare = function(o) {
-			$('#share-name').text(o.name);
-			$('#share-inputName').val('');
-			$('#share-message').hide();
-			userlist.fromusers(o.members);
-			$('#share').modal('show');
-			currentsharedoc = o;
-		};
-	}*/
+	}	
 });
 /****************************************************/
 
@@ -470,7 +389,7 @@ var LoginControl = can.Control.extend({
 		if (m_global_v.loginLock)
 			return;
 		m_global_v.loginLock = true;
-		loading('login-control');
+		m_global_v.loading('login-control');
 		//socket请求，发送用户名和密码，待服务器端接收。
 		m_global_v.socket.emit('login', {
 			name: login_name,
@@ -479,54 +398,98 @@ var LoginControl = can.Control.extend({
 	},
 	socket_io:function(){
 		m_global_v.socket.on('login', function(data){
-		if(data.err){
-			//如果cookie期满了
-			if(data.err == 'expired') {
-				//移除cookie
-				$.removeCookie('sid');
-			} else {
-				showmessage('login-message', data.err, 'error');
+			if(data.err){
+				//如果cookie期满了
+				if(data.err == 'expired') {
+					//移除cookie
+					$.removeCookie('sid');
+				} else {
+					showmessage('login-message', data.err, 'error');
+				}
 			}
-		}
-		else{
-			//上锁
-			m_global_v.operationLock = false;
-			//一群东西出现和消失
-			$('#login-inputName').val('');
-			$('#login-inputPassword').val('');
-			$('#login-message').hide();
-			$('#ownedfile').show();
-			$('#ownedfileex').hide();
-			$('#sharedfile').removeClass('active');
-			$('#share-manage-link').hide();
-			$('#big-one').animate({height:'40px', padding:'0', 'margin-bottom':'20px'}, 'fast');
-			$('#nav-head').fadeIn('fast');
-			$('#login').hide();
-			$('#editor').hide();
-			$('#filecontrol').fadeIn('fast');
-			$('#nav-user-name').text(data.user.name);
-			$('#nav-avatar').attr('src', data.user.avatar);
-			m_global_v.currentUser = data.user;
-			//向cookie写入sid
-			$.cookie('sid', data.sid, {expires:7});
-			//当前的路径模式改为拥有的文件
-			m_global_v.dirMode = 'owned';
-			m_global_v.docshowfilter = m_global_v.allselffilter;
-			//currenDir修改为当前user的name
-			m_global_v.currentDir = [data.user.name];
-			m_global_v.currentDirString = m_global_v.getdirstring();
-			//获取当前的link
-			$('#current-dir').html(m_global_v.getdirlink());
-			//
-			m_global_v.filelist.setmode(3);
-			m_global_v.filelist.formdocs(data.user.docs, m_global_v.docshowfilter);
+			else{
+				//上锁
+				m_global_v.operationLock = false;
+				//一群东西出现和消失
+				$('#login-inputName').val('');
+				$('#login-inputPassword').val('');
+				$('#login-message').hide();
+				$('#ownedfile').show();
+				$('#ownedfileex').hide();
+				$('#sharedfile').removeClass('active');
+				$('#share-manage-link').hide();
+				$('#big-one').animate({height:'40px', padding:'0', 'margin-bottom':'20px'}, 'fast');
+				$('#nav-head').fadeIn('fast');
+				$('#login').hide();
+				$('#editor').hide();
+				$('#filecontrol').fadeIn('fast');
+				$('#nav-user-name').text(data.user.name);
+				$('#nav-avatar').attr('src', data.user.avatar);
+				m_global_v.currentUser = data.user;
+				//向cookie写入sid
+				$.cookie('sid', data.sid, {expires:7});
+				//当前的路径模式改为拥有的文件
+				m_global_v.dirMode = 'owned';
+
+				//currenDir修改为当前user的name
+				m_global_v.currentDir = [data.user.name];
+				m_global_v.currentDirString = m_global_v.getdirstring();
+				m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
+				//获取当前的link
+				$('#current-dir').html(m_global_v.getdirlink());
+				//
+				m_global_v.filelist.setmode(3);
+				m_global_v.filelist.formdocs(data.user.docs,  m_global_v.docshowfilter);
 		
-			m_global_v.memberlist.clear();
-			m_global_v.memberlist.add(data.user);
-		}
-		cleanloading();
-		m_global_v.loginLock = false;
-	});}
+				m_global_v.memberlist.clear();
+				m_global_v.memberlist.add(data.user);
+			}
+			m_global_v.cleanloading();
+			m_global_v.loginLock = false;
+		});
+		m_global_v.socket.on('unauthorized', function(){
+			m_global_v.backtologin();
+			m_global_v.showmessage('login-message', 'needrelogin', 'error');
+
+			if(!window.joinedARoom){
+				return;
+			}
+			window.joinedARoom = false;
+			window.voiceConnection.myLocalStream.stop();
+			window.voiceConnection.leave();
+			while(window.userArray.length > 0){
+				$(window.audioArray[window.userArray.shift()]).remove();
+			}
+			delete window.voiceConnection;
+		});
+
+		m_global_v.socket.on('version', function(data){
+			if(data.version != VERSION) {
+				location.reload('Refresh');
+			}
+			if(failed)
+				return;
+			if(!m_global_v.firstconnect) {
+				m_global_v.backtologin();
+			}
+			m_global_v.firstconnect = false;
+			$('#loading-init').remove();
+			m_global_v.cleanloading();
+			if($.cookie('sid')){
+				socket.emit('relogin', {sid:$.cookie('sid')});
+				m_global_v.loading('login-control');
+				m_global_v.loginLock = true;
+			} else {
+				$('#login-control').fadeIn('fast');
+			}
+			m_global_v.loadDone = true;
+		});
+
+		m_global_v.socket.on('connect', function(){
+			m_global_v.socket.emit('version', {
+			});
+		});
+	}
 });
 /****************************************************/
 
@@ -558,7 +521,7 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'owned';
-		m_global_v.docshowfilter = m_global_v.allselffilter;
+		m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		$('#current-dir').html(m_global_v.getdirlink());
@@ -575,7 +538,7 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'shared';
-		m_global_v.docshowfilter = m_global_v.allsharefilter;
+		m_global_v.docshowfilter = {flag:0,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		$('#current-dir').html(m_global_v.getdirlink());
@@ -616,22 +579,22 @@ var NewFileController = can.Control.extend({
 		var filename = this.m_filename;
 		filename = $.trim(filename);
 		if(filename == '') {
-			showmessageindialog('newfile', 'inputfilename');
+			m_global_v.showmessageindialog('newfile', 'inputfilename');
 			return;
 		}
 		if(/\/|\\|@/.test(filename)) {
-			showmessageindialog('newfile', 'filenameinvalid');
+			m_global_v.showmessageindialog('newfile', 'filenameinvalid');
 			return;
 		}
 		if(filename.length > 32) {
-			showmessageindialog('newfile', 'filenamelength');
+			m_global_v.showmessageindialog('newfile', 'filenamelength');
 			return;
 		}
 		m_global_v.operationLock = false;
 		if(m_global_v.operationLock)
 			return;
 		m_global_v.operationLock = true;
-		loading('newfile-buttons');
+		m_global_v.loading('newfile-buttons');
 		m_global_v.socket.emit('new', {
 			type: m_global_v.newfiletype,
 			path: m_global_v.currentDirString + '/' + filename
@@ -660,10 +623,8 @@ var NewFileController = can.Control.extend({
 /*********************rename*************************/
 var ReNameControl = can.Control.extend({
 	m_global_v:'',
-	m_object:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
-		m_object = this.options.m_object;
 		this.element.html(can.view("../ejs/rename.ejs", {}));
 		this.socket_io();
 	},
@@ -678,7 +639,7 @@ var ReNameControl = can.Control.extend({
 			m_global_v.showmessageindialog('rename', 'filenameinvalid');
 			return;
 		}
-		if(name == this.m_object.name) {
+		if(name == m_global_v.rename_obj) {
 			$('#rename').modal('hide');
 			return;
 		}
@@ -688,7 +649,7 @@ var ReNameControl = can.Control.extend({
 		m_global_v.loading('rename-buttons');
 		m_global_v.movehandler = this.renamedone;
 		m_global_v.socket.emit('move', {
-			path: m_object.path,
+			path: m_global_v.rename_obj.path,
 			newPath: m_global_v.currentDirString + '/' + name
 		});
 	},
@@ -715,10 +676,10 @@ var ReNameControl = can.Control.extend({
 /********************deletefile**********************/
 var DeleteControl = can.Control.extend({
 	m_global_v:'',
-	m_object:'',
+	//m_object:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
-		m_object = this.options.m_object;
+		//m_object = this.options.m_object;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
 	},
@@ -728,7 +689,7 @@ var DeleteControl = can.Control.extend({
 		m_global_v.operationLock = true;
 		m_global_v.loading('delete-buttons');
 		m_global_v.socket.emit('delete', {
-			path: m_object.path
+			path: m_global_v.delete_obj.path
 		});
 	},
 	socket_io:function(){
@@ -743,6 +704,180 @@ var DeleteControl = can.Control.extend({
 				}
 				m_global_v.removeloading('delete-buttons');
 		});
+	}
+});
+/****************************************************/
+
+/*********************Share Files********************/
+var ShareController = can.Control.extend({
+	m_global_v:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/share.ejs", {}));
+		this.socket_io();
+	},
+
+	//events
+	".close-share click":function(){
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.refreshfilelist(function(){;});
+		$('#share').modal('hide');
+	},
+	
+	"#share-submit click":function(){
+		this.share();
+	},
+	'#unshare-submit click':function(){
+		this.unshare();
+	},
+	'#share-inputName keydown':function(){
+		m_global_v.pressenter(arguments[0],this.share);
+	},
+
+	unshare:function(){
+		//获取选中的的用户名
+		var selected = m_global_v.userlist.getselection();
+		//没有选中的话，显示error
+		//传入当前的对话框
+		if(!selected) {
+			m_global_v.showmessage('share-message', 'selectuser', 'error');
+			return;
+		}
+		//如果当前操作被锁了
+		//返回
+		if(m_global_v.operationLock)
+			return;
+		//否则，上锁
+		m_global_v.operationLock = true;
+		m_global_v.loading('share-buttons');
+		//向服务器发送取消共享的请求
+		m_global_v.socket.emit('unshare', {
+			path: m_global_v.currentsharedoc.path,
+			name: selected.name
+		});
+	},
+
+	share:function(){
+		var share_name = $('#share-inputName').val();
+		if(share_name == '') {
+			m_global_v.showmessage('share-message', 'inputusername', 'error');
+			return;
+		}
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.loading('share-buttons');
+		m_global_v.socket.emit('share', {
+			path: m_global_v.currentsharedoc.path,
+			name: share_name
+		});
+	},
+
+	socket_io:function(){
+		var self = this;
+		m_global_v.socket.on('share', function(data){
+			if(data.err){
+				m_global_v.showmessage('share-message', data.err, 'error');
+				m_global_v.operationLock = false;
+				m_global_v.removeloading('share-buttons');
+			} else {
+				m_global_v.dochandler = self.sharedone;
+				m_global_v.socket.emit('doc', {
+					path: m_global_v.currentsharedoc.path
+				});
+			}
+		});
+
+		m_global_v.socket.on('unshare', function(data){
+			if(data.err){
+				m_global_v.showmessage('share-message', data.err, 'error');
+				m_global_v.operationLock = false;
+				m_global_v.removeloading('share-buttons');
+			} else {
+				m_global_v.dochandler = self.sharedone;
+				m_global_v.socket.emit('doc', {
+					path: m_global_v.currentsharedoc.path
+				});
+			}
+		});
+	},
+	sharedone:function(data){
+		if(!data.err){
+			m_global_v.userlist.fromusers(data.doc.members);
+		}
+		$('#share-message').hide();
+		m_global_v.removeloading('share-buttons');
+		m_global_v.operationLock = false;
+	},
+});
+/****************************************************/
+
+
+/**********************Filelist**********************/
+
+var FileListController = can.Control.extend({
+	m_global_v:'',
+	m_object:'',
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/filelist.ejs", {}));
+		this.initfilelistevent(m_global_v.filelist);
+	},	
+	'#delete-ok click':function(o){
+		//if(m_global_v.operationLock)
+				//return;
+		m_global_v.operationLock = true;
+		m_global_v.loading('delete-buttons');
+		m_global_v.socket.emit('delete', {
+			path: m_object.path
+		});
+	},
+	initfilelistevent:function(fl) {
+		var self = this;
+		fl.onname = function(o) {
+			if(m_global_v.operationLock)
+				return;
+			if(o.type == 'dir') {
+				m_global_v.currentDir.push(o.name);
+				m_global_v.currentDirString = m_global_v.getdirstring();
+				m_global_v.refreshfilelist(function() {
+					m_global_v.currentDir.pop();
+					m_global_v.currentDirString = m_global_v.getdirstring();
+				});
+			}
+			/* 
+			else if(o.type == 'doc') {
+				openeditor(o);
+			}*/
+		};
+	
+		fl.ondelete = function(o) {
+			if(o.type == 'dir')
+				$('#delete').find('.folder').text(strings['folder']);
+			else
+				$('#delete').find('.folder').text(strings['file']);
+			$('#delete-name').text(o.name);
+			$('#delete').modal('show');
+			m_global_v.delete_obj = o;
+		};
+	
+		fl.onrename = function(o) {
+			$('#rename-inputName').val(o.name);
+			$('#rename .control-group').removeClass('error');
+			$('#rename .help-inline').text('');
+			$('#rename').modal('show');
+			m_global_v.rename_obj = o;
+		};
+	
+		fl.onshare = function(o) {
+			$('#share-name').text(o.name);
+			$('#share-inputName').val('');
+			$('#share-message').hide();
+			m_global_v.userlist.fromusers(o.members);
+			$('#share').modal('show');
+			m_global_v.currentsharedoc = o;
+		};
 	}
 });
 /****************************************************/
@@ -849,101 +984,6 @@ var ChangeAvatarControl = can.Control.extend({
 /****************************************************/
 
 
-/*********************Share Files********************/
-var ShareController = can.Control.extend({
-	m_global_v:'',
-	init: function(element, options) {
-		m_global_v = this.options.m_global_v;
-		this.element.append(can.view("../ejs/share.ejs", {}));
-		this.socket_io();
-	},
-
-	//events
-	".close-share click":function(){
-		if(m_global_v.operationLock)
-			return;
-		m_global_v.refreshfilelist(function(){;});
-		$('#share').modal('hide');
-	},
-	
-	"#share-submit click":function(){
-		this.share();
-	},
-	'#unshare-submit click':function(){
-		this.unshare();
-	},
-	'#share-inputName keydown':function(){
-		m_global_v.pressenter(arguments[0],this.share);
-	},
-
-	unshare:function(){
-		//获取选中的的用户名
-		var selected = m_global_v.userlist.getselection();
-		//没有选中的话，显示error
-		//传入当前的对话框
-		if(!selected) {
-			m_global_v.showmessage('share-message', 'selectuser', 'error');
-			return;
-		}
-		//如果当前操作被锁了
-		//返回
-		if(m_global_v.operationLock)
-			return;
-		//否则，上锁
-		m_global_v.operationLock = true;
-		m_global_v.loading('share-buttons');
-		//向服务器发送取消共享的请求
-		m_global_v.socket.emit('unshare', {
-			path: m_global_v.currentsharedoc.path,
-			name: selected.name
-		});
-	},
-
-	share:function(){
-		var share_name = $('#share-inputName').val();
-		if(share_name == '') {
-			m_global_v.showmessage('share-message', 'inputusername', 'error');
-			return;
-		}
-		if(m_global_v.operationLock)
-			return;
-		m_global_v.operationLock = true;
-		m_global_v.loading('share-buttons');
-		m_global_v.socket.emit('share', {
-			path: m_global_v.currentsharedoc.path,
-			name: share_name
-		});
-	},
-
-	socket_io:function(){
-		m_global_v.socket.on('share', function(data){
-			if(data.err){
-				m_global_v.showmessage('share-message', data.err, 'error');
-				m_global_v.operationLock = false;
-				m_global_v.removeloading('share-buttons');
-			} else {
-				m_global_v.dochandler = m_global_v.sharedone;
-				m_global_v.socket.emit('doc', {
-					path: m_global_v.currentsharedoc.path
-				});
-			}
-		});
-
-		m_global_v.socket.on('unshare', function(data){
-			if(data.err){
-				m_global_v.showmessage('share-message', data.err, 'error');
-				m_global_v.operationLock = false;
-				m_global_v.removeloading('share-buttons');
-			} else {
-				m_global_v.dochandler = m_global_v.sharedone;
-				m_global_v.socket.emit('doc', {
-					path: m_global_v.currentsharedoc.path
-				});
-			}
-		});
-	}
-});
-/****************************************************/
 
 
 /************************Footer**********************/
@@ -1114,61 +1154,7 @@ var FooterController = can.Control.extend({
 });
 /****************************************************/
 
-var FileListController = can.Control.extend({
-	m_global_v:'',
-	init: function(element, options) {
-		m_global_v = this.options.m_global_v;
-		this.element.append(can.view("../ejs/filelist.ejs", {}));
-		this.initfilelistevent(m_global_v.filelist);
-	},	
-	initfilelistevent:function(fl) {
-		var self = this;
-		fl.onname = function(o) {
-			if(m_global_v.operationLock)
-				return;
-			if(o.type == 'dir') {
-				m_global_v.currentDir.push(o.name);
-				m_global_v.currentDirString = m_global_v.getdirstring();
-				m_global_v.refreshfilelist(function() {
-					m_global_v.currentDir.pop();
-					m_global_v.currentDirString = m_global_v.getdirstring();
-				});
-			}
-			/* 
-			else if(o.type == 'doc') {
-				openeditor(o);
-			}*/
-		};
-	
-		fl.ondelete = function(o) {
-			if(o.type == 'dir')
-				$('#delete').find('.folder').text(strings['folder']);
-			else
-				$('#delete').find('.folder').text(strings['file']);
-			$('#delete-name').text(o.name);
-			$('#delete').modal('show');
-			var delete_controller = new DeleteControl('#delete',{m_object:o,m_global_v:self.options.m_global_v});
-			//delete delete_controller;
-		};
-	
-		fl.onrename = function(o) {
-			$('#rename-inputName').val(o.name);
-			$('#rename .control-group').removeClass('error');
-			$('#rename .help-inline').text('');
-			$('#rename').modal('show');
-			var rename_controller = new ReNameControl('#rename',{m_object:o,m_global_v:self.options.m_global_v});
-		};
-	
-		fl.onshare = function(o) {
-			$('#share-name').text(o.name);
-			$('#share-inputName').val('');
-			$('#share-message').hide();
-			m_global_v.userlist.fromusers(o.members);
-			$('#share').modal('show');
-			m_global_v.currentsharedoc = o;
-		};
-	}
-});
+
 
 
 /***********************test*************************/
@@ -1212,7 +1198,7 @@ function cleanloading() {
 		removeloading(k);
 	}
 }
-
+/*
 function showmessage(id, stringid, type) {
 	var o = $('#' + id);
 	o.removeClass('alert-error');
@@ -1254,7 +1240,7 @@ function showmessagebox(title, content, timeout) {
 		$('#messagedialogContent').html(content);
 	$('#messagedialog').modal('show');
 	t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout*1000);
-}
+}*/
 function loadfailed() {
 	if(loadDone)
 		return;
@@ -1305,39 +1291,7 @@ function checkusername() {
 	$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
 	return;
 }
-
-
-function getdirstring() {
-	if(dirMode == 'owned')
-		return '/' + currentDir.join('/');
-	else {
-		var name = currentDir.shift();
-		var r = '/' + currentDir.join('/');
-		if(currentDir.length == 0) {
-			r = '/' + name;
-		}
-		currentDir.unshift(name);
-		return r;
-	}
-}
-
-function getdirlink(before) {
-	var s = '';
-	if(!before) {
-		before = '';
-	}
-	for(var i=0, j=currentDir.length-1; i<currentDir.length; i++, j--) {
-		var t = currentDir[i];
-		var p = t.split('/');
-		if(p.length > 1)
-			t = p[1] + '@' + p[0];
-		if(i == 0 && dirMode == 'shared')
-			s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">shared@' + htmlescape(t) + '</a>';
-		else
-			s += ' / <a href="javascript:;" onclick="' + before + 'backto(' + j + ');">' + htmlescape(t) + '</a>';
-	}
-	return s;
-}
+ 
 
 var languagemap = { 
 	'c':		'clike',
@@ -1397,18 +1351,6 @@ var modemap = {
 	'xml':		'application/xml',
 	};
 
-function changelanguage(language) {
-	if(languagemap[language]) {
-		if(modemap[language])
-			editor.setOption('mode', modemap[language]);
-		else
-			editor.setOption('mode', languagemap[language]);
-		CodeMirror.autoLoadMode(editor, languagemap[language]);
-	} else {
-		editor.setOption('mode', 'text/plain');
-		CodeMirror.autoLoadMode(editor, '');
-	}
-}
 
 function isFullScreen(cm) {
 	return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className);
@@ -1440,85 +1382,18 @@ function setFullScreen(cm, full) {
 	cm.focus();
 }
 
-function allselffilter(o) {
-	return currentDir.length > 1 || o.owner.name == currentUser.name;
-}
-
-function allsharefilter(o) {
-	return currentDir.length > 1 || o.owner.name != currentUser.name;
-}
-
-function htmlescape(text) {
-	return text.
-		replace(/&/gm, '&amp;').
-		replace(/</gm, '&lt;').
-		replace(/>/gm, '&gt;').
-		replace(/ /gm, '&nbsp;').
-		replace(/\n/gm, '<br />');
-}
-
-function backtologin() {
-	$('#big-one .container').removeAttr('style');
-	$('#big-one').animate({height:'120px', padding:'60px', 'margin-bottom':'30px'}, 'fast', function() {
-		$('#big-one').removeAttr('style');
-		$('#big-one .container').css('margin','auto');
-		$('#login-inputName').focus();
-		resize();
-	});
-	$('#nav-head').fadeOut('fast');
-	$('#filecontrol').hide();
-	$('#editor').hide();
-	$('#login').fadeIn('fast');
-	//SilunWang fix a bug(footer disappear)
-	$('#footer').fadeIn('fast');
-	$('.modal').modal('hide');
-}
+	function htmlescape(text) {
+		return text.
+			replace(/&/gm, '&amp;').
+			replace(/</gm, '&lt;').
+			replace(/>/gm, '&gt;').
+			replace(/ /gm, '&nbsp;').
+			replace(/\n/gm, '<br />');
+	}
 
 ///////////////////// websocket & callback //////////////////////
 
 
-socket.on('unauthorized', function(){
-	backtologin();
-	showmessage('login-message', 'needrelogin', 'error');
-
-	if(!window.joinedARoom){
-		return;
-	}
-	window.joinedARoom = false;
-	window.voiceConnection.myLocalStream.stop();
-	window.voiceConnection.leave();
-	while(window.userArray.length > 0){
-		$(window.audioArray[window.userArray.shift()]).remove();
-	}
-	delete window.voiceConnection;
-});
-
-socket.on('version', function(data){
-	if(data.version != VERSION) {
-		location.reload('Refresh');
-	}
-	if(failed)
-		return;
-	if(!firstconnect) {
-		backtologin();
-	}
-	firstconnect = false;
-	$('#loading-init').remove();
-	cleanloading();
-	if($.cookie('sid')){
-		socket.emit('relogin', {sid:$.cookie('sid')});
-		loading('login-control');
-		loginLock = true;
-	} else {
-		$('#login-control').fadeIn('fast');
-	}
-	loadDone = true;
-});
-
-socket.on('connect', function(){
-	socket.emit('version', {
-	});
-});
 
 socket.on('register', function(data){
 	if(data.err){
@@ -1533,34 +1408,6 @@ socket.on('register', function(data){
 	registerLock = false;
 });
 
-function refreshlistdone(data){
-	filelist.removeloading();
-	if(data.err){
-		filelisterror();
-		showmessagebox('error', 'failed', 1);
-	} else {
-		$('#current-dir').html(getdirlink());
-		if(dirMode == 'owned')
-			filelist.setmode(filelist.getmode() | 2);
-		else
-			filelist.setmode(0);
-		if(currentDir.length == 1) {
-			if(dirMode == 'owned')
-				filelist.setmode(filelist.getmode() | 1);
-			filelist.formdocs(data.doc, docshowfilter);
-			memberlist.clear();
-			memberlist.add(currentUser);
-		} else {
-			filelist.setmode(filelist.getmode() & ~1);
-			filelist.formdocs(data.doc.docs, docshowfilter, data.doc.members.length > 0, data.doc);
-			memberlist.fromdoc(data.doc);
-			memberlistdoc.fromdoc(data.doc);
-		}
-		if(doccallback)
-			doccallback();
-	}
-	operationLock = false;
-}
 
 function sharedone(data){
 	if(!data.err){
@@ -1570,22 +1417,6 @@ function sharedone(data){
 	removeloading('share-buttons');
 	operationLock = false;
 }
-
-/*
-socket.on('new', function(data){
-	if(data.err){
-		showmessageindialog('newfile', data.err);
-	} else {
-		$('#newfile').modal('hide');
-		if(newfiletype == 'doc')
-			showmessagebox('newfile', 'createfilesuccess', 1);
-		else
-			showmessagebox('newfolder', 'createfoldersuccess', 1);
-	}
-	removeloading('newfile-buttons');
-	operationLock = false;
-	refreshfilelist(function() {;});
-});*/
 
 socket.on('password', function(data){
 	if(data.err){
@@ -1598,44 +1429,7 @@ socket.on('password', function(data){
 	operationLock = false;
 });
 
-/*
-socket.on('delete', function(data){
-	$('#delete').modal('hide');
-	if(data.err){
-		showmessagebox('delete', data.err, 1);
-		operationLock = false;
-	} else {
-		operationLock = false;
-		refreshfilelist(function() {;});
-	}
-	removeloading('delete-buttons');
-});*/
 
-socket.on('share', function(data){
-	if(data.err){
-		showmessage('share-message', data.err, 'error');
-		operationLock = false;
-		removeloading('share-buttons');
-	} else {
-		dochandler = sharedone;
-		socket.emit('doc', {
-			path: currentsharedoc.path
-		});
-	}
-});
-
-socket.on('unshare', function(data){
-	if(data.err){
-		showmessage('share-message', data.err, 'error');
-		operationLock = false;
-		removeloading('share-buttons');
-	} else {
-		dochandler = sharedone;
-		socket.emit('doc', {
-			path: currentsharedoc.path
-		});
-	}
-});
 
 socket.on('avatar', function(data){
 	if(data.err){
@@ -1729,32 +1523,6 @@ function register() {
 }
 
 
-//****************************new file canjs**********************//
-function newfile() {
-	var name = $('#newfile-inputName').val();
-	name = $.trim(name);
-	if(name == '') {
-		showmessageindialog('newfile', 'inputfilename');
-		return;
-	}
-	if(/\/|\\|@/.test(name)) {
-		showmessageindialog('newfile', 'filenameinvalid');
-		return;
-	}
-	if(name.length > 32) {
-		showmessageindialog('newfile', 'filenamelength');
-		return;
-	}
-	if(operationLock)
-		return;
-	operationLock = true;
-	loading('newfile-buttons');
-	socket.emit('new', {
-		type: newfiletype,
-		path: currentDirString + '/' + name
-	});
-}
-
 var editor;
 var chatstate = false;
 var oldwidth;
@@ -1782,59 +1550,11 @@ function togglechat(o) {
 	chatstate = !chatstate;
 }
 
-function refreshfilelist(error, callback) {
-	operationLock = true;
-	filelist.loading();
-	dochandler = refreshlistdone;
-	doccallback = callback;
-	socket.emit('doc', {
-		path: currentDirString
-	});
-	filelisterror = error;
-}
 
 var deleteconfirm = function(){;};
 
 var rename = function(){;};
 
-function share(){
-	var name = $('#share-inputName').val();
-	if(name == '') {
-		showmessage('share-message', 'inputusername', 'error');
-		return;
-	}
-	if(operationLock)
-		return;
-	operationLock = true;
-	loading('share-buttons');
-	socket.emit('share', {
-		path: currentsharedoc.path,
-		name: name
-	});
-}
-
-function unshare() {
-	var selected = userlist.getselection();
-	if(!selected) {
-		showmessage('share-message', 'selectuser', 'error');
-		return;
-	}
-	if(operationLock)
-		return;
-	operationLock = true;
-	loading('share-buttons');
-	socket.emit('unshare', {
-		path: currentsharedoc.path,
-		name: selected.name
-	});
-}
-
-function closeshare() {
-	if(operationLock)
-		return;
-	refreshfilelist(function(){;});
-	$('#share').modal('hide');
-}
 
 /*
 function initfilelistevent(fl) {
@@ -1889,23 +1609,6 @@ function initfilelistevent(fl) {
 	};
 }*/
 
-function backto(n) {
-	if(operationLock)
-		return;
-	operationLock = true;
-	var temp = [];
-	for(var i=0; i<n; i++) {
-		temp.push(currentDir.pop());
-	}
-	currentDirString = getdirstring();
-	refreshfilelist(function() {
-		for(var i=0; i<n; i++) {
-			currentDir.push(temp.pop());
-		}
-		currentDirString = getdirstring();
-	});
-}
-
 /////////////////////// initialize ///////////////////////////
 
 $(document).ready(function() {
@@ -1942,6 +1645,7 @@ $(document).ready(function() {
 
 	filelist = fileList('#file-list-table');
 	filelist.clear();
+
 	//initfilelistevent(filelist);
 	
 	userlist = userList('#share-user-list');
@@ -1952,7 +1656,7 @@ $(document).ready(function() {
 	
 	expressionlist = expressionList('#varlist-table');
 	
-	docshowfilter = allselffilter;
+	docshowfilter = {};
 
 	$('#newfile').on('shown', function() {
 		$('#newfile-inputName').focus();
@@ -1973,7 +1677,7 @@ $(document).ready(function() {
 	///*********************data init area**********************///
 	
 	//global data
-	var global_v = new GlobalVariables({
+	global_v = new GlobalVariables({
 		////////////////////////// vars ///////////////////////////////
 		g_currentUser:currentUser,
 		g_currentDir:currentDir,
@@ -2107,16 +1811,18 @@ $(document).ready(function() {
 		var margin_left = (width/2 - 108) + "px";
 		$("#foot-information").css("margin-left",margin_left);	
 	});
-
-	var file_list_control = new FileListController('#file-list-table',{m_global_v:global_v});
 	var footer_control = new FooterController('#footer',{m_global_v:global_v});
+	var file_list_control = new FileListController('#file-list-table',{m_global_v:global_v});
 	var new_file_control = new NewFileController('#newfile',{m_global_v:global_v});
 	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
 	var change_pass_control = new ChangePassControl('#changepassword',{m_global_v:global_v});
 	var change_avatar_control = new ChangeAvatarControl('#changeavatar',{m_global_v:global_v});
 	var nav_head_control = new NavHeadControl('#nav-head',{m_global_v:global_v});
 	var share_control = new ShareController('#share',{m_global_v:global_v});
+	var delete_controller = new DeleteControl('#delete',{m_global_v:global_v});
+	var rename_controller = new ReNameControl('#rename',{m_global_v:global_v});
 	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_global_v:global_v}); 
+	
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
 			return strings[old];
