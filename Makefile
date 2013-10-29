@@ -65,7 +65,7 @@ bin:
 	@cp `which perl` $(BIN_DIR)/perl
 	@cp `which ruby` $(BIN_DIR)/ruby
 	@cp `which lua` $(BIN_DIR)/lua
-	@cp -r `readlink -f \`which java\` | sed "s:bin/java:jre:"` $(BIN_DIR)/
+	#@cp -r `readlink -f \`which java\` | sed "s:bin/java:jre:"` $(BIN_DIR)/
 
 clean:
 	@rm -rf $(TMP_DIR)/*
