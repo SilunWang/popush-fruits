@@ -301,7 +301,6 @@ GlobalVariables = can.Model.extend({},{
 		else if(e.keyCode == 40)
 			$('#' + idDown).focus();
 	},
-
 	refreshfilelist:function(error, callback) {
 		this.operationLock = true;
 		this.filelist.loading();
@@ -382,7 +381,7 @@ var LoginControl = can.Control.extend({
 		var login_pass = self.m_login_information.login_password;
 		//名字输入为空
 		if (login_name == '') {
-			showmessage('login-message', 'pleaseinput', 'error');
+			m_global_v.showmessage('login-message', 'pleaseinput', 'error');
 			return;
 		}
 		//如果
@@ -404,7 +403,7 @@ var LoginControl = can.Control.extend({
 					//移除cookie
 					$.removeCookie('sid');
 				} else {
-					showmessage('login-message', data.err, 'error');
+					m_global_v.showmessage('login-message', data.err, 'error');
 				}
 			}
 			else{
@@ -676,16 +675,24 @@ var ReNameControl = can.Control.extend({
 /********************deletefile**********************/
 var DeleteControl = can.Control.extend({
 	m_global_v:'',
-	//m_object:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
-		//m_object = this.options.m_object;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
+		this.keydown;
 	},
 	'#delete-ok click':function(){
-		//if(m_global_v.operationLock)
-				//return;
+		this.deletefile();
+	},
+	keydown:function(){
+		self = this;
+		$(window).keydown(function(){
+		  m_global_v.pressenter(arguments[0],self.deletefile);
+		});
+	},
+	deletefile:function(){
+		if(m_global_v.operationLock)
+			return;
 		m_global_v.operationLock = true;
 		m_global_v.loading('delete-buttons');
 		m_global_v.socket.emit('delete', {
@@ -947,6 +954,7 @@ var ChangeAvatarControl = can.Control.extend({
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/changeavatar.ejs", {}));
+		this.socket_io();
 	},
 	'#changeavatar-input change': function() {
 		this.changeavatar($('#changeavatar-input')[0]);
@@ -979,6 +987,22 @@ var ChangeAvatarControl = can.Control.extend({
 			}
 		}
 		reader.readAsDataURL(file);
+	},
+	socket_io:function(){	
+		m_global_v.socket.on('avatar', function(data){
+			if(data.err){
+				m_global_v.showmessage('changeavatar-message', data.err, 'error');
+			} else {
+				m_global_v.currentUser.avatar = data.url;
+				$('#nav-avatar').attr('src', m_global_v.currentUser.avatar);
+				$('#changeavatar-img').attr('src', m_global_v.currentUser.avatar);
+				$('img.user-' + m_global_v.currentUser.name).attr('src', m_global_v.currentUser.avatar);
+				m_global_v.memberlist.refreshpopover(m_global_v.currentUser);
+				m_global_v.memberlistdoc.refreshpopover(m_global_v.currentUser);
+				m_global_v.showmessage('changeavatar-message', 'changeavatarok');
+			}
+			m_global_v.operationLock = false;
+		});
 	}
 });
 /****************************************************/
@@ -1409,14 +1433,6 @@ socket.on('register', function(data){
 });
 
 
-function sharedone(data){
-	if(!data.err){
-		userlist.fromusers(data.doc.members);
-	}
-	$('#share-message').hide();
-	removeloading('share-buttons');
-	operationLock = false;
-}
 
 socket.on('password', function(data){
 	if(data.err){
@@ -1431,20 +1447,6 @@ socket.on('password', function(data){
 
 
 
-socket.on('avatar', function(data){
-	if(data.err){
-		showmessage('changeavatar-message', data.err, 'error');
-	} else {
-		currentUser.avatar = data.url;
-		$('#nav-avatar').attr('src', currentUser.avatar);
-		$('#changeavatar-img').attr('src', currentUser.avatar);
-		$('img.user-' + currentUser.name).attr('src', currentUser.avatar);
-		memberlist.refreshpopover(currentUser);
-		memberlistdoc.refreshpopover(currentUser);
-		showmessage('changeavatar-message', 'changeavatarok');
-	}
-	operationLock = false;
-});
 
 ////////////////////// click event //////////////////////////////
 
@@ -1551,68 +1553,12 @@ function togglechat(o) {
 }
 
 
-var deleteconfirm = function(){;};
 
-var rename = function(){;};
-
-
-/*
-function initfilelistevent(fl) {
-
-	fl.onname = function(o) {
-		if(operationLock)
-			return;
-		if(o.type == 'dir') {
-			currentDir.push(o.name);
-			currentDirString = getdirstring();
-			refreshfilelist(function() {
-				currentDir.pop();
-				currentDirString = getdirstring();
-			});
-		} else if(o.type == 'doc') {
-			openeditor(o);
-		}
-	};
-	
-	fl.ondelete = function(o) {
-		if(o.type == 'dir')
-			$('#delete').find('.folder').text(strings['folder']);
-		else
-			$('#delete').find('.folder').text(strings['file']);
-		$('#delete-name').text(o.name);
-		$('#delete').modal('show');
-		deleteconfirm = function() {
-			if(operationLock)
-				return;
-			operationLock = true;
-			loading('delete-buttons');
-			socket.emit('delete', {
-				path: o.path
-			});
-		};
-	};
-	
-	fl.onrename = function(o) {
-		$('#rename-inputName').val(o.name);
-		$('#rename .control-group').removeClass('error');
-		$('#rename .help-inline').text('');
-		$('#rename').modal('show');
-	};
-	
-	fl.onshare = function(o) {
-		$('#share-name').text(o.name);
-		$('#share-inputName').val('');
-		$('#share-message').hide();
-		userlist.fromusers(o.members);
-		$('#share').modal('show');
-		currentsharedoc = o;
-	};
-}*/
 
 /////////////////////// initialize ///////////////////////////
 
 $(document).ready(function() {
-    setTimeout('loadfailed()', 10000);
+    setTimeout('m_global_v.loadfailed()', 10000);
 
     CodeMirror.on(window, "resize", function() {
 		var showing = document.getElementsByClassName("CodeMirror-fullscreen")[0];
@@ -1724,7 +1670,7 @@ $(document).ready(function() {
 		g_strings:strings,
 		g_strings_en:strings_en,
 		g_strings_cn:strings_cn,
-		///////////////////////theme related//////////////////////
+		///////////////////////theme related//////// //////////////
 		g_myTheme:myTheme
 	});
 	//login
