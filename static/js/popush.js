@@ -350,19 +350,22 @@ GlobalVariables = can.Model.extend({},{
 
 
 /*********************Login part*********************/
-LoginInformation = can.Model.extend({}, {});
+
+
+var LoginInformation = can.Model.extend({});
 
 var LoginControl = can.Control.extend({
 	m_global_v:'',
 	m_login_information: '',
 	self: this,
 	init: function(element, options) {
-		self.m_login_information = this.options.m_login_information;
 		self.m_global_v = this.options.m_global_v;
+		self.m_login_information = this.options.m_login_information;
 		this.element.append(can.view("../ejs/login.ejs", {
 			control_login_information: self.m_login_information
 		}));
 		this.socket_io();
+		this.resize();
 	},
 
 	//reaction area
@@ -371,6 +374,10 @@ var LoginControl = can.Control.extend({
 		self.m_login_information.attr('login_password', $('#login-inputPassword').val());
 		//self.m_login_information.save();
 		this.login();
+	},
+
+	'#login-to-register click':function(){
+		this.registerview();
 	},
 
 	//business
@@ -395,6 +402,36 @@ var LoginControl = can.Control.extend({
 			password: login_pass
 		});
 	},
+
+	
+	registerview:function() {
+		if(m_global_v.viewswitchLock)
+			return;
+		m_global_v.viewswitchLock = true;
+		$('#login .blink').fadeOut('fast');
+		$('#login-message').slideUp();
+		$('#login-padding').slideDown('fast', function(){
+			$('#register').show();
+			$('#register .blink').fadeIn('fast');
+			$('#login').hide();
+			$('#register-inputName').val('');
+			$('#register-inputPassword').val('');
+			$('#register-confirmPassword').val('');
+			$('#register-message').hide();
+			$('#register-padding').fadeIn('fast', function(){
+				$('#register-inputName').focus();
+				m_global_v.viewswitchLock = false;
+			});
+			var w = $('#register-box').parent('*').width();
+			$('#register-box').css('left', ((w-420)/2-30) + 'px');
+		});
+	},
+
+	resize:function(){
+		var w = $('#login-box').parent('*').width();
+		$('#login-box').css('left', ((w-420)/2-30) + 'px');	
+	},
+
 	socket_io:function(){
 		m_global_v.socket.on('login', function(data){
 			if(data.err){
@@ -492,6 +529,148 @@ var LoginControl = can.Control.extend({
 });
 /****************************************************/
 
+/************************Resgister part***********************/
+
+var RegisterController = can.Control.extend({
+	m_global_v:'',
+	m_register_information: '',
+	self: this,
+	init: function(element, options) {
+		self.m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/register.ejs", {
+		}));
+		this.socket_io();
+		this.keyup();
+	},
+	
+	'#register-submit click':function(){
+		this.register();
+	},
+
+	'#register-to-login click':function(){
+		this.loginview();
+	},
+
+	keyup:function(){
+		self = this;
+		$('#register-inputName').keyup(function(){
+			self.checkusername();	
+		});
+	},
+
+
+	register:function() {
+		var registername = $('#register-inputName').val();
+		var pass = $('#register-inputPassword').val();
+		var confirm = $('#register-confirmPassword').val();
+		if(!/^[A-Za-z0-9]*$/.test(registername)) {
+			m_global_v.showmessage('register-message', 'name invalid');
+			return;
+		}
+		if(registername.length < 6 || registername.length > 20) {
+			m_global_v.showmessage('register-message', 'namelength');
+			return;
+		}
+		if(pass.length > 32){
+			m_global_v.showmessage('register-message', 'passlength');
+			return;
+		}
+		if(pass != confirm) {
+			m_global_v.showmessage('register-message', 'doesntmatch');
+			return;
+		}
+		if(m_global_v.registerLock)
+			return;
+		m_global_v.registerLock = true;
+		m_global_v.loading('register-control');
+		m_global_v.socket.emit('register', {
+			name:registername,
+			password:pass,
+			avatar:'images/character.png'
+		});
+	},
+
+	loginview:function() {
+		if(m_global_v.viewswitchLock)
+			return;
+		m_global_v.viewswitchLock = true;
+		$('#register .blink').fadeOut('fast');
+		$('#register-message').slideUp();
+		$('#register-padding').fadeOut('fast', function(){
+			$('#login').show();
+			$('#login .blink').fadeIn('fast');
+			$('#register').hide();
+			$('#login-inputName').val('');
+			$('#login-inputPassword').val('');
+			$('#login-message').hide();
+			$('#login-padding').slideUp('fast', function(){
+				$('#login-inputName').focus();
+				m_global_v.viewswitchLock = false;
+			});
+			var w = $('#login-box').parent('*').width();
+			$('#login-box').css('left', ((w-420)/2-30) + 'px');
+		});
+	},
+
+	checkusername:function() {
+		var name = $('#register-inputName').val();
+		if(name.length == "") {
+			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+			return;
+		}
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			$("#msg-username").html(strings['name invalid']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		if(name.length < 6) {
+			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+			return;
+		}
+		if(name.length > 20) {
+			$("#msg-username").html(strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		$("#msg-username").html("");
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
+		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
+		return;
+	},
+
+	socket_io:function(){	
+		m_global_v.socket.on('register', function(data){
+			if(data.err){
+				m_global_v.showmessage('register-message', data.err, 'error');
+			}else{
+				m_global_v.showmessage('register-message', 'registerok');
+				$('#register-inputName').val('');
+				$('#register-inputPassword').val('');
+				$('#register-confirmPassword').val('');
+			}
+			m_global_v.removeloading('register-control');
+			m_global_v.registerLock = false;
+		});
+
+		m_global_v.socket.on('password', function(data){
+			if(data.err){
+				m_global_v.showmessageindialog('changepassword', data.err, 0);
+			} else {
+				$('#changepassword').modal('hide');
+				m_global_v.showmessagebox('changepassword', 'changepassworddone', 1);
+			}
+			m_global_v.removeloading('changepassword-buttons');
+			m_global_v.operationLock = false;
+		});
+	}
+
+});
 
 /*******************fileTabs*************************/
 var FileTabsContorl = can.Control.extend({
@@ -1181,25 +1360,7 @@ var FooterController = can.Control.extend({
 
 
 
-/***********************test*************************/
-Lala = can.Construct.extend({
-},
-{
-	init:function(haha){
-		this.Glele = haha.lela;
-	},
-	print:function(){
-		this.Glele = "a";
-		console.log(this.Glele);	
-	}	
-});
-var lela = "bbbbbb";
-var lala = new Lala({lela:lela});
-lala.print();
-lala.lela = "a";
-console.log(lela);
-/****************************************************/
-
+/**
 function loading(id) {
 	if(loadings[id])
 		return;
@@ -1221,7 +1382,7 @@ function cleanloading() {
 	for(var k in loadings) {
 		removeloading(k);
 	}
-}
+}*/
 /*
 function showmessage(id, stringid, type) {
 	var o = $('#' + id);
@@ -1265,56 +1426,7 @@ function showmessagebox(title, content, timeout) {
 	$('#messagedialog').modal('show');
 	t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout*1000);
 }*/
-function loadfailed() {
-	if(loadDone)
-		return;
-	failed = true;
-	$('#loading-init').remove();
-	showmessage('login-message', 'loadfailed');
-}
 
-
-function pressenter(e, func, idUp, idDown) {
-	e = e || event;	
-	if(e.keyCode == 13 && loadDone)
-		func();
-	else if(e.keyCode == 38)
-		$('#' + idUp).focus();
-	else if(e.keyCode == 40)
-		$('#' + idDown).focus();
-}
-
-function checkusername() {
-	var name = $('#register-inputName').val();
-	if(name.length == "") {
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
-		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
-		return;
-	}
-	if(!/^[A-Za-z0-9]*$/.test(name)) {
-		$("#msg-username").html(strings['name invalid']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-		return;
-	}
-	if(name.length < 6) {
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
-		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
-		return;
-	}
-	if(name.length > 20) {
-		$("#msg-username").html(strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-		return;
-	}
-	$("#msg-username").html("");
-	$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
-	$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
-	return;
-}
  
 
 var languagemap = { 
@@ -1419,110 +1531,13 @@ function setFullScreen(cm, full) {
 
 
 
-socket.on('register', function(data){
-	if(data.err){
-		showmessage('register-message', data.err, 'error');
-	}else{
-		showmessage('register-message', 'registerok');
-		$('#register-inputName').val('');
-		$('#register-inputPassword').val('');
-		$('#register-confirmPassword').val('');
-	}
-	removeloading('register-control');
-	registerLock = false;
-});
 
-
-
-socket.on('password', function(data){
-	if(data.err){
-		showmessageindialog('changepassword', data.err, 0);
-	} else {
-		$('#changepassword').modal('hide');
-		showmessagebox('changepassword', 'changepassworddone', 1);
-	}
-	removeloading('changepassword-buttons');
-	operationLock = false;
-});
 
 
 
 
 ////////////////////// click event //////////////////////////////
 
-function loginview() {
-	if(viewswitchLock)
-		return;
-	viewswitchLock = true;
-	$('#register .blink').fadeOut('fast');
-	$('#register-message').slideUp();
-	$('#register-padding').fadeOut('fast', function(){
-		$('#login').show();
-		$('#login .blink').fadeIn('fast');
-		$('#register').hide();
-		$('#login-inputName').val('');
-		$('#login-inputPassword').val('');
-		$('#login-message').hide();
-		$('#login-padding').slideUp('fast', function(){
-			$('#login-inputName').focus();
-			viewswitchLock = false;
-		});
-		resize();
-	});
-}
-
-function registerview() {
-	if(viewswitchLock)
-		return;
-	viewswitchLock = true;
-	$('#login .blink').fadeOut('fast');
-	$('#login-message').slideUp();
-	$('#login-padding').slideDown('fast', function(){
-		$('#register').show();
-		$('#register .blink').fadeIn('fast');
-		$('#login').hide();
-		$('#register-inputName').val('');
-		$('#register-inputPassword').val('');
-		$('#register-confirmPassword').val('');
-		$('#register-message').hide();
-		$('#register-padding').fadeIn('fast', function(){
-			$('#register-inputName').focus();
-			viewswitchLock = false;
-		});
-		resize();
-	});
-}
-
-function register() {
-	var name = $('#register-inputName').val();
-	var pass = $('#register-inputPassword').val();
-	var confirm = $('#register-confirmPassword').val();
-	if(!/^[A-Za-z0-9]*$/.test(name)) {
-		showmessage('register-message', 'name invalid');
-		return;
-	}
-	if(name.length < 6 || name.length > 20) {
-		showmessage('register-message', 'namelength');
-		return;
-	}
-	if(pass.length > 32){
-		showmessage('register-message', 'passlength');
-		return;
-	}
-	if(pass != confirm) {
-		showmessage('register-message', 'doesntmatch');
-		return;
-	}
-	if(registerLock)
-		return;
-	registerLock = true;
-	loading('register-control');
-	socket.emit('register', {
-		name:name,
-		password:pass,
-		avatar:'images/character.png'
-	});
-}
 
 
 var editor;
@@ -1767,7 +1782,8 @@ $(document).ready(function() {
 	var share_control = new ShareController('#share',{m_global_v:global_v});
 	var delete_controller = new DeleteControl('#delete',{m_global_v:global_v});
 	var rename_controller = new ReNameControl('#rename',{m_global_v:global_v});
-	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_global_v:global_v}); 
+	var register_control = new RegisterController('#register',{m_global_v:global_v}); 
+	var login_control = new LoginControl('#login-box',{m_global_v:global_v,m_login_information:login_information}); 
 	
 	$('[localization]').html(function(index, old) {
 		if(strings[old])
