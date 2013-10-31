@@ -506,8 +506,11 @@ var RegisterController = can.Control.extend({
 		}));
 		this.socket_io();
 		this.keyup();
+		this.focus();
 	},
 	
+
+	//events
 	'#register-submit click':function(){
 		this.register();
 	},
@@ -523,7 +526,48 @@ var RegisterController = can.Control.extend({
 		});
 	},
 
+	focus:function(){
+		$('#register-inputName').focus(function(){
+			$("#msg-username").html(m_global_v.strings['name invalid'] + "," + m_global_v.strings['namelength']);
+		});
 
+		$('#register-inputPassword').focus(function(){
+			var name = $('#register-inputName').val();
+			if(!/^[A-Za-z0-9]*$/.test(name)) {
+				$("#msg-username").html(m_global_v.strings['name invalid']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			if(name == "" || name.length < 6 || name.length > 20) {
+				$("#msg-username").html(m_global_v.strings['namelength']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			return;
+		});
+
+		$("#register-confirmPassword").focus(function(){
+			var name = $('#register-inputName').val();
+			if(!/^[A-Za-z0-9]*$/.test(name)) {
+				$("#msg-username").html(m_global_v.strings['name invalid']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			if(name.length < 6 || name.length > 20) {
+				$("#msg-username").html(m_global_v.strings['namelength']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			return;
+		});
+	},
+
+
+	///logics 
 	register:function() {
 		var registername = $('#register-inputName').val();
 		var pass = $('#register-inputPassword').val();
@@ -580,25 +624,25 @@ var RegisterController = can.Control.extend({
 	checkusername:function() {
 		var name = $('#register-inputName').val();
 		if(name.length == "") {
-			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+			$("#msg-username").html(m_global_v.strings['name invalid'] + "," + m_global_v.strings['namelength']);
 			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
 			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
 			return;
 		}
 		if(!/^[A-Za-z0-9]*$/.test(name)) {
-			$("#msg-username").html(strings['name invalid']);
+			$("#msg-username").html(m_global_v.strings['name invalid']);
 			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
 			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
 			return;
 		}
 		if(name.length < 6) {
-			$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
+			$("#msg-username").html(m_global_v.strings['name invalid'] + "," + m_global_v.strings['namelength']);
 			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
 			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
 			return;
 		}
 		if(name.length > 20) {
-			$("#msg-username").html(strings['namelength']);
+			$("#msg-username").html(m_global_v.strings['namelength']);
 			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
 			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
 			return;
@@ -664,9 +708,9 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'owned';
-		m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		$('#current-dir').html(m_global_v.getdirlink());
 		m_global_v.refreshfilelist(function(){;});
 
@@ -681,9 +725,9 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'shared';
-		m_global_v.docshowfilter = {flag:0,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {flag:0,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		$('#current-dir').html(m_global_v.getdirlink());
 		m_global_v.refreshfilelist(function(){;});
 		
@@ -692,7 +736,6 @@ var FileTabsContorl = can.Control.extend({
 		$('#sharedfile').addClass('active');
 	}
 });
-
 /****************************************************/
 
 
@@ -860,6 +903,7 @@ var DeleteControl = can.Control.extend({
 	}
 });
 /****************************************************/
+
 
 /*********************Share Files********************/
 var ShareController = can.Control.extend({
@@ -1325,75 +1369,6 @@ var FooterController = can.Control.extend({
 /****************************************************/
 
 
-
-
-/**
-function loading(id) {
-	if(loadings[id])
-		return;
-	var o = $('#' + id);
-	o.after('<p id="' + id + '-loading" align="center" style="margin:1px 0 2px 0"><img src="images/loading.gif"/></p>');
-	o.hide();
-	loadings[id] = {self: o, loading: $('#' + id + '-loading')};
-}
-
-function removeloading(id) {
-	if(!loadings[id])
-		return;
-	loadings[id].self.show();
-	loadings[id].loading.remove();
-	delete loadings[id];
-}
-
-function cleanloading() {
-	for(var k in loadings) {
-		removeloading(k);
-	}
-}*/
-/*
-function showmessage(id, stringid, type) {
-	var o = $('#' + id);
-	o.removeClass('alert-error');
-	o.removeClass('alert-success');
-	o.removeClass('alert-info');
-	if(type && type != '' && type != 'warning')
-		o.addClass('alert-' + type);
-	if(strings[stringid])
-		$('#' + id + ' span').html(strings[stringid]);
-	else
-		$('#' + id + ' span').html(stringid);
-	o.slideDown();
-}
-
-function showmessageindialog(id, stringid, index) {
-	if(index === undefined) {
-		$('#' + id + ' .control-group').addClass('error');
-		if(strings[stringid])
-			$('#' + id + ' .help-inline').text(strings[stringid]);
-		else
-			$('#' + id + ' .help-inline').text(stringid);
-	} else {
-		$('#' + id + ' .control-group:eq('+index+')').addClass('error');
-		if(strings[stringid])
-			$('#' + id + ' .help-inline:eq('+index+')').text(strings[stringid]);
-		else
-			$('#' + id + ' .help-inline:eq('+index+')').text(stringid);
-	}
-}
-
-function showmessagebox(title, content, timeout) {
-	if(strings[title])
-		$('#messagedialogLabel').html(strings[title]);
-	else
-		$('#messagedialogLabel').html(title);
-	if(strings[content])
-		$('#messagedialogContent').html(strings[content]);
-	else
-		$('#messagedialogContent').html(content);
-	$('#messagedialog').modal('show');
-	t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout*1000);
-}*/
-
  
 
 var languagemap = { 
@@ -1455,12 +1430,41 @@ var modemap = {
 	};
 
 
-function isFullScreen(cm) {
-	return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className);
+
+function htmlescape(text) {
+	return text.
+		replace(/&/gm, '&amp;').
+		replace(/</gm, '&lt;').
+		replace(/>/gm, '&gt;').
+		replace(/ /gm, '&nbsp;').
+		replace(/\n/gm, '<br />');
 }
+
+
+
+
+
+
+
+
+
+////////////////////// click event //////////////////////////////
+
+
+
+
+/*************************************Editor Initialization Related***************************/
+
+var editor;
+//var chatstate = false;
+//var oldwidth;
 
 function winHeight() {
 	return window.innerHeight || (document.documentElement || document.body).clientHeight;
+}
+
+function isFullScreen(cm) {
+	return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className);
 }
 
 function setFullScreen(cm, full) {
@@ -1485,77 +1489,7 @@ function setFullScreen(cm, full) {
 	cm.focus();
 }
 
-	function htmlescape(text) {
-		return text.
-			replace(/&/gm, '&amp;').
-			replace(/</gm, '&lt;').
-			replace(/>/gm, '&gt;').
-			replace(/ /gm, '&nbsp;').
-			replace(/\n/gm, '<br />');
-	}
-
-///////////////////// websocket & callback //////////////////////
-
-
-
-
-
-
-
-
-////////////////////// click event //////////////////////////////
-
-
-
-var editor;
-var chatstate = false;
-var oldwidth;
-
-function togglechat(o) {
-	if(viewswitchLock)
-		return;
-	if(chatstate) {
-		$('#editormain').parent().removeClass('span12');
-		$('#editormain').parent().addClass('span9');
-		$('#chatbox').show();
-		$(o).html('<i class="icon-forward"></i>');
-		$(o).attr('title', strings['hide-title']);
-	} else {
-		$('#chatbox').hide();
-		$('#editormain').parent().removeClass('span9');
-		$('#editormain').parent().addClass('span12');
-		$(o).html('<i class="icon-backward"></i>');
-		$(o).attr('title', strings['show-title']);
-	}
-	var o = $('#chat-show').get(0);
-	o.scrollTop = o.scrollHeight;
-	editor.refresh();
-	resize();
-	chatstate = !chatstate;
-}
-
-
-
-
-/////////////////////// initialize ///////////////////////////
-
-$(document).ready(function() {
-    	//global data
-	global_v = new GlobalVariables({
-		////////////////////////// vars ///////////////////////////////
-		////////////////////////Socket//////////////////////
-		g_socket:socket,
-
-		///////////////////////language related///////////////////
-		g_strings:strings,
-		g_strings_en:strings_en,
-		g_strings_cn:strings_cn,
-		///////////////////////theme related//////// //////////////
-		g_myTheme:myTheme
-	});
-
-    setTimeout('global_v.loadfailed()', 10000);
-
+function InitEditor(){	
     CodeMirror.on(window, "resize", function() {
 		var showing = document.getElementsByClassName("CodeMirror-fullscreen")[0];
 		if (!showing) return;
@@ -1582,7 +1516,58 @@ $(document).ready(function() {
 	});
 	
 	gutterclick = function(cm, n) {};
-	
+}
+/*************************************Editor Initialization Related***************************/
+
+/*
+
+function togglechat(o) {
+	if(viewswitchLock)
+		return;
+	if(chatstate) {
+		$('#editormain').parent().removeClass('span12');
+		$('#editormain').parent().addClass('span9');
+		$('#chatbox').show();
+		$(o).html('<i class="icon-forward"></i>');
+		$(o).attr('title', strings['hide-title']);
+	} else {
+		$('#chatbox').hide();
+		$('#editormain').parent().removeClass('span9');
+		$('#editormain').parent().addClass('span12');
+		$(o).html('<i class="icon-backward"></i>');
+		$(o).attr('title', strings['show-title']);
+	}
+	var o = $('#chat-show').get(0);
+	o.scrollTop = o.scrollHeight;
+	editor.refresh();
+	resize();
+	chatstate = !chatstate;
+}*/
+
+
+
+
+/////////////////////// initialize ///////////////////////////
+
+$(document).ready(function() {
+    	//global data
+	global_v = new GlobalVariables({
+		////////////////////////// vars ///////////////////////////////
+		////////////////////////Socket//////////////////////
+		g_socket:socket,
+
+		///////////////////////language related///////////////////
+		g_strings:strings,
+		g_strings_en:strings_en,
+		g_strings_cn:strings_cn,
+		///////////////////////theme related//////// //////////////
+		g_myTheme:myTheme
+	});
+
+    	setTimeout('global_v.loadfailed()', 10000);
+
+
+	InitEditor();
 	registereditorevent();
 
 	//filelist init
@@ -1643,44 +1628,6 @@ $(document).ready(function() {
 	
 	$('body').show();
 	$('#login-inputName').focus();
-
-	$('#register-inputName').focus(function(){
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-	});
-
-	$('#register-inputPassword').focus(function(){
-		var name = $('#register-inputName').val();
-		if(!/^[A-Za-z0-9]*$/.test(name)) {
-			$("#msg-username").html(strings['name invalid']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		if(name == "" || name.length < 6 || name.length > 20) {
-			$("#msg-username").html(strings['namelength']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		return;
-	});
-
-	$("#register-confirmPassword").focus(function(){
-		var name = $('#register-inputName').val();
-		if(!/^[A-Za-z0-9]*$/.test(name)) {
-			$("#msg-username").html(strings['name invalid']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		if(name.length < 6 || name.length > 20) {
-			$("#msg-username").html(strings['namelength']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		return;
-	});
 	
 	if((!Browser.chrome || parseInt(Browser.chrome) < 18) &&
 		(!Browser.opera || parseInt(Browser.opera) < 12)) {
