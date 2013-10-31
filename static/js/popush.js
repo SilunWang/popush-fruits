@@ -3,43 +3,8 @@
 var global_v;
 
 
-var currentUser;
-var currentDir;
-var currentDirString;
-var dirMode = 'owned';
-
-var newfiletype = 'doc';
-var filelisterror = function(){;};
-var docshowfilter = function(o){ return true; };
-var filelist;
-
-var userlist;
-var currentsharedoc;
-
-var memberlist;
-var memberlistdoc;
-
-var expressionlist;
-
-var movehandler;
-
-var dochandler;
-var doccallback;
-
-var loadDone = false;
-var failed = false;
-
-var loadings = {};
-
 var gutterclick;
 
-var firstconnect = true;
-
-/////////////////////// locks //////////////////////////////////
-var loginLock = false;
-var registerLock = false;
-var viewswitchLock = false;
-var operationLock = false;
 
 /////////////////////// Check Browser //////////////////////////
 
@@ -91,43 +56,43 @@ GlobalVariables = can.Model.extend({},{
 	self:this,
 	init:function(global_data){
 		////////////////////////// vars ///////////////////////////////
-		this.currentUser = global_data.g_currentUser;
-		this.currentDir = global_data.g_currentDir;
-		this.currentDirString = global_data.g_currentDirString;
+		this.currentUser = [];
+		this.currentDir = [];
+		this.currentDirString = '';
 		this.dirMode = global_data.g_dirMode;
 
-		this.newfiletype = global_data.g_newfiletype;
-		this.filelisterror = global_data.g_filelisterror;
-		this.docshowfilter = global_data.g_docshowfilter;
+		this.newfiletype = 'doc';
+		this.filelisterror = function(){;};
+		this.docshowfilter = function(o){ return true; };
 		this.filelist = global_data.g_filelist;
 
-		this.userlist = global_data.g_userlist;
-		this.currentsharedoc = global_data.g_currentsharedoc;
+		this.userlist = '';
+		this.currentsharedoc = '';
 
-		this.memberlist = global_data.g_memberlist;
-		this.memberlistdoc = global_data.g_memberlistdoc;
+		this.memberlist = '';
+		this.memberlistdoc = '';
 
-		this.expressionlist = global_data.g_expressionlist;
+		this.expressionlist = '';
 
-		this.movehandler = global_data.g_movehandler;
+		this.movehandler = '';
 
-		this.dochandler = global_data.g_dochandler;
-		this.doccallback = global_data.g_doccallback;
+		this.dochandler = '';
+		this.doccallback = '';
 
-		this.loadDone = global_data.g_loadDone;
-		this.failed = global_data.g_failed;
+		this.loadDone = false;
+		this.failed = false;
 
-		this.loadings = global_data.g_loadings;
+		this.loadings = {};
 
-		this.gutterclick = global_data.g_gutterclick;
+		this.gutterclick = function(cm, n) {};
 
-		this.firstconnect = global_data.g_firstconnect;
+		this.firstconnect = true;
 
 		/////////////////////// locks //////////////////////////////////
-		this.loginLock = global_data.g_loginLock;
-		this.registerLock = global_data.g_registerLock;
-		this.viewswitchLock = global_data.g_viewswitchLock;
-		this.operationLock = global_data.g_operationLock;
+		this.loginLock = false;
+		this.registerLock = false
+		this.viewswitchLock = false
+		this.operationLock = false;
 
 		////////////////////////Socket//////////////////////
 		this.socket = global_data.g_socket;
@@ -239,7 +204,7 @@ GlobalVariables = can.Model.extend({},{
 		delete this.loadings[id];
 	},
 	cleanloading:function() {
-		for(var k in loadings) {
+		for(var k in this.loadings) {
 			this.removeloading(k);
 		}
 	},
@@ -503,7 +468,7 @@ var LoginControl = can.Control.extend({
 			if(data.version != VERSION) {
 				location.reload('Refresh');
 			}
-			if(failed)
+			if(m_global_v.failed)
 				return;
 			if(!m_global_v.firstconnect) {
 				m_global_v.backtologin();
@@ -784,7 +749,7 @@ var NewFileController = can.Control.extend({
 				m_global_v.showmessageindialog('newfile', data.err);
 			} else {
 				$('#newfile').modal('hide');
-				if(newfiletype == 'doc')
+				if(m_global_v.newfiletype == 'doc')
 					m_global_v.showmessagebox('newfile', 'createfilesuccess', 1);
 				else
 					m_global_v.showmessagebox('newfolder', 'createfoldersuccess', 1);
@@ -858,8 +823,10 @@ var DeleteControl = can.Control.extend({
 		m_global_v = this.options.m_global_v;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
-		this.keydown;
+		this.keydown();
 	},
+
+	
 	'#delete-ok click':function(){
 		this.deletefile();
 	},
@@ -1573,7 +1540,21 @@ function togglechat(o) {
 /////////////////////// initialize ///////////////////////////
 
 $(document).ready(function() {
-    setTimeout('m_global_v.loadfailed()', 10000);
+    	//global data
+	global_v = new GlobalVariables({
+		////////////////////////// vars ///////////////////////////////
+		////////////////////////Socket//////////////////////
+		g_socket:socket,
+
+		///////////////////////language related///////////////////
+		g_strings:strings,
+		g_strings_en:strings_en,
+		g_strings_cn:strings_cn,
+		///////////////////////theme related//////// //////////////
+		g_myTheme:myTheme
+	});
+
+    setTimeout('global_v.loadfailed()', 10000);
 
     CodeMirror.on(window, "resize", function() {
 		var showing = document.getElementsByClassName("CodeMirror-fullscreen")[0];
@@ -1604,20 +1585,23 @@ $(document).ready(function() {
 	
 	registereditorevent();
 
-	filelist = fileList('#file-list-table');
-	filelist.clear();
+	//filelist init
+	global_v.filelist = fileList('#file-list-table');
+	global_v.filelist.clear();
 
-	//initfilelistevent(filelist);
+	//userlist init
+	global_v.userlist = userList('#share-user-list');
+	global_v.userlist.clear();
+
+	//memberlist init	
+	global_v.memberlist = userListAvatar('#member-list');
+	global_v.memberlistdoc = userListAvatar('#member-list-doc');
 	
-	userlist = userList('#share-user-list');
-	userlist.clear();
+	//expressionlist init
+	global_v.expressionlist = expressionList('#varlist-table');
+	expressionlist = global_v.expressionlist;
 	
-	memberlist = userListAvatar('#member-list');
-	memberlistdoc = userListAvatar('#member-list-doc');
-	
-	expressionlist = expressionList('#varlist-table');
-	
-	docshowfilter = {};
+	global_v.docshowfilter = {};
 
 	$('#newfile').on('shown', function() {
 		$('#newfile-inputName').focus();
@@ -1637,57 +1621,7 @@ $(document).ready(function() {
 
 	///*********************data init area**********************///
 	
-	//global data
-	global_v = new GlobalVariables({
-		////////////////////////// vars ///////////////////////////////
-		g_currentUser:currentUser,
-		g_currentDir:currentDir,
-		g_currentDirString:currentDirString,
-		g_dirMode:dirMode,
 
-		g_newfiletype:newfiletype,
-		g_filelisterror:filelisterror,
-		g_docshowfilter:docshowfilter,
-		g_filelist:filelist,
-
-		g_userlist:userlist,
-		g_currentsharedoc:currentsharedoc,
-
-		g_memberlist:memberlist,
-		g_memberlistdoc:memberlistdoc,
-
-		g_expressionlist:expressionlist,
-
-		g_movehandler:movehandler,
-
-		g_dochandler:dochandler,
-		g_doccallback:doccallback,
-
-		g_loadDone:loadDone,
-		g_failed:failed,
-
-		g_loadings:loadings,
-
-		g_gutterclick:gutterclick,
-
-		g_firstconnect:firstconnect,
-
-		/////////////////////// locks //////////////////////////////////
-		g_loginLock:loginLock,
-		g_registerLock:registerLock,
-		g_viewswitchLock:viewswitchLock,
-		g_operationLock:operationLock,
-
-		////////////////////////Socket//////////////////////
-		g_socket:socket,
-
-		///////////////////////language related///////////////////
-		g_strings:strings,
-		g_strings_en:strings_en,
-		g_strings_cn:strings_cn,
-		///////////////////////theme related//////// //////////////
-		g_myTheme:myTheme
-	});
 	//login
 	var login_information = new LoginInformation({
 		login_name: '',
