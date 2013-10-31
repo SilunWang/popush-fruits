@@ -1,0 +1,33 @@
+<div class="modal-header">
+	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+	<h3 id="changepasswordLabel" localization>changepassword</h3>
+</div>
+<div class="modal-body form-horizontal">
+	<div class="control-group">
+		<label class="control-label" for="changepassword-old" localization>oldpassword</label>
+		<div class="controls">
+			<input type="password" id="changepassword-old" onkeydown="pressenter(arguments[0],changepassword, '', 'changepassword-new')" />
+			<span class="help-inline"></span>
+		</div>
+	</div>
+	<div class="control-group">
+		<label class="control-label" for="changepassword-old" localization>newpassword</label>
+		<div class="controls">
+			<input type="password" id="changepassword-new" onkeydown="pressenter(arguments[0],changepassword, 'changepassword-old', 'changepassword-confirm')" />
+			<span class="help-inline"></span>
+		</div>
+	</div>
+	<div class="control-group">
+		<label class="control-label" for="changepassword-old" localization>confirm</label>
+		<div class="controls">
+			<input type="password" id="changepassword-confirm" onkeydown="pressenter(arguments[0],changepassword, 'changepassword-new', '')" />
+			<span class="help-inline"></span>
+		</div>
+	</div>
+</div>
+<div class="modal-footer">
+	<div id="changepassword-buttons">
+		<button class="btn" id="changepass-ok" localization>ok</button>
+		<button class="btn" data-dismiss="modal" aria-hidden="true" localization>cancel</button>
+	</div>
+</div>

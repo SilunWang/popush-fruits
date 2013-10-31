@@ -1,0 +1,22 @@
+				<div class ="control-group">
+					<label class ="control-label" for="login-inputName" localization>username</label>
+					<div class ="controls">
+						<input type="text" id="login-inputName" onkeydown="pressenter(arguments[0],login, '', 'login-inputPassword')" <%= control_login_information.attr('login_name')? "value='" + control_login_information.login_name + "'":"class='empty'" %>/></div>
+				</div>
+				<div class="control-group">
+					<label class="control-label" for="login-inputPassword" localization>password</label>
+					<div class="controls">
+						<input type="password" id="login-inputPassword" onkeydown="pressenter(arguments[0],login, 'login-inputName', '')" <%= control_login_information.attr('login_password')? "value='" + control_login_information.login_password + "'":"class='empty'" %>/></div>
+				</div>
+				<div class="control-group hide" id="login-padding">
+					<label class="control-label">&nbsp;</label>
+				</div>
+				<div class="control-group">
+					<p align="center" id="loading-init" style="margin:1px 0 2px 0">
+						<img src="images/init.gif"/>				
+					</p>
+					<div class="controls hide" id="login-control" style="display:none;">
+						<button id="login-submit" type="submit" class="btn" localization>login</button>
+						<a class="switch-rel" href="javascript:;" id = "login-to-register" localization>register</a>
+					</div>
+				</div>
