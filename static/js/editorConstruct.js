@@ -3,46 +3,45 @@
 /************************************************************************
 |    函数名称： EditorController                                                
 |    函数功能： 包装了与代码编辑和socket.on相关函数                                            
-|    引用： globalModel roomModel roomController     
+|    引用： globalModel roomModel roomConstruct     
 |	 Author: SilunWang             
 *************************************************************************/
 
-var EditorController = can.Control.extend({
+var EditorConstruct = can.Construct.extend({}, {
 	//全局变量
 	globalModel: undefined,
 	//room Model
 	roomModel: undefined,
-	roomController: undefined,
-	self: this,
+	roomConstruct: undefined,
 
-	init: function(element, options){
+	init: function(options){
 		//init
-		self.globalModel = this.options.globalModel;
-		self.roomModel = this.options.roomModel;
-		self.roomController = this.options.roomController;
-		
+		this.globalModel = options.globalModel;
+		this.roomModel = options.roomModel;
+		this.roomConstruct = options.roomConstruct;
+		this.InitEditor();
 		//socket on
-		this.socket_on_ok(self.globalModel.socket);
-		this.socket_on_change(self.globalModel.socket);
+		this.socket_on_ok(this.globalModel.socket);
+		this.socket_on_change(this.globalModel.socket);
 	},
 
 	//标记已经保存
 	setsaved: function() {
-		self.roomModel.vars.savetimestamp = new Date().getTime();
-		setTimeout('this.setsavedthen(' + self.roomModel.vars.savetimestamp + ')', self.roomModel.vars.savetimeout);
-		self.roomModel.vars.savetimeout = 500;
+		this.roomModel.vars.savetimestamp = new Date().getTime();
+		setTimeout('this.setsavedthen(' + this.roomModel.vars.savetimestamp + ')', this.roomModel.vars.savetimeout);
+		this.roomModel.vars.savetimeout = 500;
 	},
 
 	//在页面上标记已经保存
 	setsavedthen: function(timestamp) {
 
-		if (self.roomModel.vars.savetimestamp == timestamp) {
+		if (this.roomModel.vars.savetimestamp == timestamp) {
 			$('#current-doc-state').removeClass('red');
 			$('#current-doc-state').text(strings['saved']);
 			$('#editor-back').popover('destroy');
 			$('#editor-back').attr('title', strings['back']);
-			self.roomModel.vars.issaving = false;
-			self.roomController.setrunanddebugstate();
+			this.roomModel.vars.issaving = false;
+			this.roomConstruct.setrunanddebugstate();
 		}
 	},
 
@@ -59,9 +58,9 @@ var EditorController = can.Control.extend({
 			trigger: 'hover',
 			container: 'body'
 		});
-		self.roomModel.vars.savetimestamp = 0;
-		self.roomModel.vars.savetimestamp = true;
-		self.roomController.setrunanddebugstate();
+		this.roomModel.vars.savetimestamp = 0;
+		this.roomModel.vars.savetimestamp = true;
+		this.roomConstruct.setrunanddebugstate();
 	},
 
 	//将自己修改的一段文字发送给服务器
@@ -73,10 +72,10 @@ var EditorController = can.Control.extend({
 	//选中一段文字修改 : 输入多个字母的话，同普通的输入
 	sendbuffer: function() {
 
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 
-		if (self.roomModel.bufferfrom != -1) {
-			if (self.roomModel.bufferto == -1) {
+		if (this.roomModel.bufferfrom != -1) {
+			if (this.roomModel.bufferto == -1) {
 				var req = {
 					version: vars.doc.version,
 					from: vars.bufferfrom,
@@ -112,18 +111,73 @@ var EditorController = can.Control.extend({
 
 	save: function() {
 		this.setsaving();
-		if (self.roomModel.timer != null) {
-			clearTimeout(self.roomModel.timer);
+		if (this.roomModel.timer != null) {
+			clearTimeout(this.roomModel.timer);
 		}
-		self.roomModel.timer = setTimeout("this.sendbuffer", self.roomModel.buffertimeout);
+		this.roomModel.timer = setTimeout("this.sendbuffer", this.roomModel.buffertimeout);
 	},
 
 	//在按下ctrl+s之后调用的处理函数
 
 	saveevent: function(cm) {
-		if (self.roomModel.savetimestamp != 0)
-			this.setsavedthen(self.roomModel.savetimestamp);
-		self.roomModel.savetimestamp = 0;
+		if (this.roomModel.savetimestamp != 0)
+			this.setsavedthen(this.roomModel.savetimestamp);
+		this.roomModel.savetimestamp = 0;
+	},
+
+	winHeight: function() {
+		return window.innerHeight || (document.documentElement || document.body).clientHeight;
+	},
+
+	setFullScreen: function(cm, full) {
+		var wrap = cm.getWrapperElement();
+		if (full) {
+			$('#editormain').css('position', 'static');
+			$('#editormain-inner').css('position', 'static');
+			$('#fullscreentip').fadeIn();
+			setTimeout('$(\'#fullscreentip\').fadeOut();', 1000);
+			wrap.className += " CodeMirror-fullscreen";
+			wrap.style.height = winHeight() + "px";
+			document.documentElement.style.overflow = "hidden";
+		} else {
+			$('#editormain').css('position', 'fixed');
+			$('#editormain-inner').css('position', 'relative');
+			$('#fullscreentip').hide();
+			wrap.className = wrap.className.replace(" CodeMirror-fullscreen", "");
+			wrap.style.height = "";
+			document.documentElement.style.overflow = "";
+		}
+		cm.refresh();
+		cm.focus();
+	},
+
+	InitEditor: function() {
+		CodeMirror.on(window, "resize", function() {
+			var showing = document.getElementsByClassName("CodeMirror-fullscreen")[0];
+			if (!showing) return;
+			showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px";
+		});
+
+		this.roomModel.vars.editor = CodeMirror.fromTextArea($('#editor-textarea').get(0), {
+			lineNumbers: true,
+			lineWrapping: true,
+			indentUnit: 4,
+			indentWithTabs: true,
+			extraKeys: {
+				"Esc": function(cm) {
+					if (isFullScreen(cm)) setFullScreen(cm, false);
+					resize();
+				},
+				"Ctrl-S": this.saveevent
+			},
+			gutters: ["runat", "CodeMirror-linenumbers", "breakpoints"]
+		});
+
+		this.roomModel.vars.editor.on("gutterClick", function(cm, n) {
+			gutterclick(cm, n);
+		});
+
+		gutterclick = function(cm, n) {};
 	},
 
 	
@@ -132,7 +186,7 @@ var EditorController = can.Control.extend({
 	
 	socket_on_ok: function(socket){
 
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 
 		socket.on('ok', function(data) {
 			var chg = vars.q.shift();
@@ -292,7 +346,7 @@ var EditorController = can.Control.extend({
 			//var curfrom = editor.indexFromPos(cursor);
 			mother.globalModel.editor.replaceRange(ttext, mother.globalModel.editor.posFromIndex(tfrom), mother.globalModel.editor.posFromIndex(tto));
 			//if (curfrom == tfrom){
-			//	self.globalModel.editorDoc.setCursor(cursor);
+			//	this.globalModel.editorDoc.setCursor(cursor);
 			//}
 			for (var i = 0; i < hist.done.length; i++) {
 				if (doneto[i] <= tfrom) {} else if (doneto[i] <= tto && donefrom[i] <= tfrom) {} else if (doneto[i] <= tto && donefrom[i] > tfrom) {} else if (doneto[i] > tto && donefrom[i] <= tfrom) {

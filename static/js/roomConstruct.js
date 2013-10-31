@@ -1,79 +1,92 @@
 //Room部分的通用Controller
 
-var RoomController = can.Control.extend ({
+var RoomConstruct = can.Construct.extend ({}, {
 
 	//当前页面的模型
 	roomModel: undefined,
 	//全局模型
 	globalModel: undefined,
-	//处理一些socket消息的控制器
-	socketController: undefined,
-	//控制运行和调试的控制器
-	run_debugController: undefined,
-	//控制编辑区的控制器
-	editorController: undefined,
-	//
-	ejs_toolbarController: undefined,
-	//
-	ejs_chatboxController: undefined,
-	//
-	ejs_varlistController: undefined,
-	//解决init函数this指针问题
-	self: this,
+	//处理一些socket消息的Construct
+	messageConstruct: undefined,
+	//控制运行和调试的Construct
+	runCodeConstruct: undefined,
+	//控制编辑区的Construct
+	editorConstruct: undefined,
+	//toolbar
+	toolbarController: undefined,
+	//chatbox + console
+	chatboxController: undefined,
+	//varlist
+	varlistController: undefined,
 
-	init: function(element, options) {
-		self.roomModel = this.options.roomModel;
-		self.globalModel = this.options.globalModel;
+	init: function(options) {
+
+		this.roomModel = options.roomModel;
+		this.globalModel = options.globalModel;
 		
-		self.socketController = new SocketController("", {roomModel:self.roomModel, globalModel:self.globalModel, roomController:this});
-		self.run_debugController = new Run_debugController("", {roomModel:self.roomModel, globalModel:self.globalModel, roomController:this});
-		self.editorController = new EditorController("", {roomModel:self.roomModel, globalModel:self.globalModel, roomController:this});
-
-		self.ejs_toolbarController = new ToolbarController("#over-editor", {
-			m_room_c: this, 
-			m_global_v: self.globalModel,
-			m_room_v: self.roomModel,
-			m_socket_c: self.socketController
+		this.messageConstruct = new MessageConstruct({
+			roomModel: this.roomModel, 
+			globalModel: this.globalModel, 
+			roomConstruct: this
 		});
 
-		self.ejs_varlistController = new VarlistController("#varlist", {
-			m_room_c: this, 
-			m_global_v: self.globalModel,
-			m_room_v: self.roomModel,
-			m_rundebug_c:self.run_debugController,
-			m_socket_c: self.socketController
+		this.runCodeConstruct = new RunCodeConstruct({
+			roomModel: this.roomModel, 
+			globalModel: this.globalModel, 
+			roomConstruct: this
 		});
 
-		self.ejs_chatboxController = new ChatboxController('#chatbox', {
+		this.editorConstruct = new EditorConstruct({
+			roomModel:this.roomModel, 
+			globalModel:this.globalModel, 
+			roomConstruct:this
+		});
+
+		this.toolbarController = new ToolbarController("#over-editor", {
 			m_room_c: this, 
-			m_global_v: self.globalModel,
-			m_room_v: self.roomModel,
-			m_rundebug_c:self.run_debugController,
-			m_socket_c: self.socketController
+			m_global_v: this.globalModel,
+			m_room_v: this.roomModel,
+			m_message_c: this.messageConstruct
+		});
+
+		this.varlistController = new VarlistController("#varlist", {
+			m_room_c: this, 
+			m_global_v: this.globalModel,
+			m_room_v: this.roomModel,
+			m_rundebug_c:this.runCodeConstruct,
+			m_message_c: this.messageConstruct
+		});
+
+		this.chatboxController = new ChatboxController('#chatbox', {
+			m_room_c: this, 
+			m_global_v: this.globalModel,
+			m_room_v: this.roomModel,
+			m_rundebug_c:this.runCodeConstruct,
+			m_message_c: this.messageConstruct
 		});
 
 		this.initModelData();
-		this.socket_on_set(globalModel.socket);
+		this.socket_on_set(this.globalModel.socket);
 		this.registereditorevent();
 	},
 
 	//初始化模型中的一些数据
 	initModelData: function() {
 		//将修改出队的函数
-		roomModel.vars.q._shift = roomModel.vars.q.shift;
-		roomModel.vars.q.shift = function() {
+		this.roomModel.vars.q._shift = this.roomModel.vars.q.shift;
+		this.roomModel.vars.q.shift = function() {
 			var r = this._shift();
-			if (this.length == 0 && self.roomModel.vars.bufferfrom == -1) { // buffertext == "") {
+			if (this.length == 0 && this.roomModel.vars.bufferfrom == -1) { // buffertext == "") {
 				//如果本地的修改已经处理完毕，则标记已保存
-				self.editorController.setsaved();
+				this.editorConstruct.setsaved();
 			}
 			return r;
 		}
 		//将修改入队的函数
-		self.roomModel.vars.q._push = self.roomModel.vars.q.push;
-		self.roomModel.vars.q._push = function(element) {
+		this.roomModel.vars.q._push = this.roomModel.vars.q.push;
+		this.roomModel.vars.q._push = function(element) {
 			this._push(element);
-			self.editorController.setsaving();
+			this.editorConstruct.setsaving();
 		}
 	},
 
@@ -83,10 +96,10 @@ var RoomController = can.Control.extend ({
 		$('#editor-run').removeClass('disabled');
 		$('#editor-debug').removeClass('disabled');
 		//如果不可运行，则禁用运行按钮
-		if (!self.roomModel.runenabled())
+		if (!this.roomModel.runenabled())
 			$('#editor-run').addClass('disabled');
 		//如果不可调试，则禁用调试按钮
-		if (!self.roomModel.debugenabled())
+		if (!this.roomModel.debugenabled())
 			$('#editor-debug').addClass('disabled');
 	},
 
@@ -113,12 +126,12 @@ var RoomController = can.Control.extend ({
 
 	//打开编辑界面的时候会调用，o：关于打开的文件的信息
 	openeditor: function(o) {
-		if (self.globalModel.operationLock)
+		if (this.globalModel.operationLock)
 			return;
-		self.globalModel.operationLock = true;
-		self.globalModel.filelist.loading();
-		self.roomModel.vars.docobj = o;
-		self.globalModel.socket.emit('join', {
+		this.globalModel.operationLock = true;
+		this.globalModel.filelist.loading();
+		this.roomModel.vars.docobj = o;
+		this.globalModel.socket.emit('join', {
 			path: o.path
 		});
 	},
@@ -154,7 +167,7 @@ var RoomController = can.Control.extend ({
 
 	//点击“控制台”按钮时触发的响应函数，变更控制台的开关状态
 	toggleconsole: function() {
-		if (self.roomModel.vars.consoleopen) {
+		if (this.roomModel.vars.consoleopen) {
 			this.closeconsole();
 		} else {
 			this.openconsole();
@@ -163,9 +176,9 @@ var RoomController = can.Control.extend ({
 
 	//关闭控制台显示，不清除控制台内容
 	closeconsole: function() {
-		if (!self.roomModel.vars.consoleopen)
+		if (!this.roomModel.vars.consoleopen)
 			return;
-		self.roomModel.vars.consoleopen = false;
+		this.roomModel.vars.consoleopen = false;
 		$('#under-editor').hide();
 		$('#editor-console').removeClass('active');
 		this.resize();
@@ -173,8 +186,8 @@ var RoomController = can.Control.extend ({
 
 	//打开控制台显示，不清除控制台内容
 	openconsole: function() {
-		if (!self.roomModel.vars.consoleopen) {
-			self.roomModel.vars.consoleopen = true;
+		if (!this.roomModel.vars.consoleopen) {
+			this.roomModel.vars.consoleopen = true;
 			$('#under-editor').show();
 			$('#editor-console').addClass('active');
 			this.resize();
@@ -205,7 +218,7 @@ var RoomController = can.Control.extend ({
 		w = $('#editormain').parent().width();
 		$('#editormain').css('width', w);
 		var underh = h > 636 ? 212 : h / 3;
-		if (!self.roomModel.vars.consoleopen)
+		if (!this.roomModel.vars.consoleopen)
 			underh = 0;
 		$('#under-editor').css('height', underh + 'px');
 		$('#console').css('width', (w - w / 3 - 2) + 'px');
@@ -215,7 +228,7 @@ var RoomController = can.Control.extend ({
 		$('#varlistreal').css('height', (underh - 42) + 'px');
 		$('#console-inner').css('height', (underh - 81) + 'px');
 		$('#console-input').css('width', (w - w / 3 - 14) + 'px');
-		if (!this.isFullScreen(self.globalModel.editor))
+		if (!this.isFullScreen(this.roomModel.vars.editor))
 			$('.CodeMirror').css('height', (h - underh - $('#over-editor').height() - 90) + 'px');
 		w = $('#chat-show').width();
 		if (w != 0)
@@ -231,7 +244,7 @@ var RoomController = can.Control.extend ({
 
 		$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
 
-		self.globalModel.editor.refresh();
+		this.roomModel.vars.editor.refresh();
 	},
 
 	//给CodeMirror添加监听者
@@ -239,9 +252,9 @@ var RoomController = can.Control.extend ({
 	//在网页启动的时候调用
 	registereditorevent: function() {
 
-		var vars = self.roomModel.vars;
-		var editor = self.globalModel.editor;
-		var localThis = self;
+		var vars = this.roomModel.vars;
+		var editor = vars.editor;
+		var localThis = this;
 
 		//chg（例子） : Object {from: Pos, to: Pos, text: Array[5], origin: "setValue", removed: Array[7]}
 		//text : 新打开的文档内容
@@ -288,7 +301,7 @@ var RoomController = can.Control.extend ({
 			var bto = chg.to.line;
 
 			if (chg.text.length != (bto - bfrom + 1)) {
-				self.editorController.sendbuffer();
+				this.editorConstruct.sendbuffer();
 				var req = {
 					version: vars.doc.version,
 					from: cfrom,
@@ -301,9 +314,9 @@ var RoomController = can.Control.extend ({
 				vars.q.push(req);
 				var btext = "";
 				for (var i = 0; i < chg.text.length; i++) {
-					btext += self.run_debugController.havebreakat(editor, bfrom + i);
+					btext += this.runCodeConstruct.havebreakat(editor, bfrom + i);
 				}
-				self.run_debugController.sendbreak(bfrom, bto + 1, btext);
+				this.runCodeConstruct.sendbreak(bfrom, bto + 1, btext);
 				return;
 			}
 			if (chg.text.length > 1) {
@@ -317,7 +330,7 @@ var RoomController = can.Control.extend ({
 				} else {
 					vars.buffertext += cattext;
 				}
-				self.editorController.save();
+				this.editorConstruct.save();
 				return;
 			} else if (vars.bufferto == -1 && chg.origin == "+delete" &&
 				vars.bufferfrom != -1 && cto == vars.bufferfrom + vars.buffertext.length && cfrom >= vars.bufferfrom) {
@@ -325,23 +338,23 @@ var RoomController = can.Control.extend ({
 				if (vars.buffertext.length == 0) {
 					vars.bufferfrom = -1;
 					if (vars.q.length == 0) {
-						self.editorController.setsaved();
+						this.editorConstruct.setsaved();
 					}
 					return;
 				}
-				self.editorController.save();
+				this.editorConstruct.save();
 				return;
 			} else if (chg.origin == "+delete" &&
 				vars.bufferfrom == -1) {
 				vars.bufferfrom = cfrom;
 				vars.bufferto = cto;
 				vars.buffertext = "";
-				self.editorController.save();
+				this.editorConstruct.save();
 				return;
 			} else if (vars.bufferto != -1 && chg.origin == "+delete" &&
 				cto == vars.bufferfrom) {
 				vars.bufferfrom = cfrom;
-				self.editorController.save();
+				this.editorConstruct.save();
 				return;
 			} else if (vars.bufferfrom != -1) {
 				if (vars.bufferto == -1) {
@@ -392,11 +405,11 @@ var RoomController = can.Control.extend ({
 		$('#filecontrol').show();
 		$('#footer').show();
 
-		self.globalModel.socket.emit('leave', {});
+		this.globalModel.socket.emit('leave', {});
 
 		var localThis = self;
 
-		self.globalModel.refreshfilelist(function() {;
+		this.globalModel.refreshfilelist(function() {;
 		}, function() {
 
 			var localLocalThis = localThis;
@@ -406,31 +419,44 @@ var RoomController = can.Control.extend ({
 			});
 		});
 
-		self.socketController.leaveVoiceRoom();
+		this.messageConstruct.leaveVoiceRoom();
 	},
 
 	//点击运行时的界面控制
 	setrun: function() {
-		self.roomModel.vars.runLock = true;
+		this.roomModel.vars.runLock = true;
 		$('#editor-run').html('<i class="icon-stop"></i>');
-		$('#editor-run').attr('title', self.globalModel.strings['kill-title']);
+		$('#editor-run').attr('title', this.globalModel.strings['kill-title']);
 		$('#console-inner').html('');
 		$('#console-input').val('');
 		$('#editor-debug').addClass('disabled');
-		$('#console-title').text(self.globalModel.strings['console']);
+		$('#console-title').text(this.globalModel.strings['console']);
 		this.openconsole();
 	},
 
 	//调试一个程序时的界面控制
 	setdebug: function() {
-		self.roomModel.vars.debugLock = true;
+		this.roomModel.vars.debugLock = true;
 		$('#editor-debug').html('<i class="icon-eye-close"></i>');
 		$('#editor-debug').attr('title', strings['stop-debug-title']);
 		$('#console-inner').html('');
 		$('#console-input').val('');
 		$('#editor-run').addClass('disabled');
-		$('#console-title').text(self.globalModel.strings['console']);
+		$('#console-title').text(this.globalModel.strings['console']);
 		this.openconsole();
+	},
+
+	changelanguage: function(language) {
+		if (languagemap[language]) {
+			if (modemap[language])
+				this.roomModel.vars.editor.setOption('mode', modemap[language]);
+			else
+				this.roomModel.vars.editor.setOption('mode', languagemap[language]);
+			CodeMirror.autoLoadMode(this.roomModel.vars.editor, languagemap[language]);
+		} else {
+			this.roomModel.vars.editor.setOption('mode', 'text/plain');
+			CodeMirror.autoLoadMode(this.roomModel.vars.editor, '');
+		}
 	},
 
 	//进入编辑界面时，显示各种数据
@@ -441,17 +467,17 @@ var RoomController = can.Control.extend ({
 
 		socket.on('set', function(data) {
 
-			var vars = self.roomModel.vars;
+			var vars = localThis.roomModel.vars;
 
 			vars.savetimestamp = 1;
-			self.editorController.setsavedthen(1);
+			localThis.editorConstruct.setsavedthen(1);
 
 			vars.q.length = 0;
 			vars.bq.length = 0;
 			vars.lock = false;
 
 			$('#editor-run').html('<i class="icon-play"></i>');
-			$('#editor-run').attr('title', self.globalModel.strings['run-title']);
+			$('#editor-run').attr('title', localThis.globalModel.strings['run-title']);
 			vars.runLock = false;
 			vars.debugLock = false;
 			vars.waiting = false;
@@ -464,16 +490,16 @@ var RoomController = can.Control.extend ({
 			$('#footer').hide();
 			var filepart = vars.docobj.name.split('.');
 			vars.ext = filepart[filepart.length - 1];
-			self.globalModel.changelanguage(vars.ext);
-			self.run_debugController.checkrunanddebug(vars.ext);
+			localThis.changelanguage(vars.ext);
+			localThis.runCodeConstruct.checkrunanddebug(vars.ext);
 
-			self.globalModel.editor.refresh();
+			localThis.roomModel.vars.editor.refresh();
 
-			if (self.globalModel.currentDir.length == 1) {
-				self.globalModel.memberlistdoc.fromdoc(vars.docobj);
+			if (localThis.globalModel.currentDir.length == 1) {
+				localThis.globalModel.memberlistdoc.fromdoc(vars.docobj);
 			}
-			self.globalModel.memberlistdoc.setalloffline();
-			self.globalModel.memberlistdoc.setonline(self.globalModel.currentUser.name, true);
+			localThis.globalModel.memberlistdoc.setalloffline();
+			localThis.globalModel.memberlistdoc.setonline(localThis.globalModel.currentUser.name, true);
 
 			for (var k in vars.cursors) {
 				$(vars.cursors[k].element).remove();
@@ -493,17 +519,17 @@ var RoomController = can.Control.extend ({
 
 			$('#voice-on').removeClass('active');
 
-			self.globalModel.operationLock = false;
+			localThis.globalModel.operationLock = false;
 
 			vars.lock = true;
 			vars.doc = data;
-			self.globalModel.editor.setValue(vars.doc.text);
-			self.globalModel.editor.clearHistory();
-			self.globalModel.editor.setOption('readOnly', false);
-			self.run_debugController.initbreakpoints(data.bps);
+			localThis.roomModel.vars.editor.setValue(vars.doc.text);
+			localThis.roomModel.vars.editor.clearHistory();
+			localThis.roomModel.vars.editor.setOption('readOnly', false);
+			localThis.runCodeConstruct.initbreakpoints(data.bps);
 			for (var i in data.users) {
-				self.globalModel.memberlistdoc.setonline(i, true);
-				if (i == self.globalModel.currentUser.name)
+				localThis.globalModel.memberlistdoc.setonline(i, true);
+				if (i == localThis.globalModel.currentUser.name)
 					continue;
 				var cursor = localThis.newcursor(i);
 				if (vars.cursors[i] && vars.cursors[i].element)
@@ -513,38 +539,38 @@ var RoomController = can.Control.extend ({
 					pos: 0
 				};
 			}
-			self.globalModel.memberlistdoc.sort();
+			localThis.globalModel.memberlistdoc.sort();
 
-			self.globalModel.filelist.removeloading();
+			localThis.globalModel.filelist.removeloading();
 			$('#console-inner').html('');
 			localThis.closeconsole();
-			self.globalModel.expressionlist.clear();
+			localThis.globalModel.expressionlist.clear();
 			for (var k in data.exprs) {
-				self.globalModelexpressionlist.addExpression(k);
-				self.globalModelexpressionlist.setValue(k, data.exprs[k]);
+				localThis.globalModelexpressionlist.addExpression(k);
+				localThis.globalModelexpressionlist.setValue(k, data.exprs[k]);
 			}
 
-			$('#console-title').text(self.globalModel.strings['console']);
+			$('#console-title').text(localThis.globalModel.strings['console']);
 
 			localThis.resize();
 			$('body').scrollTop(99999);
 
 			if (data.running) {
-				self.run_debugController.setrun();
+				localThis.runCodeConstruct.setrun();
 			}
 			if (data.debugging) {
-				self.run_debugController.setdebug();
-				self.globalModel.editor.setOption('readOnly', true);
+				localThis.runCodeConstruct.setdebug();
+				localthis.roomModel.vars.editor.setOption('readOnly', true);
 				vars.old_text = data.text;
 				vars.old_bps = data.bps;
 				if (data.state == 'waiting') {
 					vars.waiting = true;
-					self.run_debugController.runtoline(data.line - 1);
+					localThis.runCodeConstruct.runtoline(data.line - 1);
 					$('.debugandwait').removeClass('disabled');
 					if (data.line !== null)
-						$('#console-title').text(self.globalModel.strings['console'] + self.globalModel.strings['waiting']);
+						$('#console-title').text(localThis.globalModel.strings['console'] + localThis.globalModel.strings['waiting']);
 					else
-						$('#console-title').text(self.globalModel.strings['console'] + self.globalModel.strings['waiting'] + self.globalModel.strings['nosource']);
+						$('#console-title').text(localThis.globalModel.strings['console'] + localThis.globalModel.strings['waiting'] + localThis.globalModel.strings['nosource']);
 				}
 			}
 			localThis.setrunanddebugstate();

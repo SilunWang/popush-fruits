@@ -71,9 +71,9 @@ var RoomModel = can.Model.extend({}, {
 		//从本地完全出队到更新视图的延时，用途待定
 		savetimeout: 500,
 
-		chatstate:undefined
+		chatstate:undefined,
 
-		//editor:undefined
+		editor:undefined
 	},
 
 	//初始化函数

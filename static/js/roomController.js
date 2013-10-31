@@ -1,15 +1,17 @@
 var ToolbarController = can.Control.extend({
+
 	m_global_v: '',
 	m_room_v: '',
 	m_room_c: '',
-	m_socket_c: '',
+	m_message_c: '',
 	m_fullscreen: '',
 	m_togglechat: '',
+	
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		m_room_v = this.options.m_room_v;
 		m_room_c = this.options.m_room_c;
-		m_socket_c = this.options.m_socket_c;
+		m_message_c = this.options.m_message_c;
 		this.element.append(can.view("../ejs/editor-toolbar.ejs", {}));
 	},
 	'#editor-debug click': function() {
@@ -48,7 +50,7 @@ var ToolbarController = can.Control.extend({
 			});
 		});
 
-		m_socket_c.leaveVoiceRoom();
+		m_message_c.leaveVoiceRoom();
 	},
 	'#editor-run click': function() {
 		if (!m_room_v.runenabled())
@@ -116,7 +118,7 @@ var ChatboxController = can.Control.extend({
 	m_room_v: '',
 	m_room_c: '',
 	m_rundebug_c: '',
-	m_socket_c: '',
+	m_message_c: '',
 	m_fullscreen: '',
 	m_togglechat: '',
 	init: function(element, options) {
@@ -124,7 +126,7 @@ var ChatboxController = can.Control.extend({
 		m_room_v = this.options.m_room_v;
 		m_room_c = this.options.m_room_c;
 		m_rundebug_c = this.options.m_rundebug_c;
-		m_socket_c = this.options.m_socket_c;
+		m_message_c = this.options.m_message_c;
 		this.element.append(can.view("../ejs/room-chatbox.ejs", {}));
 	},
 	'#chat click': function() {
@@ -246,7 +248,7 @@ var ChatboxController = can.Control.extend({
 				alert(err);
 			}
 		} else {
-			m_socket_c.leaveVoiceRoom();
+			m_message_c.leaveVoiceRoom();
 		}
 	}
 });
@@ -256,7 +258,7 @@ var VarlistController = can.Control.extend({
 	m_room_v: '',
 	m_room_c: '',
 	m_rundebug_c: '',
-	m_socket_c: '',
+	m_message_c: '',
 	m_fullscreen: '',
 	m_togglechat: '',
 	init: function(element, options) {
@@ -264,7 +266,7 @@ var VarlistController = can.Control.extend({
 		m_room_v = this.options.m_room_v;
 		m_room_c = this.options.m_room_c;
 		m_rundebug_c = this.m_rundebug_c;
-		m_socket_c = this.m_socket_c;
+		m_message_c = this.m_message_c;
 		this.element.append(can.view("../ejs/varlist.ejs", {}));
 	},
 	'#debugstep click': function() {

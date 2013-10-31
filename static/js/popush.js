@@ -1,46 +1,10 @@
 
 ////////////////////////// vars ///////////////////////////////
 var global_v;
-var room_Controller;
-var room_Model;
 
-var currentUser;
-var currentDir;
-var currentDirString;
-var dirMode = 'owned';
 
-var newfiletype = 'doc';
-var filelisterror = function(){;};
-var docshowfilter = function(o){ return true; };
-var filelist;
 
-var userlist;
-var currentsharedoc;
 
-var memberlist;
-var memberlistdoc;
-
-var expressionlist;
-
-var movehandler;
-
-var dochandler;
-var doccallback;
-
-var loadDone = false;
-var failed = false;
-
-var loadings = {};
-
-var gutterclick;
-
-var firstconnect = true;
-
-/////////////////////// locks //////////////////////////////////
-var loginLock = false;
-var registerLock = false;
-var viewswitchLock = false;
-var operationLock = false;
 
 /////////////////////// Check Browser //////////////////////////
 
@@ -89,46 +53,46 @@ function getCookie(name)
 
 /********************全局变量Model*********************/
 GlobalVariables = can.Model.extend({},{
+
 	self:this,
+
 	init:function(global_data){
 		////////////////////////// vars ///////////////////////////////
-		this.currentUser = global_data.g_currentUser;
-		this.currentDir = global_data.g_currentDir;
-		this.currentDirString = global_data.g_currentDirString;
+		this.currentUser = [];
+		this.currentDir = [];
+		this.currentDirString = '';
 		this.dirMode = global_data.g_dirMode;
-		this.editor = global_data.g_editor;
-		this.newfiletype = global_data.g_newfiletype;
-		this.filelisterror = global_data.g_filelisterror;
-		this.docshowfilter = global_data.g_docshowfilter;
+
+		this.newfiletype = 'doc';
+		this.filelisterror = function(){;};
+		this.docshowfilter = function(o){ return true; };
 		this.filelist = global_data.g_filelist;
 
-		this.userlist = global_data.g_userlist;
-		this.currentsharedoc = global_data.g_currentsharedoc;
+		this.userlist = '';
+		this.currentsharedoc = '';
 
-		this.memberlist = global_data.g_memberlist;
-		this.memberlistdoc = global_data.g_memberlistdoc;
+		this.memberlist = '';
+		this.memberlistdoc = '';
 
-		this.expressionlist = global_data.g_expressionlist;
+		this.expressionlist = '';
 
-		this.movehandler = global_data.g_movehandler;
+		this.movehandler = '';
 
-		this.dochandler = global_data.g_dochandler;
-		this.doccallback = global_data.g_doccallback;
+		this.dochandler = '';
+		this.doccallback = '';
 
-		this.loadDone = global_data.g_loadDone;
-		this.failed = global_data.g_failed;
+		this.loadDone = false;
+		this.failed = false;
 
-		this.loadings = global_data.g_loadings;
+		this.loadings = {};
 
-		this.gutterclick = global_data.g_gutterclick;
-
-		this.firstconnect = global_data.g_firstconnect;
+		this.firstconnect = true;
 
 		/////////////////////// locks //////////////////////////////////
-		this.loginLock = global_data.g_loginLock;
-		this.registerLock = global_data.g_registerLock;
-		this.viewswitchLock = global_data.g_viewswitchLock;
-		this.operationLock = global_data.g_operationLock;
+		this.loginLock = false;
+		this.registerLock = false
+		this.viewswitchLock = false
+		this.operationLock = false;
 
 		////////////////////////Socket//////////////////////
 		this.socket = global_data.g_socket;
@@ -143,18 +107,6 @@ GlobalVariables = can.Model.extend({},{
 		this.doc_on();
 		this.delete_obj = '';
 		this.rename_obj = '';
-	},
-	changelanguage: function(language) {
-		if (languagemap[language]) {
-			if (modemap[language])
-				editor.setOption('mode', modemap[language]);
-			else
-				editor.setOption('mode', languagemap[language]);
-			CodeMirror.autoLoadMode(editor, languagemap[language]);
-		} else {
-			editor.setOption('mode', 'text/plain');
-			CodeMirror.autoLoadMode(editor, '');
-		}
 	},
 	//获得当前路径的标准路径名
 	//拆分成路径的标准格式
@@ -252,7 +204,7 @@ GlobalVariables = can.Model.extend({},{
 		delete this.loadings[id];
 	},
 	cleanloading:function() {
-		for(var k in loadings) {
+		for(var k in this.loadings) {
 			this.removeloading(k);
 		}
 	},
@@ -314,7 +266,6 @@ GlobalVariables = can.Model.extend({},{
 		else if(e.keyCode == 40)
 			$('#' + idDown).focus();
 	},
-
 	refreshfilelist:function(error, callback) {
 		this.operationLock = true;
 		this.filelist.loading();
@@ -364,19 +315,22 @@ GlobalVariables = can.Model.extend({},{
 
 
 /*********************Login part*********************/
-LoginInformation = can.Model.extend({}, {});
+
+
+var LoginInformation = can.Model.extend({});
 
 var LoginControl = can.Control.extend({
 	m_global_v:'',
 	m_login_information: '',
 	self: this,
 	init: function(element, options) {
-		self.m_login_information = this.options.m_login_information;
 		self.m_global_v = this.options.m_global_v;
+		self.m_login_information = this.options.m_login_information;
 		this.element.append(can.view("../ejs/login.ejs", {
 			control_login_information: self.m_login_information
 		}));
 		this.socket_io();
+		this.resize();
 	},
 
 	//reaction area
@@ -385,6 +339,10 @@ var LoginControl = can.Control.extend({
 		self.m_login_information.attr('login_password', $('#login-inputPassword').val());
 		//self.m_login_information.save();
 		this.login();
+	},
+
+	'#login-to-register click':function(){
+		this.registerview();
 	},
 
 	//business
@@ -409,6 +367,36 @@ var LoginControl = can.Control.extend({
 			password: login_pass
 		});
 	},
+
+	
+	registerview:function() {
+		if(m_global_v.viewswitchLock)
+			return;
+		m_global_v.viewswitchLock = true;
+		$('#login .blink').fadeOut('fast');
+		$('#login-message').slideUp();
+		$('#login-padding').slideDown('fast', function(){
+			$('#register').show();
+			$('#register .blink').fadeIn('fast');
+			$('#login').hide();
+			$('#register-inputName').val('');
+			$('#register-inputPassword').val('');
+			$('#register-confirmPassword').val('');
+			$('#register-message').hide();
+			$('#register-padding').fadeIn('fast', function(){
+				$('#register-inputName').focus();
+				m_global_v.viewswitchLock = false;
+			});
+			var w = $('#register-box').parent('*').width();
+			$('#register-box').css('left', ((w-420)/2-30) + 'px');
+		});
+	},
+
+	resize:function(){
+		var w = $('#login-box').parent('*').width();
+		$('#login-box').css('left', ((w-420)/2-30) + 'px');	
+	},
+
 	socket_io:function(){
 		m_global_v.socket.on('login', function(data){
 			if(data.err){
@@ -480,7 +468,7 @@ var LoginControl = can.Control.extend({
 			if(data.version != VERSION) {
 				location.reload('Refresh');
 			}
-			if(failed)
+			if(m_global_v.failed)
 				return;
 			if(!m_global_v.firstconnect) {
 				m_global_v.backtologin();
@@ -506,6 +494,192 @@ var LoginControl = can.Control.extend({
 });
 /****************************************************/
 
+/************************Resgister part***********************/
+
+var RegisterController = can.Control.extend({
+	m_global_v:'',
+	m_register_information: '',
+	self: this,
+	init: function(element, options) {
+		self.m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/register.ejs", {
+		}));
+		this.socket_io();
+		this.keyup();
+		this.focus();
+	},
+	
+
+	//events
+	'#register-submit click':function(){
+		this.register();
+	},
+
+	'#register-to-login click':function(){
+		this.loginview();
+	},
+
+	keyup:function(){
+		self = this;
+		$('#register-inputName').keyup(function(){
+			self.checkusername();	
+		});
+	},
+
+	focus:function(){
+		$('#register-inputName').focus(function(){
+			$("#msg-username").html(m_global_v.strings['name invalid'] + "," + m_global_v.strings['namelength']);
+		});
+
+		$('#register-inputPassword').focus(function(){
+			var name = $('#register-inputName').val();
+			if(!/^[A-Za-z0-9]*$/.test(name)) {
+				$("#msg-username").html(m_global_v.strings['name invalid']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			if(name == "" || name.length < 6 || name.length > 20) {
+				$("#msg-username").html(m_global_v.strings['namelength']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			return;
+		});
+
+		$("#register-confirmPassword").focus(function(){
+			var name = $('#register-inputName').val();
+			if(!/^[A-Za-z0-9]*$/.test(name)) {
+				$("#msg-username").html(m_global_v.strings['name invalid']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			if(name.length < 6 || name.length > 20) {
+				$("#msg-username").html(m_global_v.strings['namelength']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			return;
+		});
+	},
+
+
+	///logics 
+	register:function() {
+		var registername = $('#register-inputName').val();
+		var pass = $('#register-inputPassword').val();
+		var confirm = $('#register-confirmPassword').val();
+		if(!/^[A-Za-z0-9]*$/.test(registername)) {
+			m_global_v.showmessage('register-message', 'name invalid');
+			return;
+		}
+		if(registername.length < 6 || registername.length > 20) {
+			m_global_v.showmessage('register-message', 'namelength');
+			return;
+		}
+		if(pass.length > 32){
+			m_global_v.showmessage('register-message', 'passlength');
+			return;
+		}
+		if(pass != confirm) {
+			m_global_v.showmessage('register-message', 'doesntmatch');
+			return;
+		}
+		if(m_global_v.registerLock)
+			return;
+		m_global_v.registerLock = true;
+		m_global_v.loading('register-control');
+		m_global_v.socket.emit('register', {
+			name:registername,
+			password:pass,
+			avatar:'images/character.png'
+		});
+	},
+
+	loginview:function() {
+		if(m_global_v.viewswitchLock)
+			return;
+		m_global_v.viewswitchLock = true;
+		$('#register .blink').fadeOut('fast');
+		$('#register-message').slideUp();
+		$('#register-padding').fadeOut('fast', function(){
+			$('#login').show();
+			$('#login .blink').fadeIn('fast');
+			$('#register').hide();
+			$('#login-inputName').val('');
+			$('#login-inputPassword').val('');
+			$('#login-message').hide();
+			$('#login-padding').slideUp('fast', function(){
+				$('#login-inputName').focus();
+				m_global_v.viewswitchLock = false;
+			});
+			var w = $('#login-box').parent('*').width();
+			$('#login-box').css('left', ((w-420)/2-30) + 'px');
+		});
+	},
+
+	checkusername:function() {
+		var name = $('#register-inputName').val();
+		if(name.length == "") {
+			$("#msg-username").html(m_global_v.strings['name invalid'] + "," + m_global_v.strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+			return;
+		}
+		if(!/^[A-Za-z0-9]*$/.test(name)) {
+			$("#msg-username").html(m_global_v.strings['name invalid']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		if(name.length < 6) {
+			$("#msg-username").html(m_global_v.strings['name invalid'] + "," + m_global_v.strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
+			$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
+			return;
+		}
+		if(name.length > 20) {
+			$("#msg-username").html(m_global_v.strings['namelength']);
+			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+			return;
+		}
+		$("#msg-username").html("");
+		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
+		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
+		return;
+	},
+
+	socket_io:function(){	
+		m_global_v.socket.on('register', function(data){
+			if(data.err){
+				m_global_v.showmessage('register-message', data.err, 'error');
+			}else{
+				m_global_v.showmessage('register-message', 'registerok');
+				$('#register-inputName').val('');
+				$('#register-inputPassword').val('');
+				$('#register-confirmPassword').val('');
+			}
+			m_global_v.removeloading('register-control');
+			m_global_v.registerLock = false;
+		});
+
+		m_global_v.socket.on('password', function(data){
+			if(data.err){
+				m_global_v.showmessageindialog('changepassword', data.err, 0);
+			} else {
+				$('#changepassword').modal('hide');
+				m_global_v.showmessagebox('changepassword', 'changepassworddone', 1);
+			}
+			m_global_v.removeloading('changepassword-buttons');
+			m_global_v.operationLock = false;
+		});
+	}
+
+});
 
 /*******************fileTabs*************************/
 var FileTabsContorl = can.Control.extend({
@@ -534,9 +708,9 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'owned';
-		m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		$('#current-dir').html(m_global_v.getdirlink());
 		m_global_v.refreshfilelist(function(){;});
 
@@ -551,9 +725,9 @@ var FileTabsContorl = can.Control.extend({
 			return;
 		m_global_v.operationLock = true;
 		m_global_v.dirMode = 'shared';
-		m_global_v.docshowfilter = {flag:0,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {flag:0,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		$('#current-dir').html(m_global_v.getdirlink());
 		m_global_v.refreshfilelist(function(){;});
 		
@@ -562,7 +736,6 @@ var FileTabsContorl = can.Control.extend({
 		$('#sharedfile').addClass('active');
 	}
 });
-
 /****************************************************/
 
 
@@ -619,7 +792,7 @@ var NewFileController = can.Control.extend({
 				m_global_v.showmessageindialog('newfile', data.err);
 			} else {
 				$('#newfile').modal('hide');
-				if(newfiletype == 'doc')
+				if(m_global_v.newfiletype == 'doc')
 					m_global_v.showmessagebox('newfile', 'createfilesuccess', 1);
 				else
 					m_global_v.showmessagebox('newfolder', 'createfoldersuccess', 1);
@@ -689,16 +862,26 @@ var ReNameControl = can.Control.extend({
 /********************deletefile**********************/
 var DeleteControl = can.Control.extend({
 	m_global_v:'',
-	//m_object:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
-		//m_object = this.options.m_object;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
+		this.keydown();
 	},
+
+	
 	'#delete-ok click':function(){
-		//if(m_global_v.operationLock)
-				//return;
+		this.deletefile();
+	},
+	keydown:function(){
+		self = this;
+		$(window).keydown(function(){
+		  m_global_v.pressenter(arguments[0],self.deletefile);
+		});
+	},
+	deletefile:function(){
+		if(m_global_v.operationLock)
+			return;
 		m_global_v.operationLock = true;
 		m_global_v.loading('delete-buttons');
 		m_global_v.socket.emit('delete', {
@@ -720,6 +903,7 @@ var DeleteControl = can.Control.extend({
 	}
 });
 /****************************************************/
+
 
 /*********************Share Files********************/
 var ShareController = can.Control.extend({
@@ -831,14 +1015,13 @@ var ShareController = can.Control.extend({
 
 var FileListController = can.Control.extend({
 	m_global_v:'',
+	room_construct:'',
 	m_object:'',
-	roomCtrl: undefined,
-	self: this,
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
-		self.roomCtrl = this.options.roomControl;
+		room_construct = this.options.room_construct;
 		this.element.append(can.view("../ejs/filelist.ejs", {}));
-		this.initfilelistevent(m_global_v.filelist, roomCtrl);
+		this.initfilelistevent(m_global_v.filelist);
 	},	
 	'#delete-ok click':function(o){
 		//if(m_global_v.operationLock)
@@ -849,7 +1032,7 @@ var FileListController = can.Control.extend({
 			path: m_object.path
 		});
 	},
-	initfilelistevent:function(fl, roomCtrl) {
+	initfilelistevent:function(fl) {
 		var self = this;
 		fl.onname = function(o) {
 			if(m_global_v.operationLock)
@@ -862,9 +1045,9 @@ var FileListController = can.Control.extend({
 					m_global_v.currentDirString = m_global_v.getdirstring();
 				});
 			}
-			
+			 
 			else if(o.type == 'doc') {
-				roomCtrl.openeditor(o);
+				room_construct.openeditor(o);
 			}
 		};
 	
@@ -963,6 +1146,7 @@ var ChangeAvatarControl = can.Control.extend({
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/changeavatar.ejs", {}));
+		this.socket_io();
 	},
 	'#changeavatar-input change': function() {
 		this.changeavatar($('#changeavatar-input')[0]);
@@ -995,6 +1179,22 @@ var ChangeAvatarControl = can.Control.extend({
 			}
 		}
 		reader.readAsDataURL(file);
+	},
+	socket_io:function(){	
+		m_global_v.socket.on('avatar', function(data){
+			if(data.err){
+				m_global_v.showmessage('changeavatar-message', data.err, 'error');
+			} else {
+				m_global_v.currentUser.avatar = data.url;
+				$('#nav-avatar').attr('src', m_global_v.currentUser.avatar);
+				$('#changeavatar-img').attr('src', m_global_v.currentUser.avatar);
+				$('img.user-' + m_global_v.currentUser.name).attr('src', m_global_v.currentUser.avatar);
+				m_global_v.memberlist.refreshpopover(m_global_v.currentUser);
+				m_global_v.memberlistdoc.refreshpopover(m_global_v.currentUser);
+				m_global_v.showmessage('changeavatar-message', 'changeavatarok');
+			}
+			m_global_v.operationLock = false;
+		});
 	}
 });
 /****************************************************/
@@ -1171,142 +1371,6 @@ var FooterController = can.Control.extend({
 /****************************************************/
 
 
-
-
-/***********************test*************************/
-Lala = can.Construct.extend({
-},
-{
-	init:function(haha){
-		this.Glele = haha.lela;
-	},
-	print:function(){
-		this.Glele = "a";
-		console.log(this.Glele);	
-	}	
-});
-var lela = "bbbbbb";
-var lala = new Lala({lela:lela});
-lala.print();
-lala.lela = "a";
-console.log(lela);
-/****************************************************/
-
-function loading(id) {
-	if(loadings[id])
-		return;
-	var o = $('#' + id);
-	o.after('<p id="' + id + '-loading" align="center" style="margin:1px 0 2px 0"><img src="images/loading.gif"/></p>');
-	o.hide();
-	loadings[id] = {self: o, loading: $('#' + id + '-loading')};
-}
-
-function removeloading(id) {
-	if(!loadings[id])
-		return;
-	loadings[id].self.show();
-	loadings[id].loading.remove();
-	delete loadings[id];
-}
-
-function cleanloading() {
-	for(var k in loadings) {
-		removeloading(k);
-	}
-}
-/*
-function showmessage(id, stringid, type) {
-	var o = $('#' + id);
-	o.removeClass('alert-error');
-	o.removeClass('alert-success');
-	o.removeClass('alert-info');
-	if(type && type != '' && type != 'warning')
-		o.addClass('alert-' + type);
-	if(strings[stringid])
-		$('#' + id + ' span').html(strings[stringid]);
-	else
-		$('#' + id + ' span').html(stringid);
-	o.slideDown();
-}
-
-function showmessageindialog(id, stringid, index) {
-	if(index === undefined) {
-		$('#' + id + ' .control-group').addClass('error');
-		if(strings[stringid])
-			$('#' + id + ' .help-inline').text(strings[stringid]);
-		else
-			$('#' + id + ' .help-inline').text(stringid);
-	} else {
-		$('#' + id + ' .control-group:eq('+index+')').addClass('error');
-		if(strings[stringid])
-			$('#' + id + ' .help-inline:eq('+index+')').text(strings[stringid]);
-		else
-			$('#' + id + ' .help-inline:eq('+index+')').text(stringid);
-	}
-}
-
-function showmessagebox(title, content, timeout) {
-	if(strings[title])
-		$('#messagedialogLabel').html(strings[title]);
-	else
-		$('#messagedialogLabel').html(title);
-	if(strings[content])
-		$('#messagedialogContent').html(strings[content]);
-	else
-		$('#messagedialogContent').html(content);
-	$('#messagedialog').modal('show');
-	t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout*1000);
-}*/
-/*function loadfailed() {
-	if(loadDone)
-		return;
-	failed = true;
-	$('#loading-init').remove();
-	showmessage('login-message', 'loadfailed');
-}*/
-
-
-function pressenter(e, func, idUp, idDown) {
-	e = e || event;	
-	if(e.keyCode == 13 && loadDone)
-		func();
-	else if(e.keyCode == 38)
-		$('#' + idUp).focus();
-	else if(e.keyCode == 40)
-		$('#' + idDown).focus();
-}
-
-function checkusername() {
-	var name = $('#register-inputName').val();
-	if(name.length == "") {
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
-		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
-		return;
-	}
-	if(!/^[A-Za-z0-9]*$/.test(name)) {
-		$("#msg-username").html(strings['name invalid']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-		return;
-	}
-	if(name.length < 6) {
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -160px transparent");
-		$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");	
-		return;
-	}
-	if(name.length > 20) {
-		$("#msg-username").html(strings['namelength']);
-		$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-		$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-		return;
-	}
-	$("#msg-username").html("");
-	$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px -200px transparent");
-	$('#register-inputName').css("border-color","rgba(82,168,236,0.8)");
-	return;
-}
  
 
 var languagemap = { 
@@ -1369,177 +1433,26 @@ var modemap = {
 
 
 
-
-function winHeight() {
-	return window.innerHeight || (document.documentElement || document.body).clientHeight;
+function htmlescape(text) {
+	return text.
+		replace(/&/gm, '&amp;').
+		replace(/</gm, '&lt;').
+		replace(/>/gm, '&gt;').
+		replace(/ /gm, '&nbsp;').
+		replace(/\n/gm, '<br />');
 }
 
-function setFullScreen(cm, full) {
-	var wrap = cm.getWrapperElement();
-	if (full) {
-		$('#editormain').css('position', 'static');
-		$('#editormain-inner').css('position', 'static');
-		$('#fullscreentip').fadeIn();
-		setTimeout('$(\'#fullscreentip\').fadeOut();', 1000);
-		wrap.className += " CodeMirror-fullscreen";
-		wrap.style.height = winHeight() + "px";
-		document.documentElement.style.overflow = "hidden";
-	} else {
-		$('#editormain').css('position', 'fixed');
-		$('#editormain-inner').css('position', 'relative');
-		$('#fullscreentip').hide();
-		wrap.className = wrap.className.replace(" CodeMirror-fullscreen", "");
-		wrap.style.height = "";
-		document.documentElement.style.overflow = "";
-	}
-	cm.refresh();
-	cm.focus();
-}
-
-	function htmlescape(text) {
-		return text.
-			replace(/&/gm, '&amp;').
-			replace(/</gm, '&lt;').
-			replace(/>/gm, '&gt;').
-			replace(/ /gm, '&nbsp;').
-			replace(/\n/gm, '<br />');
-	}
-
-///////////////////// websocket & callback //////////////////////
 
 
 
-socket.on('register', function(data){
-	if(data.err){
-		showmessage('register-message', data.err, 'error');
-	}else{
-		showmessage('register-message', 'registerok');
-		$('#register-inputName').val('');
-		$('#register-inputPassword').val('');
-		$('#register-confirmPassword').val('');
-	}
-	removeloading('register-control');
-	registerLock = false;
-});
-
-
-function sharedone(data){
-	if(!data.err){
-		userlist.fromusers(data.doc.members);
-	}
-	$('#share-message').hide();
-	removeloading('share-buttons');
-	operationLock = false;
-}
-
-socket.on('password', function(data){
-	if(data.err){
-		showmessageindialog('changepassword', data.err, 0);
-	} else {
-		$('#changepassword').modal('hide');
-		showmessagebox('changepassword', 'changepassworddone', 1);
-	}
-	removeloading('changepassword-buttons');
-	operationLock = false;
-});
 
 
 
-socket.on('avatar', function(data){
-	if(data.err){
-		showmessage('changeavatar-message', data.err, 'error');
-	} else {
-		currentUser.avatar = data.url;
-		$('#nav-avatar').attr('src', currentUser.avatar);
-		$('#changeavatar-img').attr('src', currentUser.avatar);
-		$('img.user-' + currentUser.name).attr('src', currentUser.avatar);
-		memberlist.refreshpopover(currentUser);
-		memberlistdoc.refreshpopover(currentUser);
-		showmessage('changeavatar-message', 'changeavatarok');
-	}
-	operationLock = false;
-});
+
 
 ////////////////////// click event //////////////////////////////
 
-function loginview() {
-	if(viewswitchLock)
-		return;
-	viewswitchLock = true;
-	$('#register .blink').fadeOut('fast');
-	$('#register-message').slideUp();
-	$('#register-padding').fadeOut('fast', function(){
-		$('#login').show();
-		$('#login .blink').fadeIn('fast');
-		$('#register').hide();
-		$('#login-inputName').val('');
-		$('#login-inputPassword').val('');
-		$('#login-message').hide();
-		$('#login-padding').slideUp('fast', function(){
-			$('#login-inputName').focus();
-			viewswitchLock = false;
-		});
-		resize();
-	});
-}
-
-function registerview() {
-	if(viewswitchLock)
-		return;
-	viewswitchLock = true;
-	$('#login .blink').fadeOut('fast');
-	$('#login-message').slideUp();
-	$('#login-padding').slideDown('fast', function(){
-		$('#register').show();
-		$('#register .blink').fadeIn('fast');
-		$('#login').hide();
-		$('#register-inputName').val('');
-		$('#register-inputPassword').val('');
-		$('#register-confirmPassword').val('');
-		$('#register-message').hide();
-		$('#register-padding').fadeIn('fast', function(){
-			$('#register-inputName').focus();
-			viewswitchLock = false;
-		});
-		resize();
-	});
-}
-
-function register() {
-	var name = $('#register-inputName').val();
-	var pass = $('#register-inputPassword').val();
-	var confirm = $('#register-confirmPassword').val();
-	if(!/^[A-Za-z0-9]*$/.test(name)) {
-		showmessage('register-message', 'name invalid');
-		return;
-	}
-	if(name.length < 6 || name.length > 20) {
-		showmessage('register-message', 'namelength');
-		return;
-	}
-	if(pass.length > 32){
-		showmessage('register-message', 'passlength');
-		return;
-	}
-	if(pass != confirm) {
-		showmessage('register-message', 'doesntmatch');
-		return;
-	}
-	if(registerLock)
-		return;
-	registerLock = true;
-	loading('register-control');
-	socket.emit('register', {
-		name:name,
-		password:pass,
-		avatar:'images/character.png'
-	});
-}
-
-
-var editor;
-var chatstate = false;
-var oldwidth;
+/*
 
 function togglechat(o) {
 	if(viewswitchLock)
@@ -1562,114 +1475,47 @@ function togglechat(o) {
 	editor.refresh();
 	resize();
 	chatstate = !chatstate;
-}
-
-
-var deleteconfirm = function(){;};
-
-var rename = function(){;};
-
-
-/*
-function initfilelistevent(fl) {
-
-	fl.onname = function(o) {
-		if(operationLock)
-			return;
-		if(o.type == 'dir') {
-			currentDir.push(o.name);
-			currentDirString = getdirstring();
-			refreshfilelist(function() {
-				currentDir.pop();
-				currentDirString = getdirstring();
-			});
-		} else if(o.type == 'doc') {
-			openeditor(o);
-		}
-	};
-	
-	fl.ondelete = function(o) {
-		if(o.type == 'dir')
-			$('#delete').find('.folder').text(strings['folder']);
-		else
-			$('#delete').find('.folder').text(strings['file']);
-		$('#delete-name').text(o.name);
-		$('#delete').modal('show');
-		deleteconfirm = function() {
-			if(operationLock)
-				return;
-			operationLock = true;
-			loading('delete-buttons');
-			socket.emit('delete', {
-				path: o.path
-			});
-		};
-	};
-	
-	fl.onrename = function(o) {
-		$('#rename-inputName').val(o.name);
-		$('#rename .control-group').removeClass('error');
-		$('#rename .help-inline').text('');
-		$('#rename').modal('show');
-	};
-	
-	fl.onshare = function(o) {
-		$('#share-name').text(o.name);
-		$('#share-inputName').val('');
-		$('#share-message').hide();
-		userlist.fromusers(o.members);
-		$('#share').modal('show');
-		currentsharedoc = o;
-	};
 }*/
+
+
+
 
 /////////////////////// initialize ///////////////////////////
 
 $(document).ready(function() {
+    	//global data
+	global_v = new GlobalVariables({
+		////////////////////////// vars ///////////////////////////////
+		////////////////////////Socket//////////////////////
+		g_socket:socket,
+
+		///////////////////////language related///////////////////
+		g_strings:strings,
+		g_strings_en:strings_en,
+		g_strings_cn:strings_cn,
+		///////////////////////theme related//////// //////////////
+		g_myTheme:myTheme
+	});
 
     setTimeout('global_v.loadfailed()', 10000);
 
-    CodeMirror.on(window, "resize", function() {
-		var showing = document.getElementsByClassName("CodeMirror-fullscreen")[0];
-		if (!showing) return;
-		showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px";
-    });
+	//filelist init
+	global_v.filelist = fileList('#file-list-table');
+	global_v.filelist.clear();
 
-	editor = CodeMirror.fromTextArea($('#editor-textarea').get(0), {
-		lineNumbers: true,
-		lineWrapping: true,
-		indentUnit: 4,
-		indentWithTabs: true,
-		extraKeys: {
-			"Esc": function(cm) {
-				if (isFullScreen(cm)) setFullScreen(cm, false);
-				resize();
-			}/*,
-			"Ctrl-S": saveevent*/
-		},
-		gutters: ["runat", "CodeMirror-linenumbers", "breakpoints"]
-	});
-	
-	editor.on("gutterClick", function(cm, n) {
-		gutterclick(cm, n);
-	});
-	
-	gutterclick = function(cm, n) {};
+	//userlist init
+	global_v.userlist = userList('#share-user-list');
+	global_v.userlist.clear();
 
-	filelist = fileList('#file-list-table');
-	filelist.clear();
-
-	//initfilelistevent(filelist);
+	//memberlist init	
+	global_v.memberlist = userListAvatar('#member-list');
+	global_v.memberlistdoc = userListAvatar('#member-list-doc');
 	
-	userlist = userList('#share-user-list');
-	userlist.clear();
+	//expressionlist init
+	global_v.expressionlist = expressionList('#varlist-table');
+	expressionlist = global_v.expressionlist;
 	
-	memberlist = userListAvatar('#member-list');
-	memberlistdoc = userListAvatar('#member-list-doc');
-	
-	expressionlist = expressionList('#varlist-table');
-	
-	docshowfilter = {};
+	global_v.docshowfilter = {};
 
 	$('#newfile').on('shown', function() {
 		$('#newfile-inputName').focus();
@@ -1689,58 +1535,7 @@ $(document).ready(function() {
 
 	///*********************data init area**********************///
 	
-	//global data
-	global_v = new GlobalVariables({
-		////////////////////////// vars ///////////////////////////////
-		g_editor: editor,
-		g_currentUser:currentUser,
-		g_currentDir:currentDir,
-		g_currentDirString:currentDirString,
-		g_dirMode:dirMode,
 
-		g_newfiletype:newfiletype,
-		g_filelisterror:filelisterror,
-		g_docshowfilter:docshowfilter,
-		g_filelist:filelist,
-
-		g_userlist:userlist,
-		g_currentsharedoc:currentsharedoc,
-
-		g_memberlist:memberlist,
-		g_memberlistdoc:memberlistdoc,
-
-		g_expressionlist:expressionlist,
-
-		g_movehandler:movehandler,
-
-		g_dochandler:dochandler,
-		g_doccallback:doccallback,
-
-		g_loadDone:loadDone,
-		g_failed:failed,
-
-		g_loadings:loadings,
-
-		g_gutterclick:gutterclick,
-
-		g_firstconnect:firstconnect,
-
-		/////////////////////// locks //////////////////////////////////
-		g_loginLock:loginLock,
-		g_registerLock:registerLock,
-		g_viewswitchLock:viewswitchLock,
-		g_operationLock:operationLock,
-
-		////////////////////////Socket//////////////////////
-		g_socket:socket,
-
-		///////////////////////language related///////////////////
-		g_strings:strings,
-		g_strings_en:strings_en,
-		g_strings_cn:strings_cn,
-		///////////////////////theme related//////////////////////
-		g_myTheme:myTheme
-	});
 	//login
 	var login_information = new LoginInformation({
 		login_name: '',
@@ -1749,13 +1544,13 @@ $(document).ready(function() {
 
 	//创建Model和Controller
 	room_Model = new RoomModel({});
-	room_Controller = new RoomController("", {
+	room_Construct = new RoomConstruct({
 		roomModel: room_Model,
 		globalModel: global_v
 	});
-
-	///******************data init area end**********************///
 	
+	///******************data init area end**********************///
+
 	if(!ENABLE_RUN) {
 		$('#editor-run').remove();
 		if(!ENABLE_DEBUG) {
@@ -1769,44 +1564,6 @@ $(document).ready(function() {
 	
 	$('body').show();
 	$('#login-inputName').focus();
-
-	$('#register-inputName').focus(function(){
-		$("#msg-username").html(strings['name invalid'] + "," + strings['namelength']);
-	});
-
-	$('#register-inputPassword').focus(function(){
-		var name = $('#register-inputName').val();
-		if(!/^[A-Za-z0-9]*$/.test(name)) {
-			$("#msg-username").html(strings['name invalid']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		if(name == "" || name.length < 6 || name.length > 20) {
-			$("#msg-username").html(strings['namelength']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		return;
-	});
-
-	$("#register-confirmPassword").focus(function(){
-		var name = $('#register-inputName').val();
-		if(!/^[A-Za-z0-9]*$/.test(name)) {
-			$("#msg-username").html(strings['name invalid']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		if(name.length < 6 || name.length > 20) {
-			$("#msg-username").html(strings['namelength']);
-			$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
-			$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
-			return;
-		}
-		return;
-	});
 	
 	if((!Browser.chrome || parseInt(Browser.chrome) < 18) &&
 		(!Browser.opera || parseInt(Browser.opera) < 12)) {
@@ -1822,8 +1579,8 @@ $(document).ready(function() {
 		});
 	}
 
-	room_Controller.resize();
-	$(window).resize(room_Controller.resize);
+	room_Construct.resize();
+	$(window).resize(room_Construct.resize);
 	$(window).scroll(function() {
 		$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
 	});
@@ -1832,8 +1589,9 @@ $(document).ready(function() {
 		var margin_left = (width/2 - 108) + "px";
 		$("#foot-information").css("margin-left",margin_left);	
 	});
+
 	var footer_control = new FooterController('#footer',{m_global_v:global_v});
-	var file_list_control = new FileListController('#file-list-table',{m_global_v:global_v, roomControl: room_Controller});
+	var file_list_control = new FileListController('#file-list-table',{m_global_v:global_v, room_construct: room_Construct});
 	var new_file_control = new NewFileController('#newfile',{m_global_v:global_v});
 	var file_tabs_control = new FileTabsContorl('#file-tabs',{m_global_v:global_v});
 	var change_pass_control = new ChangePassControl('#changepassword',{m_global_v:global_v});
@@ -1842,7 +1600,8 @@ $(document).ready(function() {
 	var share_control = new ShareController('#share',{m_global_v:global_v});
 	var delete_controller = new DeleteControl('#delete',{m_global_v:global_v});
 	var rename_controller = new ReNameControl('#rename',{m_global_v:global_v});
-	var login_control = new LoginControl('#login-box',{m_login_information:login_information,m_global_v:global_v}); 
+	var register_control = new RegisterController('#register',{m_global_v:global_v}); 
+	var login_control = new LoginControl('#login-box',{m_global_v:global_v,m_login_information:login_information}); 
 	
 	$('[localization]').html(function(index, old) {
 		if(strings[old])

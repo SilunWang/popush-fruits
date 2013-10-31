@@ -1,22 +1,20 @@
-var Run_debugController = can.Control.extend({
+var RunCodeConstruct = can.Construct.extend({}, {
 
 	//当前页面的模型
 	roomModel: undefined,
 	//全局模型
 	globalModel: undefined,
 	//当前页面的主控制器
-	roomController: undefined,
-	//解决init函数this指针问题
-	self: this,
+	roomConstruct: undefined,
 
-	init: function(element, options) {
+	init: function(options) {
 
-		self.roomModel = this.options.roomModel;
-		self.globalModel = this.options.globalModel;
-		self.roomController = this.options.roomController;
+		this.roomModel = options.roomModel;
+		this.globalModel = options.globalModel;
+		this.roomConstruct = options.roomConstruct;
 
 		//初始化socket
-		var socket = self.globalModel.socket;
+		var socket = this.globalModel.socket;
 		this.socket_on_add_expr(socket);
 		this.socket_on_rm_expr(socket);
 		this.socket_on_run(socket);
@@ -31,7 +29,7 @@ var Run_debugController = can.Control.extend({
 		this.socket_on_bps(socket);
 		
 		//初始化expressionList
-		var expressionlist = self.globalModel.expressionlist;
+		var expressionlist = this.globalModel.expressionlist;
 		expressionlist.renameExpression = this.expressionlist_renameExpression;
 		expressionlist.renameExpressionDone = this.expressionlist_renameExpressionDone;
 		expressionlist.removeExpression = this.expressionlist_removeExpression;
@@ -44,15 +42,15 @@ var Run_debugController = can.Control.extend({
 		//解决this指针问题
 		var localThis = this;
 		//模型变量的引用
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 
 		if (ENABLE_RUN) {
-			vars.runable = self.roomModel.isrunable(ext);
+			vars.runable = this.roomModel.isrunable(ext);
 		}
 		if (ENABLE_DEBUG) {
-			vars.debugable = self.roomModel.isdebugable(ext);
+			vars.debugable = this.roomModel.isdebugable(ext);
 			if (vars.debugable) {
-				self.globalModel.gutterclick = function(cm, n) {
+				this.globalModel.gutterclick = function(cm, n) {
 					if (vars.debugLock && !vars.waiting)
 						return;
 					//如果断点删除失败（本身不存在），则增加断点，否则删除断点
@@ -61,11 +59,11 @@ var Run_debugController = can.Control.extend({
 					}
 				};
 			} else {
-				self.globalModel.gutterclick = function(cm, n) {};
+				this.globalModel.gutterclick = function(cm, n) {};
 			}
 			this.removeallbreakpoints();
 		}
-		self.roomController.setrunanddebugstate();
+		this.roomConstruct.setrunanddebugstate();
 	},
 
 	//向服务器发送设置的断点信息
@@ -74,15 +72,15 @@ var Run_debugController = can.Control.extend({
 	//text:增加断点=1,取消断点=0
 	sendbreak: function(from, to, text) {
 		var req = {
-			version: self.roomModel.vars.doc.version,
+			version: this.roomModel.vars.doc.version,
 			from: from,
 			to: to,
 			text: text
 		};
-		if (self.roomModel.vars.bq.length == 0) {
+		if (this.roomModel.vars.bq.length == 0) {
 			socket.emit('bps', req);
 		}
-		self.roomModel.vars.bq.push(req);
+		this.roomModel.vars.bq.push(req);
 	},
 
 	//增加一个断点
@@ -135,15 +133,15 @@ var Run_debugController = can.Control.extend({
 
 	//调试的时候，在界面标注当前进行在第几行，n：行数
 	runtoline: function(n) {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		if (vars.runningline >= 0) {
-			self.globalModel.editor.removeLineClass(runningline, '*', 'running');
-			self.globalModel.editor.setGutterMarker(runningline, 'runat', null);
+			this.roomModel.vars.editor.removeLineClass(runningline, '*', 'running');
+			this.roomModel.vars.editor.setGutterMarker(runningline, 'runat', null);
 		}
 		if (n >= 0) {
-			self.globalModel.editor.addLineClass(n, '*', 'running');
-			self.globalModel.editor.setGutterMarker(n, 'runat', $('<div><img src="images/arrow.png" width="16" height="16" style="min-width:16px;min-width:16px;" /></div>').get(0));
-			self.globalModel.editor.scrollIntoView({
+			this.roomModel.vars.editor.addLineClass(n, '*', 'running');
+			this.roomModel.vars.editor.setGutterMarker(n, 'runat', $('<div><img src="images/arrow.png" width="16" height="16" style="min-width:16px;min-width:16px;" /></div>').get(0));
+			this.roomModel.vars.editor.scrollIntoView({
 				line: n,
 				ch: 0
 			});
@@ -155,13 +153,13 @@ var Run_debugController = can.Control.extend({
 	initbreakpoints: function(bpsstr) {
 		var vars = this.roomModel.vars;
 		vars.bps = bpsstr;
-		for (var i = bpsstr.length; i < this.globalModel.editor.lineCount(); i++) {
+		for (var i = bpsstr.length; i < this.roomModel.vars.editor.lineCount(); i++) {
 			vars.bps += "0";
 		}
 		for (var i = 0; i < vars.bps.length; i++) {
 			if (vars.bps[i] == "1") {
 				var element = $('<div><img src="images/breakpoint.png" /></div>').get(0);
-				this.globalModel.editor.setGutterMarker(i, 'breakpoints', element);
+				this.roomModel.vars.editor.setGutterMarker(i, 'breakpoints', element);
 			}
 		}
 	},
@@ -188,16 +186,16 @@ var Run_debugController = can.Control.extend({
 
 	//要调试一个程序时调用，向服务器传送相应数据
 	debug: function() {
-		var vars = self.roomModel.vars;
-		if (!self.roomModel.debugenabled())
+		var vars = this.roomModel.vars;
+		if (!this.roomModel.debugenabled())
 			return;
-		if (self.globalModel.operationLock)
+		if (this.globalModel.operationLock)
 			return;
-		self.globalModel.operationLock = true;
+		this.globalModel.operationLock = true;
 		if (vars.debugLock) {
-			self.globalModel.socket.emit('kill');
+			this.globalModel.socket.emit('kill');
 		} else {
-			self.globalModel.socket.emit('debug', {
+			this.globalModel.socket.emit('debug', {
 				version: vars.doc.version,
 				type: vars.ext
 			});
@@ -206,59 +204,59 @@ var Run_debugController = can.Control.extend({
 
 	//调试-逐语句
 	debugstep: function() {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		if (vars.debugLock && vars.waiting) {
-			self.globalModel.socket.emit('step', {});
+			this.globalModel.socket.emit('step', {});
 		}
 	},
 
 	//调试-逐过程
 	debugnext: function() {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		if (vars.debugLock && vars.waiting) {
-			self.globalModel.socket.emit('next', {});
+			this.globalModel.socket.emit('next', {});
 		}
 	},
 
 	//调试-跳出过程
 	debugfinish: function() {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		if (vars.debugLock && vars.waiting) {
-			self.globalModel.socket.emit('finish', {});
+			this.globalModel.socket.emit('finish', {});
 		}
 	},
 
 	//调试-继续
 	debugcontinue: function() {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		if (vars.debugLock && vars.waiting) {
-			self.globalModel.socket.emit('resume', {});
+			this.globalModel.socket.emit('resume', {});
 		}
 	},
 
 	//根据断点的信息初始化网页断点,bpsstr:传入的断点信息
 	initbreakpoints: function(bpsstr) {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		vars.bps = bpsstr;
-		for (var i = bpsstr.length; i < self.globalModel.editor.lineCount(); i++) {
+		for (var i = bpsstr.length; i < this.roomModel.vars.editor.lineCount(); i++) {
 			vars.bps += "0";
 		}
 		for (var i = 0; i < vars.bps.length; i++) {
 			if (vars.bps[i] == "1") {
 				var element = $('<div><img src="images/breakpoint.png" /></div>').get(0);
-				self.globalModel.editor.setGutterMarker(i, 'breakpoints', element);
+				this.roomModel.vars.editor.setGutterMarker(i, 'breakpoints', element);
 			}
 		}
 	},
 
 	//删除所有断点
 	removeallbreakpoints: function() {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		for (var i = 0; i < vars.bps.length; i++) {
 			if (vars.bps[i] == "1") {
-				var info = self.globalModel.editor.lineInfo(i);
+				var info = this.roomModel.vars.editor.lineInfo(i);
 				if (info.gutterMarkers && info.gutterMarkers["breakpoints"]) {
-					self.globalModel.editor.setGutterMarker(i, 'breakpoints', null);
+					this.roomModel.vars.editor.setGutterMarker(i, 'breakpoints', null);
 				}
 			}
 		}
@@ -267,18 +265,18 @@ var Run_debugController = can.Control.extend({
 
 	//处理控制台的输入
 	stdin: function() {
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		if (vars.debugLock && vars.waiting)
 			return;
 		var text = $('#console-input').val();
 		//当处于运行等待状态时，发送输入框数据到服务器
 		if (vars.runLock || vars.debugLock) {
-			self.globalModel.socket.emit('stdin', {
+			this.globalModel.socket.emit('stdin', {
 				data: text + '\n'
 			});
 			//在发送之后，也在控制台输出了内容，应当是别的函数调用了appendtoconsole
 		} else {
-			self.roomController.appendtoconsole(text + '\n', 'stdin');
+			this.roomConstruct.appendtoconsole(text + '\n', 'stdin');
 		}
 		$('#console-input').val('');
 	},
@@ -305,12 +303,12 @@ var Run_debugController = can.Control.extend({
 	//接收到服务器发送的运行消息
 	//data : {(uesr)name, time};
 	socket_on_run: function(socket) {
-		var localRoomController = self.roomController;
-
+		var localRoom = this.roomConstruct;
+		var localThis = this;
 		socket.on('run', function(data) {
-			localRoomController.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['runsaprogram'], new Date(data.time));
-			localRoomController.setrun();
-			self.globalModel.operationLock = false;
+			localRoom.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['runsaprogram'], new Date(data.time));
+			localRoom.setrun();
+			localThis.globalModel.operationLock = false;
 		});
 	},
 
@@ -319,26 +317,26 @@ var Run_debugController = can.Control.extend({
 	//data : {(uesr)name, time, text（程序）, bps(断点信息字符串)};
 	socket_on_debug: function(socket) {
 		var localThis = this;
-		var localRoomController = self.roomController;
-		var strings = self.globalModel.strings;
+		var localRoom = this.roomConstruct;
+		var strings = this.globalModel.strings;
 		socket.on('debug', function(data) {
-			localRoomController.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['startdebug'], new Date(data.time));
+			localRoom.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['startdebug'], new Date(data.time));
 
-			localRoomController.setdebug();
+			localRoom.setdebug();
 
-			self.globalModel.editor.setOption('readOnly', true);
-			self.roomModel.vars.old_text = self.globalModel.editor.getValue();
-			self.roomModel.vars.old_bps = self.roomModel.vars.bps;
-			self.globalModel.editor.setValue(data.text);
+			localThis.roomModel.vars.editor.setOption('readOnly', true);
+			localThis.roomModel.vars.old_text = localThis.roomModel.vars.editor.getValue();
+			localThis.roomModel.vars.old_bps = localThis.roomModel.vars.bps;
+			localThis.roomModel.vars.editor.setValue(data.text);
 			localThis.removeallbreakpoints();
 			localThis.initbreakpoints(data.bps);
 
-			var editordoc = self.globalModel.editor.getDoc();
+			var editordoc = localThis.roomModel.vars.editor.getDoc();
 			var hist = editordoc.getHistory();
 			hist.done.pop();
 			editordoc.setHistory(hist);
 
-			self.globalModel.operationLock = false;
+			localThis.globalModel.operationLock = false;
 		});
 	},
 
@@ -346,7 +344,7 @@ var Run_debugController = can.Control.extend({
 	//?data : 一直是null?
 	socket_on_running: function(socket) {
 
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		var localThis = this;
 
 		socket.on('running', function(data) {
@@ -364,9 +362,9 @@ var Run_debugController = can.Control.extend({
 	//data : {line, exprs}
 	socket_on_waiting: function(socket) {
 
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		var localThis = self;
-		var strings = self.globalModel.strings;
+		var strings = this.globalModel.strings;
 
 		socket.on('waiting', function(data) {
 			if (!vars.debugLock)
@@ -393,25 +391,25 @@ var Run_debugController = can.Control.extend({
 
 	//处理输出
 	socket_on_stdout: function(socket) {
-		var localRoomController = self.roomController;
+		var localRoom = this.roomConstruct;
 		socket.on('stdout', function(data) {
-			localRoomController.appendtoconsole(data.data);
+			localRoom.appendtoconsole(data.data);
 		});
 	},
 
 	//处理输入
 	socket_on_stdin: function(socket) {
-		var localRoomController = self.roomController;
+		var localRoom = this.roomConstruct;
 		socket.on('stdin', function(data) {
-			localRoomController.appendtoconsole(data.data, 'stdin');
+			localRoom.appendtoconsole(data.data, 'stdin');
 		});
 	},
 
 	//处理错误流
 	socket_on_stderr: function(socket) {
-		var localRoomController = self.roomController;
+		var localRoom = this.roomConstruct;
 		socket.on('stderr', function(data) {
-			localRoomController.appendtoconsole(data.data, 'stderr');
+			localRoom.appendtoconsole(data.data, 'stderr');
 		});
 	},
 
@@ -420,18 +418,18 @@ var Run_debugController = can.Control.extend({
 	socket_on_exit: function(socket) {
 
 		var localThis = this;
-		var localRoomController = self.roomController;
-		var vars = self.roomModel.vars;
-		var strings = self.globalModel.strings;
+		var localRoom = this.roomConstruct;
+		var vars = this.roomModel.vars;
+		var strings = this.globalModel.strings;
 
 		socket.on('exit', function(data) {
 
-			self.globalModel.operationLock = false;
+			localThis.globalModel.operationLock = false;
 
 			if (data.err.code !== undefined)
-				localRoomController.appendtochatbox(strings['systemmessage'], 'system', strings['programfinish'] + '&nbsp;' + data.err.code, new Date(data.time));
+				localRoom.appendtochatbox(strings['systemmessage'], 'system', strings['programfinish'] + '&nbsp;' + data.err.code, new Date(data.time));
 			else
-				localRoomController.appendtochatbox(strings['systemmessage'], 'system', strings['programkilledby'] + '&nbsp;' + data.err.signal, new Date(data.time));
+				localRoom.appendtochatbox(strings['systemmessage'], 'system', strings['programkilledby'] + '&nbsp;' + data.err.signal, new Date(data.time));
 
 			//运行时退出
 			if (vars.runLock) {
@@ -441,28 +439,28 @@ var Run_debugController = can.Control.extend({
 			}
 			//调试时退出
 			if (vars.debugLock) {
-				self.globalModel.editor.setValue(vars.old_text);
+				localThis.roomModel.vars.editor.setValue(vars.old_text);
 				localThis.removeallbreakpoints();
 				localThis.initbreakpoints(vars.old_bps);
 
-				var editordoc = self.globalModel.editor.getDoc();
+				var editordoc = localThis.roomModel.vars.editor.getDoc();
 				var hist = editordoc.getHistory();
 				hist.done.pop();
 				editordoc.setHistory(hist);
 
-				self.globalModel.editor.setOption('readOnly', false);
+				localThis.roomModel.vars.editor.setOption('readOnly', false);
 				if (vars.q.length > 0) {
-					self.globalModel.socket.emit('change', vars.q[0]);
+					localThis.globalModel.socket.emit('change', vars.q[0]);
 				}
 				$('#editor-debug').html('<i class="icon-eye-open"></i>');
 				$('#editor-debug').attr('title', strings['debug-title']);
 				localThis.runtoline(-1);
-				for (var k in self.globalModel.expressionlist.elements) {
-					self.globalModel.expressionlist.setValue(self.expressionlist.elements[k].expression, null);
+				for (var k in localThis.globalModel.expressionlist.elements) {
+					localThis.globalModel.expressionlist.setValue(localThis.expressionlist.elements[k].expression, null);
 				}
 				vars.debugLock = false;
 			}
-			localRoomController.setrunanddebugstate();
+			localRoom.setrunanddebugstate();
 			$('#console-title').text(strings['console'] + strings['finished']);
 		});
 	},
@@ -473,8 +471,8 @@ var Run_debugController = can.Control.extend({
 	//本函数在自己设置断点时被调用
 	socket_on_bpsok: function(socket) {
 
-		var vars = self.roomModel.vars;
-		var localRoomController = self.roomController;
+		var vars = this.roomModel.vars;
+		var localRoom = this.roomConstruct;
 
 		socket.on('bpsok', function(data) {
 			var chg = vars.bq.shift();
@@ -509,7 +507,7 @@ var Run_debugController = can.Control.extend({
 	//本函数在他人设置断点时被调用
 	socket_on_bps: function(socket) {
 
-		var vars = self.roomModel.vars;
+		var vars = this.roomModel.vars;
 		var localThis = self;
 
 
@@ -560,11 +558,11 @@ var Run_debugController = can.Control.extend({
 			if (data.to == data.from + 1) {
 				if (data.text == "1") {
 					var element = $('<div><img src="images/breakpoint.png" /></div>').get(0);
-					this.globalModel.editor.setGutterMarker(data.from, 'breakpoints', element);
+					this.roomModel.vars.editor.setGutterMarker(data.from, 'breakpoints', element);
 				} else if (data.text == "0") {
-					var info = this.globalModel.editor.lineInfo(data.from);
+					var info = this.roomModel.vars.editor.lineInfo(data.from);
 					if (info.gutterMarkers && info.gutterMarkers["breakpoints"]) {
-						this.globalModel.editor.setGutterMarker(data.from, 'breakpoints', null);
+						this.roomModel.vars.editor.setGutterMarker(data.from, 'breakpoints', null);
 					}
 				}
 			}

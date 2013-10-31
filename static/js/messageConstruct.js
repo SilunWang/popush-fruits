@@ -3,29 +3,28 @@
 /************************************************************************
 |    函数名称： SocketController                                                
 |    函数功能： 包装了与系统消息、聊天、语音有关的socket.on和相关函数                                            
-|    引用： globalModel roomModel roomController     
+|    引用： globalModel roomModel roomConstruct     
 |	 Author: SilunWang              
 *************************************************************************/
 
-var SocketController = can.Control.extend({
+var MessageConstruct = can.Construct.extend({}, {
 
 	globalModel: undefined,
 	roomModel: undefined,
-	roomController: undefined,
-	self: this,
+	roomConstruct: undefined,
 
-	init: function(element, options) {
+	init: function(options) {
 
-		self.globalModel = this.options.globalModel;
-		self.roomModel = this.options.roomModel;
-		self.roomController = this.options.roomController;
+		this.globalModel = options.globalModel;
+		this.roomModel = options.roomModel;
+		this.roomConstruct = options.roomConstruct;
 		
-		this.socket_on_chat(self.globalModel.socket);
-		this.socket_on_deleted(self.globalModel.socket);
-		this.socket_on_unshared(self.globalModel.socket);
-		this.socket_on_shared(self.globalModel.socket);
-		this.socket_on_join(self.globalModel.socket);
-		this.socket_on_leave(self.globalModel.socket);
+		this.socket_on_chat(this.globalModel.socket);
+		this.socket_on_deleted(this.globalModel.socket);
+		this.socket_on_unshared(this.globalModel.socket);
+		this.socket_on_shared(this.globalModel.socket);
+		this.socket_on_join(this.globalModel.socket);
+		this.socket_on_leave(this.globalModel.socket);
 	},
 
 
@@ -35,10 +34,10 @@ var SocketController = can.Control.extend({
 
 		socket.on('chat', function(data) {
 
-			var text = self.globalModel.htmlescape(data.text);
+			var text = this.globalModel.htmlescape(data.text);
 			var time = new Date(data.time);
 
-			mother.roomController.appendtochatbox(data.name, (data.name == currentUser.name ? 'self' : ''), text, time);
+			mother.roomConstruct.appendtochatbox(data.name, (data.name == currentUser.name ? 'self' : ''), text, time);
 		});
 	},
 
@@ -47,7 +46,7 @@ var SocketController = can.Control.extend({
 		var mother = this;
 		
 		socket.on('deleted', function(data) {
-			mother.roomController.closeeditor();
+			mother.roomConstruct.closeeditor();
 			mother.globalModel.showmessagebox('info', 'deleted', 1);
 		});
 	},
@@ -58,11 +57,11 @@ var SocketController = can.Control.extend({
 
 		socket.on('unshared', function(data) {
 			if (data.name == currentUser.name) {
-				mother.roomController.closeeditor();
+				mother.roomConstruct.closeeditor();
 				mother.globalModel.showmessagebox('info', 'you unshared', 1);
 			} else {
 				mother.globalModel.memberlistdoc.remove(data.name);
-				mother.roomController.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['unshared'], new Date(data.time));
+				mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['unshared'], new Date(data.time));
 			}
 		});
 	},
@@ -75,7 +74,7 @@ var SocketController = can.Control.extend({
 			mother.globalModel.memberlistdoc.add(data);
 			mother.globalModel.memberlistdoc.setonline(data.name, false);
 			mother.globalModel.memberlistdoc.sort();
-			mother.roomController.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
+			mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
 		});
 	},
 
@@ -93,8 +92,8 @@ var SocketController = can.Control.extend({
 			} else {
 				mother.globalModel.memberlistdoc.setonline(data.name, true);
 				mother.globalModel.memberlistdoc.sort();
-				mother.roomController.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
-				var cursor = mother.roomController.newcursor(data.name);
+				mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
+				var cursor = mother.roomConstruct.newcursor(data.name);
 				if (cursors[data.name] && cursors[data.name].element)
 					$(cursors[data.name].element).remove();
 				cursors[data.name] = {
@@ -113,7 +112,7 @@ var SocketController = can.Control.extend({
 		socket.on('leave', function(data) {
 			mother.globalModel.memberlistdoc.setonline(data.name, false);
 			mother.globalModel.memberlistdoc.sort();
-			mother.roomController.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
+			mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
 			if (cursors[data.name]) {
 				if (cursors[data.name].element)
 					$(cursors[data.name].element).remove();
