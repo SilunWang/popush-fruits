@@ -12,6 +12,7 @@ var EditorConstruct = can.Construct.extend({}, {
 	globalModel: undefined,
 	//room Model
 	roomModel: undefined,
+	//room Construct
 	roomConstruct: undefined,
 
 	init: function(options){
@@ -26,7 +27,7 @@ var EditorConstruct = can.Construct.extend({}, {
 	},
 
 	//标记已经保存
-	setsaved: function() {
+	setsave: function() {
 		this.roomModel.vars.savetimestamp = new Date().getTime();
 		setTimeout('this.setsavedthen(' + this.roomModel.vars.savetimestamp + ')', this.roomModel.vars.savetimeout);
 		this.roomModel.vars.savetimeout = 500;
@@ -34,12 +35,11 @@ var EditorConstruct = can.Construct.extend({}, {
 
 	//在页面上标记已经保存
 	setsavedthen: function(timestamp) {
-
 		if (this.roomModel.vars.savetimestamp == timestamp) {
 			$('#current-doc-state').removeClass('red');
-			$('#current-doc-state').text(strings['saved']);
+			$('#current-doc-state').text(this.globalModel.strings['saved']);
 			$('#editor-back').popover('destroy');
-			$('#editor-back').attr('title', strings['back']);
+			$('#editor-back').attr('title', this.globalModel.strings['back']);
 			this.roomModel.vars.issaving = false;
 			this.roomConstruct.setrunanddebugstate();
 		}
@@ -47,19 +47,19 @@ var EditorConstruct = can.Construct.extend({}, {
 
 	//在页面上标记正在保存
 	setsaving: function() {
-
+		var vars = this.roomModel.vars;
 		$('#current-doc-state').addClass('red');
-		$('#current-doc-state').text(strings['saving...']);
+		$('#current-doc-state').text(this.globalModel.strings['saving...']);
 		$('#editor-back').attr('title', '');
 		$('#editor-back').popover({
 			html: true,
-			content: strings['unsaved'],
+			content: this.globalModel.strings['unsaved'],
 			placement: 'right',
 			trigger: 'hover',
 			container: 'body'
 		});
-		this.roomModel.vars.savetimestamp = 0;
-		this.roomModel.vars.savetimestamp = true;
+		vars.savetimestamp = 0;
+		vars.savetimestamp = true;
 		this.roomConstruct.setrunanddebugstate();
 	},
 
@@ -74,8 +74,8 @@ var EditorConstruct = can.Construct.extend({}, {
 
 		var vars = this.roomModel.vars;
 
-		if (this.roomModel.bufferfrom != -1) {
-			if (this.roomModel.bufferto == -1) {
+		if (vars.bufferfrom != -1) {
+			if (vars.bufferto == -1) {
 				var req = {
 					version: vars.doc.version,
 					from: vars.bufferfrom,
@@ -107,22 +107,22 @@ var EditorConstruct = can.Construct.extend({}, {
 	},
 
 	//设置保存
-	//?没找到什么时候调用
-
+	//没找到什么时候调用
 	save: function() {
+		var vars = this.roomModel.vars;
 		this.setsaving();
-		if (this.roomModel.timer != null) {
-			clearTimeout(this.roomModel.timer);
+		if (vars.timer != null) {
+			clearTimeout(vars.timer);
 		}
-		this.roomModel.timer = setTimeout("this.sendbuffer", this.roomModel.buffertimeout);
+		vars.timer = setTimeout("this.sendbuffer", vars.buffertimeout);
 	},
 
 	//在按下ctrl+s之后调用的处理函数
-
 	saveevent: function(cm) {
-		if (this.roomModel.savetimestamp != 0)
-			this.setsavedthen(this.roomModel.savetimestamp);
-		this.roomModel.savetimestamp = 0;
+		var vars = this.roomModel.vars;
+		if (vars.savetimestamp != 0)
+			this.setsavedthen(vars.savetimestamp);
+		vars.savetimestamp = 0;
 	},
 
 	winHeight: function() {
@@ -137,7 +137,7 @@ var EditorConstruct = can.Construct.extend({}, {
 			$('#fullscreentip').fadeIn();
 			setTimeout('$(\'#fullscreentip\').fadeOut();', 1000);
 			wrap.className += " CodeMirror-fullscreen";
-			wrap.style.height = winHeight() + "px";
+			wrap.style.height = this.winHeight() + "px";
 			document.documentElement.style.overflow = "hidden";
 		} else {
 			$('#editormain').css('position', 'fixed');
@@ -152,10 +152,13 @@ var EditorConstruct = can.Construct.extend({}, {
 	},
 
 	InitEditor: function() {
+
+		var localThis = this;
+
 		CodeMirror.on(window, "resize", function() {
 			var showing = document.getElementsByClassName("CodeMirror-fullscreen")[0];
 			if (!showing) return;
-			showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px";
+			showing.CodeMirror.getWrapperElement().style.height = localThis.winHeight() + "px";
 		});
 
 		this.roomModel.vars.editor = CodeMirror.fromTextArea($('#editor-textarea').get(0), {
@@ -165,26 +168,26 @@ var EditorConstruct = can.Construct.extend({}, {
 			indentWithTabs: true,
 			extraKeys: {
 				"Esc": function(cm) {
-					if (isFullScreen(cm)) setFullScreen(cm, false);
-					resize();
+					if (localThis.roomConstruct.isFullScreen(cm)) localThis.setFullScreen(cm, false);
+					localThis.roomConstruct.resize();
 				},
 				"Ctrl-S": this.saveevent
 			},
-			gutters: ["runat", "CodeMirror-linenumbers", "breakpoints"]
+			gutters: ["rfunat", "CodeMirror-linenumbers", "breakpoints"]
 		});
 
 		this.roomModel.vars.editor.on("gutterClick", function(cm, n) {
-			gutterclick(cm, n);
+			this.roomConstruct.gutterclick(cm, n);
 		});
 
-		gutterclick = function(cm, n) {};
+		this.roomConstruct.gutterclick = function(cm, n) {};
 	},
 
 	
 	//当对代码的修改已保存时对应的响应函数，用于版本控制
 	//?data : undefined , 貌似没用
 	
-	socket_on_ok: function(socket){
+	socket_on_ok: function(socket) {
 
 		var vars = this.roomModel.vars;
 
@@ -218,105 +221,104 @@ var EditorConstruct = can.Construct.extend({}, {
 	
 	socket_on_change: function(socket){
 
-		var mother = this;
+		var localThis = this;
+		var vars = this.roomModel.vars
 		
 		socket.on('change', function(data) {
 
-			mother.roomModel.lock = true;
+			vars.lock = true;
 			var tfrom = data.from;
 			var tto = data.to;
 			var ttext = data.text;
-			var q = mother.roomModel.q;
 
-			for (var i = 0; i < q.length; i++) {
-				if (q[i].to <= tfrom) {
-					tfrom += q[i].text.length + q[i].from - q[i].to;
-					tto += q[i].text.length + q[i].from - q[i].to;
-				} else if (q[i].to <= tto && q[i].from <= tfrom) {
-					var tdlen = tto - q[i].to;
-					q[i].to = tfrom;
-					tfrom = q[i].from + q[i].text.length;
+			for (var i = 0; i < vars.q.length; i++) {
+				if (vars.q[i].to <= tfrom) {
+					tfrom += vars.q[i].text.length + vars.q[i].from - vars.q[i].to;
+					tto += vars.q[i].text.length + vars.q[i].from - vars.q[i].to;
+				} else if (vars.q[i].to <= tto && vars.q[i].from <= tfrom) {
+					var tdlen = tto - vars.q[i].to;
+					vars.q[i].to = tfrom;
+					tfrom = vars.q[i].from + vars.q[i].text.length;
 					tto = tfrom + tdlen;
-				} else if (q[i].to <= tto && q[i].from > tfrom) {
-					tto = tto + q[i].text.length + q[i].from - q[i].to;
-					ttext = q[i].text + ttext;
-					q[i].from = tfrom;
-					q[i].to = tfrom;
-				} else if (q[i].to > tto && q[i].from <= tfrom) {
-					var qlen = q[i].text.length;
-					//q[i].to = q[i].to + ttext.length + tfrom - tto;
-					q[i].to = q[i].to + ttext.length + tfrom - tto;
-					q[i].text = q[i].text + ttext;
-					tfrom = q[i].from + qlen;
+				} else if (vars.q[i].to <= tto && vars.q[i].from > tfrom) {
+					tto = tto + vars.q[i].text.length + vars.q[i].from - vars.q[i].to;
+					ttext = vars.q[i].text + ttext;
+					vars.q[i].from = tfrom;
+					vars.q[i].to = tfrom;
+				} else if (vars.q[i].to > tto && vars.q[i].from <= tfrom) {
+					var qlen = vars.q[i].text.length;
+					vars.q[i].to = vars.q[i].to + ttext.length + tfrom - tto;
+					vars.q[i].text = vars.q[i].text + ttext;
+					tfrom = vars.q[i].from + qlen;
 					tto = tfrom;
-				} else if (q[i].to > tto && q[i].from <= tto) {
-					var qdlen = q[i].to - tto;
-					tto = q[i].from;
-					q[i].from = tfrom + ttext.length;
-					q[i].to = q[i].from + qdlen;
-				} else if (q[i].from > tto) {
-					q[i].from += ttext.length + tfrom - tto;
-					q[i].to += ttext.length + tfrom - tto;
+				} else if (vars.q[i].to > tto && vars.q[i].from <= tto) {
+					var qdlen = vars.q[i].to - tto;
+					tto = vars.q[i].from;
+					vars.q[i].from = tfrom + ttext.length;
+					vars.q[i].to = vars.q[i].from + qdlen;
+				} else if (vars.q[i].from > tto) {
+					vars.q[i].from += ttext.length + tfrom - tto;
+					vars.q[i].to += ttext.length + tfrom - tto;
 				}
-				q[i].version++;
-				q[i].version = q[i].version % 65536;
+				vars.q[i].version++;
+				vars.q[i].version = vars.q[i].version % 65536;
 			}
 
-			for (var i = 0; i < bq.length; i++) {
-				bq[i].version++;
-				bq[i].version = bq[i].version % 65536;
+			for (var i = 0; i < vars.bq.length; i++) {
+				vars.bq[i].version++;
+				vars.bq[i].version = vars.bq[i].version % 65536;
 			}
 
-			if (mother.roomModel.bufferfrom != -1) {
-				if (mother.roomModel.bufferto == -1) {
-					if (mother.roomModel.bufferfrom <= tfrom) {
-						tfrom += mother.roomModel.buffertext.length;
-						tto += mother.roomModel.buffertext.length;
-					} else if (mother.bufferfrom <= tto) {
-						tto += mother.roomModel.buffertext.length;
-						ttext = mother.roomModel.buffertext + ttext;
-						mother.roomModel.bufferfrom = tfrom;
+			if (vars.bufferfrom != -1) {
+				if (vars.bufferto == -1) {
+					if (vars.bufferfrom <= tfrom) {
+						tfrom += vars.buffertext.length;
+						tto += vars.buffertext.length;
+					} else if (vars.bufferfrom <= tto) {
+						tto += vars.buffertext.length;
+						ttext = vars.buffertext + ttext;
+						vars.bufferfrom = tfrom;
 					} else {
-						mother.roomModel.bufferfrom += ttext.length + tfrom - tto;
+						vars.bufferfrom += ttext.length + tfrom - tto;
 					}
 				} else {
-					if (mother.roomModel.bufferto <= tfrom) {
-						tfrom += mother.roomModel.bufferfrom - mother.roomModel.bufferto;
-						tto += mother.roomModel.bufferfrom - mother.roomModel.bufferto;
-					} else if (mother.roomModel.bufferto <= tto && mother.roomModel.bufferfrom <= tfrom) {
-						var tdlen = tto - mother.roomModel.bufferto;
-						mother.roomModel.bufferto = tfrom;
-						tfrom = mother.roomModel.bufferfrom;
+					if (vars.bufferto <= tfrom) {
+						tfrom += vars.bufferfrom - vars.bufferto;
+						tto += vars.bufferfrom - vars.bufferto;
+					} else if (vars.bufferto <= tto && vars.bufferfrom <= tfrom) {
+						var tdlen = tto - vars.bufferto;
+						vars.bufferto = tfrom;
+						tfrom = vars.bufferfrom;
 						tto = tfrom + tdlen;
-					} else if (mother.roomModel.bufferto <= tto && mother.roomModel.bufferfrom > tfrom) {
-						tto = tto + mother.roomModel.bufferfrom - mother.roomModel.bufferto;
-						mother.roomModel.bufferfrom = -1;
-						mother.roomModel.bufferto = -1;
-					} else if (mother.roomModel.bufferto > tto && mother.roomModel.bufferfrom <= tfrom) {
-						mother.roomModel.bufferto = mother.roomModel.bufferto + ttext.length + tfrom - tto;
-						mother.roomModel.buffertext = mother.roomModel.buffertext + ttext;
-						tfrom = mother.roomModel.bufferfrom;
+					} else if (vars.bufferto <= tto && vars.bufferfrom > tfrom) {
+						tto = tto + vars.bufferfrom - vars.bufferto;
+						vars.bufferfrom = -1;
+						vars.bufferto = -1;
+					} else if (vars.bufferto > tto && vars.bufferfrom <= tfrom) {
+						vars.bufferto = vars.bufferto + ttext.length + tfrom - tto;
+						vars.buffertext = vars.buffertext + ttext;
+						tfrom = vars.bufferfrom;
 						tto = tfrom;
-					} else if (mother.roomModel.bufferto > tto && mother.roomModel.bufferfrom <= tto) {
-						var qdlen = mother.roomModel.bufferto - tto;
-						tto = mother.roomModel.bufferfrom;
-						mother.roomModel.bufferfrom = tfrom + ttext.length;
-						mother.roomModel.bufferto = mother.roomModel.bufferfrom + qdlen;
-					} else if (mother.roomModel.bufferfrom > tto) {
-						mother.roomModel.bufferfrom += ttext.length + tfrom - tto;
-						mother.roomModel.bufferto += ttext.length + tfrom - tto;
+					} else if (vars.bufferto > tto && vars.bufferfrom <= tto) {
+						var qdlen = vars.bufferto - tto;
+						tto = vars.bufferfrom;
+						vars.bufferfrom = tfrom + ttext.length;
+						vars.bufferto = vars.bufferfrom + qdlen;
+					} else if (vars.bufferfrom > tto) {
+						vars.bufferfrom += ttext.length + tfrom - tto;
+						vars.bufferto += ttext.length + tfrom - tto;
 					}
 				}
 			}
 
 			var delta = tfrom + ttext.length - tto;
-			var editorDoc = mother.globalModel.editor.getDoc();
+			var editorDoc = vars.editor.getDoc();
 			var hist = editorDoc.getHistory();
 			var donefrom = new Array(hist.done.length);
 			var doneto = new Array(hist.done.length);
 			for (var i = 0; i < hist.done.length; i++) {
-				donefrom[i] = mother.globalModel.editor.indexFromPos(hist.done[i].changes[0].from);
-				doneto[i] = mother.globalModel.editor.indexFromPos(hist.done[i].changes[0].to);
+				donefrom[i] = vars.editor.indexFromPos(hist.done[i].changes[0].from);
+				doneto[i] = vars.editor.indexFromPos(hist.done[i].changes[0].to);
 			}
 			var undonefrom = new Array(hist.undone.length);
 			var undoneto = new Array(hist.undone.length);
@@ -326,58 +328,41 @@ var EditorConstruct = can.Construct.extend({}, {
 			}
 			for (var i = 0; i < hist.done.length; i++) {
 				if (doneto[i] <= tfrom) {} else if (doneto[i] <= tto && donefrom[i] <= tfrom) {
-					hist.done[i].changes[0].to = mother.globalModel.editor.posFromIndex(tfrom);
-					//doneto[i] = tfrom;
+					hist.done[i].changes[0].to = vars.editor.posFromIndex(tfrom);
 				} else if (doneto[i] <= tto && donefrom[i] > tfrom) {
-					hist.done[i].changes[0].from = mother.globalModel.editor.posFromIndex(tfrom);
-					hist.done[i].changes[0].to = mother.globalModel.editor.posFromIndex(tfrom);
+					hist.done[i].changes[0].from = vars.editor.posFromIndex(tfrom);
+					hist.done[i].changes[0].to = vars.editor.posFromIndex(tfrom);
 				}
 			}
 			for (var i = 0; i < hist.undone.length; i++) {
 				if (undoneto[i] <= tfrom) {} else if (undoneto[i] <= tto && undonefrom[i] <= tfrom) {
-					hist.undone[i].changes[0].to = mother.globalModel.editor.posFromIndex(tfrom);
-					//undoneto[i] = tfrom;
+					hist.undone[i].changes[0].to = vars.editor.posFromIndex(tfrom);
 				} else if (undoneto[i] <= tto && undonefrom[i] > tfrom) {
-					hist.undone[i].changes[0].from = mother.globalModel.editor.posFromIndex(tfrom);
-					hist.undone[i].changes[0].to = mother.globalModel.editor.posFromIndex(tfrom);
+					hist.undone[i].changes[0].from = vars.editor.posFromIndex(tfrom);
+					hist.undone[i].changes[0].to = vars.editor.posFromIndex(tfrom);
 				}
 			}
-			//var cursor = editorDoc.getCursor();
-			//var curfrom = editor.indexFromPos(cursor);
-			mother.globalModel.editor.replaceRange(ttext, mother.globalModel.editor.posFromIndex(tfrom), mother.globalModel.editor.posFromIndex(tto));
-			//if (curfrom == tfrom){
-			//	this.globalModel.editorDoc.setCursor(cursor);
-			//}
+			vars.editor.replaceRange(ttext, vars.editor.posFromIndex(tfrom), vars.editor.posFromIndex(tto));
 			for (var i = 0; i < hist.done.length; i++) {
 				if (doneto[i] <= tfrom) {} else if (doneto[i] <= tto && donefrom[i] <= tfrom) {} else if (doneto[i] <= tto && donefrom[i] > tfrom) {} else if (doneto[i] > tto && donefrom[i] <= tfrom) {
-					hist.done[i].changes[0].to = mother.globalModel.editor.posFromIndex(doneto[i] + delta);
-					/*var arr = ttext.split("\n");
-			hist.done[i].changes[0].text[hist.done[i].changes[0].text.length-1] += arr[0];
-			arr.shift();
-			if (arr.length > 0)
-				hist.done[i].changes[0].text = hist.done[i].changes[0].text.concat(arr);*/
+					hist.done[i].changes[0].to = vars.editor.posFromIndex(doneto[i] + delta);
 				} else if (doneto[i] > tto && donefrom[i] <= tto) {
-					hist.done[i].changes[0].from = mother.globalModel.editor.posFromIndex(tfrom + ttext.length);
-					hist.done[i].changes[0].to = mother.globalModel.editor.posFromIndex(donefrom[i] + doneto[i] - tto);
+					hist.done[i].changes[0].from = vars.editor.posFromIndex(tfrom + ttext.length);
+					hist.done[i].changes[0].to = vars.editor.posFromIndex(donefrom[i] + doneto[i] - tto);
 				} else if (donefrom[i] > tto) {
-					hist.done[i].changes[0].from = mother.globalModel.editor.posFromIndex(donefrom[i] + ttext.length + tfrom - tto);
-					hist.done[i].changes[0].to = mother.globalModel.editor.posFromIndex(doneto[i] + ttext.length + tfrom - tto);
+					hist.done[i].changes[0].from = vars.editor.posFromIndex(donefrom[i] + ttext.length + tfrom - tto);
+					hist.done[i].changes[0].to = vars.editor.posFromIndex(doneto[i] + ttext.length + tfrom - tto);
 				}
 			}
 			for (var i = 0; i < hist.undone.length; i++) {
 				if (undoneto[i] <= tfrom) {} else if (undoneto[i] <= tto && undonefrom[i] <= tfrom) {} else if (undoneto[i] <= tto && undonefrom[i] > tfrom) {} else if (undoneto[i] > tto && undonefrom[i] <= tfrom) {
-					hist.undone[i].changes[0].to = mother.globalModel.editor.posFromIndex(undoneto[i] + delta);
-					/*var arr = ttext.split("\n");
-			hist.undone[i].changes[0].text[hist.undone[i].changes[0].text.length-1] += arr[0];
-			arr.shift();
-			if (arr.length > 0)
-				hist.undone[i].changes[0].text = hist.undone[i].changes[0].text.concat(arr);*/
+					hist.undone[i].changes[0].to = vars.editor.posFromIndex(undoneto[i] + delta);
 				} else if (undoneto[i] > tto && undonefrom[i] <= tto) {
-					hist.undone[i].changes[0].from = mother.globalModel.editor.posFromIndex(tfrom + ttext.length);
-					hist.undone[i].changes[0].to = mother.globalModel.editor.posFromIndex(undonefrom[i] + undoneto[i] - tto);
+					hist.undone[i].changes[0].from = vars.editor.posFromIndex(tfrom + ttext.length);
+					hist.undone[i].changes[0].to = vars.editor.posFromIndex(undonefrom[i] + undoneto[i] - tto);
 				} else if (undonefrom[i] > tto) {
-					hist.undone[i].changes[0].from = mother.globalModel.editor.posFromIndex(undonefrom[i] + ttext.length + tfrom - tto);
-					hist.undone[i].changes[0].to = mother.globalModel.editor.posFromIndex(undoneto[i] + ttext.length + tfrom - tto);
+					hist.undone[i].changes[0].from = vars.editor.posFromIndex(undonefrom[i] + ttext.length + tfrom - tto);
+					hist.undone[i].changes[0].to = vars.editor.posFromIndex(undoneto[i] + ttext.length + tfrom - tto);
 				}
 			}
 			for (var i = 0; i < hist.done.length; i++) {
@@ -393,16 +378,16 @@ var EditorConstruct = can.Construct.extend({}, {
 				hist.undone[i].headBefore = hist.undone[i].changes[0].from;
 			}
 			editorDoc.setHistory(hist);
-			mother.roomModel.doc.text = mother.roomModel.doc.text.substr(0, data.from) + data.text + mother.roomModel.doc.text.substr(data.to);
-			mother.roomModel.doc.version++;
-			mother.roomModel.doc.version = mother.roomModel.doc.version % 65536;
-			if (q.length > 0) {
-				socket.emit('change', q[0]);
+			vars.doc.text = vars.doc.text.substr(0, data.from) + data.text + vars.doc.text.substr(data.to);
+			vars.doc.version++;
+			vars.doc.version = vars.doc.version % 65536;
+			if (vars.q.length > 0) {
+				socket.emit('change', vars.q[0]);
 			}
 
-			var pos = mother.globalModel.editor.posFromIndex(data.from + data.text.length);
-			mother.roomModel.cursors[data.name].pos = data.from + data.text.length;
-			mother.globalModel.editor.addWidget(pos, mother.roomModel.cursors[data.name].element, false);
+			var pos = vars.editor.posFromIndex(data.from + data.text.length);
+			vars.cursors[data.name].pos = data.from + data.text.length;
+			vars.editor.addWidget(pos, vars.cursors[data.name].element, false);
 		});
 	}
 
