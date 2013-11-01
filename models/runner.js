@@ -17,116 +17,176 @@ var RUBY = '../../bin/ruby';
 var LUA = '../../bin/lua';
 var JAVA = '../../bin/jre/bin/java';
 
-function Runner(name, type, src){
-    if (!(this instanceof Runner)) return new Runner(type, src);
+function Runner(name, type, src) {
+	if (!(this instanceof Runner)) return new Runner(type, src);
 	var that = this;
 	that.name = name;
+	that.type = type;
 	that.src = src;
 	that.dir = prefix + '/' + new Date().getTime().toString();
 	that.path = that.dir + '/' + that.name;
 	that.clean = 'rm -rf ' + that.dir;
-	if(process.platform == 'linux'){
-		switch(type){
+	if (process.platform == 'linux') {
+		switch (type) {
 			case 'c':
-				that.script = [
-					{cmd:'gcc', args:['-o', that.name + '.out', that.name]},
-					{cmd:A, args:['0', that.name + '.out'], start:true}
-				];
+				that.script = [{
+					cmd: 'gcc',
+					args: ['-o', that.name + '.out', that.name]
+				}, {
+					cmd: A,
+					args: ['0', that.name + '.out'],
+					start: true
+				}];
 				break;
 			case 'cpp':
-				that.script = [
-					{cmd:'g++', args:['-o', that.name + '.out', that.name]},
-					{cmd:A, args:['0', that.name + '.out'], start:true}
-				];
+				that.script = [{
+					cmd: 'g++',
+					args: ['-o', that.name + '.out', that.name]
+				}, {
+					cmd: A,
+					args: ['0', that.name + '.out'],
+					start: true
+				}];
 				break;
 			case 'js':
-				that.script  = [
-					{cmd:A, args:['1', NODE, that.name], start:true, filter:function(data){
+				that.script = [{
+					cmd: A,
+					args: ['1', NODE, that.name],
+					start: true,
+					filter: function(data) {
 						return data.replace(new RegExp(cwd + '/' + that.dir + '/', 'gm'), '');
-					}}
-				];
+					}
+				}];
 				break;
 			case 'py':
-				that.script = [
-					{cmd:A, args:['0', PYTHON, that.name], start:true}
-				];
+				that.script = [{
+					cmd: A,
+					args: ['0', PYTHON, that.name],
+					start: true
+				}];
 				break;
 			case 'pl':
-				that.script = [
-					{cmd:A, args:['0', PERL, that.name], start:true}
-				];
+				that.script = [{
+					cmd: A,
+					args: ['0', PERL, that.name],
+					start: true
+				}];
 				break;
 			case 'rb':
-				that.script = [
-					{cmd:A, args:['1', RUBY, that.name], start:true}
-				];
+				that.script = [{
+					cmd: A,
+					args: ['1', RUBY, that.name],
+					start: true
+				}];
 				break;
 			case 'lua':
-				that.script = [
-					{cmd:A, args:['0', LUA, that.name], start:true, filter:function(data){
+				that.script = [{
+					cmd: A,
+					args: ['0', LUA, that.name],
+					start: true,
+					filter: function(data) {
 						return data.replace(new RegExp(LUA, 'gm'), 'lua');
-					}}
-				];
+					}
+				}];
 				break;
 			case 'java':
 				that.class = that.name.substr(0, that.name.lastIndexOf('.'));
-				that.script = [
-					{cmd:'javac', args:[that.name]},
-					{cmd:A, args:['1', JAVA, that.class], start:true, filter:function(data){
+				that.script = [{
+					cmd: 'javac',
+					args: [that.name]
+				}, {
+					cmd: A,
+					args: ['1', JAVA, that.class],
+					start: true,
+					filter: function(data) {
 						return data.replace(new RegExp(JAVA, 'gm'), 'java');
-					}}
-				];
+					}
+				}];
 				break;
+			case 'make':
+				that.script = [{
+					cmd: 'make',
+					args: []
+				}, {
+					cmd: A,
+					args: ['0', that.name + '.out'],
+					start: true
+				}];
+
 		}
-	}else{
-		switch(type){
+	} else {
+		switch (type) {
 			case 'c':
-				that.script = [
-					{cmd:'gcc', args:['-o', that.name + '.out', that.name]},
-					{cmd:'./' + that.name + '.out', args:[], start:true}
-				];
+				that.script = [{
+					cmd: 'gcc',
+					args: ['-o', that.name + '.out', that.name]
+				}, {
+					cmd: './' + that.name + '.out',
+					args: [],
+					start: true
+				}];
 				break;
 			case 'cpp':
-				that.script = [
-					{cmd:'g++', args:['-o', that.name + '.out', that.name]},
-					{cmd:'./' + that.name + '.out', args:[], start:true}
-				];
+				that.script = [{
+					cmd: 'g++',
+					args: ['-o', that.name + '.out', that.name]
+				}, {
+					cmd: './' + that.name + '.out',
+					args: [],
+					start: true
+				}];
 				break;
 			case 'js':
-				that.script  = [
-					{cmd:'node', args:[that.name], start:true, filter:function(data){
+				that.script = [{
+					cmd: 'node',
+					args: [that.name],
+					start: true,
+					filter: function(data) {
 						return data.replace(new RegExp(cwd + '/' + that.dir + '/', 'gm'), '');
-					}}
-				];
+					}
+				}];
 				break;
 			case 'py':
-				that.script = [
-					{cmd:'python', args:[that.name], start:true}
-				];
+				that.script = [{
+					cmd: 'python',
+					args: [that.name],
+					start: true
+				}];
 				break;
 			case 'pl':
-				that.script = [
-					{cmd:'perl', args:[that.name], start:true}
-				];
+				that.script = [{
+					cmd: 'perl',
+					args: [that.name],
+					start: true
+				}];
 				break;
 			case 'rb':
-				that.script = [
-					{cmd:'ruby', args:[that.name], start:true}
-				];
+				that.script = [{
+					cmd: 'ruby',
+					args: [that.name],
+					start: true
+				}];
 				break;
 			case 'lua':
-				that.script = [
-					{cmd:'lua', args:[that.name], start:true, filter:function(data){
+				that.script = [{
+					cmd: 'lua',
+					args: [that.name],
+					start: true,
+					filter: function(data) {
 						return data.replace(new RegExp(LUA, 'gm'), 'lua');
-					}}
-				];
+					}
+				}];
 				break;
 			case 'java':
 				that.class = that.name.substr(0, that.name.lastIndexOf('.'));
-				that.script = [
-					{cmd:'javac', args:[that.name]},
-					{cmd:'java', args:[that.class], start:true}
-				];
+				that.script = [{
+					cmd: 'javac',
+					args: [that.name]
+				}, {
+					cmd: 'java',
+					args: [that.class],
+					start: true
+				}];
 				break;
 		}
 	}
@@ -134,103 +194,268 @@ function Runner(name, type, src){
 
 util.inherits(Runner, require('events').EventEmitter);
 
-Runner.prototype.ready = function(){
+Runner.prototype.ready = function() {
 	return this.script ? true : false;
 }
 
-Runner.prototype.run = function(callback){
-	if(!this.ready()){
-		return callback({err:'not supported'});
+Runner.prototype.run = function(callback) {
+	if (!this.ready()) {
+		return callback({
+			err: 'not supported'
+		});
 	}
-	if(typeof this.script === 'function'){
+	if (typeof this.script === 'function') {
 		return this.script(callback);
 	}
 	var that = this;
-	fs.mkdir(that.dir, function(err){
-		if(err){
-			return callback({err:err});
-		}
-		fs.writeFile(that.path, that.src, function(err){
-			if(err){
-				return callback({err:err});
-			}
-
-			function clean(err){
-				exec(that.clean, function(){});
-				if(that.err){
-					err = that.err;
+	if (that.type == "make") {
+		function _mkdir(_dir, data, _flag) {
+			fs.mkdir(_dir, function(err) {
+				if (err) {
+					return callback({
+						err: err
+					});
 				}
-				callback({err:err});
-			}
 
-			function step(){
-				if(that.script.length > 0){
-					var s = that.script.shift();
-					that.child = spawn(s.cmd, s.args, {cwd:that.dir});
-					if(s.start){
-						that.emit('start');
-						that.outLength = 0;
+				function getAllKeys(_data) {
+					if (typeof _data == 'object') {
+						var keys = new Array();
+						for (var key in _data) {
+							keys.push(key);
+						}
+						return keys;
 					}
-					that.child.stdout.on('data', function(data){
-						data = data.toString();
-						if(s.start){
-							that.outLength += data.length;
-							if(that.outLength > MAX_OUT_LENGTH){
-								return that.kill();
+					return null;
+				}
+
+				function getAllValues(_data) {
+					if (typeof _data == 'object') {
+						var values = new Array();
+						for (var key in _data) {
+							values.push(_data[key]);
+						}
+						return values;
+					}
+					return null;
+
+				}
+				var keys = getAllKeys(data);
+				var values = getAllValues(data);
+				var l = keys.length;
+				//var index = 0;
+
+				function _mkfile(_index) {
+					if (typeof values[_index] == 'object') {
+				
+						if (_index < l - 1) {
+							_mkdir(_dir + "/" + keys[_index], values[_index], false);
+						} else {
+							_mkdir(_dir + "/" + keys[_index], values[_index], _flag);
+						}
+
+						if (_index < l - 1) {
+							_mkfile(_index + 1);
+						}
+					} else if (typeof values[_index] == "string") {
+						fs.writeFile(_dir + "/" + keys[_index], values[_index], function(err) {
+							if (err) {
+								return callback({
+									err: err
+								});
 							}
-						}
-						that.emit('stdout', data);
-					});
-					that.child.stderr.on('data', function(data){
-						data = data.toString();
-						if(s.start){
-							that.outLength += data.length;
-							if(that.outLength > MAX_OUT_LENGTH){
-								return that.kill();
+							if (_index < l - 1) {
+								_mkfile(_index + 1);
+							} else if (_flag) {
+								if (err) {
+									return callback({
+										err: err
+									});
+								}
+
+								function clean(err) {
+									//exec(that.clean, function(){});
+									if (that.err) {
+										err = that.err;
+									}
+									callback({
+										err: err
+									});
+								}
+
+								function step() {
+									if (that.script.length > 0) {
+										var s = that.script.shift();
+										that.child = spawn(s.cmd, s.args, {
+											cwd: that.dir
+										});
+										if (s.start) {
+											that.emit('start');
+											that.outLength = 0;
+										}
+										that.child.stdout.on('data', function(data) {
+											data = data.toString();
+											if (s.start) {
+												that.outLength += data.length;
+												if (that.outLength > MAX_OUT_LENGTH) {
+													return that.kill();
+												}
+											}
+											that.emit('stdout', data);
+										});
+										that.child.stderr.on('data', function(data) {
+											data = data.toString();
+											if (s.start) {
+												that.outLength += data.length;
+												if (that.outLength > MAX_OUT_LENGTH) {
+													return that.kill();
+												}
+											}
+											if (s.filter) {
+												data = s.filter(data);
+											}
+											that.emit('stderr', data);
+										});
+										that.child.on('error', function(err) {
+											return clean(err);
+										});
+										that.child.on('exit', function(code, signal) {
+											that.child = null;
+											if (signal) {
+												return clean({
+													signal: signal
+												});
+											}
+											if (code) {
+												return clean({
+													code: code
+												});
+											}
+											if (that.script.length > 0) {
+												return step();
+											}
+											return clean({
+												code: code
+											});
+										});
+									}
+								};
+								return step();
 							}
-						}
-						if(s.filter){
-							data = s.filter(data);
-						}
-						that.emit('stderr', data);
-					});
-					that.child.on('error', function(err){
-						return clean(err);
-					});
-					that.child.on('exit', function(code, signal){
-						that.child = null;
-						if(signal){
-							return clean({signal:signal});
-						}
-						if(code){
-							return clean({code:code});
-						}
-						if(that.script.length > 0){
-							return step();
-						}
-						return clean({code:code});
+						});
+					}
+
+				}
+				if(l > 0){
+					_mkfile(0);
+				}
+			});
+		}
+		_mkdir(that.dir, that.src, true);
+	} else {
+		fs.mkdir(that.dir, function(err) {
+			if (err) {
+				return callback({
+					err: err
+				});
+			}
+			fs.writeFile(that.path, that.src, function(err) {
+				if (err) {
+					return callback({
+						err: err
 					});
 				}
-			};
-			return step();
+
+				function clean(err) {
+				//	exec(that.clean, function() {});
+					if (that.err) {
+						err = that.err;
+					}
+					callback({
+						err: err
+					});
+				}
+
+				function step() {
+					if (that.script.length > 0) {
+						var s = that.script.shift();
+						that.child = spawn(s.cmd, s.args, {
+							cwd: that.dir
+						});
+						if (s.start) {
+							that.emit('start');
+							that.outLength = 0;
+						}
+						that.child.stdout.on('data', function(data) {
+							data = data.toString();
+							if (s.start) {
+								that.outLength += data.length;
+								if (that.outLength > MAX_OUT_LENGTH) {
+									return that.kill();
+								}
+							}
+							that.emit('stdout', data);
+						});
+						that.child.stderr.on('data', function(data) {
+							data = data.toString();
+							if (s.start) {
+								that.outLength += data.length;
+								if (that.outLength > MAX_OUT_LENGTH) {
+									return that.kill();
+								}
+							}
+							if (s.filter) {
+								data = s.filter(data);
+							}
+							that.emit('stderr', data);
+						});
+						that.child.on('error', function(err) {
+							return clean(err);
+						});
+						that.child.on('exit', function(code, signal) {
+							that.child = null;
+							if (signal) {
+								return clean({
+									signal: signal
+								});
+							}
+							if (code) {
+								return clean({
+									code: code
+								});
+							}
+							if (that.script.length > 0) {
+								return step();
+							}
+							return clean({
+								code: code
+							});
+						});
+					}
+				};
+				return step();
+			});
 		});
-	})
-};
+
+	}
+
+}
 
 Runner.prototype.input = function(data, callback) {
-	if(!this.child){
+	if (!this.child) {
 		return callback('no stdin');
 	}
-	if(!this.child.stdin.write(data, function(){
-		return callback(null);	
-	})){
+	if (!this.child.stdin.write(data, function() {
+		return callback(null);
+	})) {
 		return callback('buffer full');
 	}
 };
 
-Runner.prototype.kill = function(){
-	if(this.child){
-		this.err = {signal:'SIGKILL'};
+Runner.prototype.kill = function() {
+	if (this.child) {
+		this.err = {
+			signal: 'SIGKILL'
+		};
 		this.child.kill('SIGTERM');
 	}
 };

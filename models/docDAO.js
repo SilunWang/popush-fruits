@@ -1739,10 +1739,9 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 				return callback("unauthorized");
 			}
 			//console.log("2"+"hele");
-			debugger;
+			//debugger;
 			if (result.type == "dir") {
 				var get_dir_files = function(dir, flag, result) {
-
 					var docs = dir.docs;
 					var get_file = function(docs, curIndex) {
 						db.doc.findOne({
@@ -1795,7 +1794,9 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 							}
 						});
 					}
-					get_file(docs, 0);
+					if(docs.length > 0){	
+						get_file(docs, 0);
+					}
 
 				}
 				var res = {};

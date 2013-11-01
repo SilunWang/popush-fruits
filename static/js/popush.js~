@@ -1,8 +1,7 @@
 ////////////////////////// vars ///////////////////////////////
 var global_v;
 
-
-
+var gutterclick;
 
 
 /////////////////////// Check Browser //////////////////////////
@@ -55,9 +54,7 @@ function getCookie(name)
 
 /********************全局变量Model*********************/
 GlobalVariables = can.Model.extend({},{
-
 	self:this,
-
 	init:function(global_data){
 		////////////////////////// vars ///////////////////////////////
 		this.currentUser = [];
@@ -87,6 +84,8 @@ GlobalVariables = can.Model.extend({},{
 		this.failed = false;
 
 		this.loadings = {};
+
+		this.gutterclick = function(cm, n) {};
 
 		this.firstconnect = true;
 
@@ -141,7 +140,7 @@ GlobalVariables = can.Model.extend({},{
 			var p = t.split('/');
 			if (p.length > 1)
 				t = p[1] + '@' + p[0];
-			if(i == 0 && this.dirMode == 'shared')
+			if (i == 0 && this.dirMode == 'shared')
 				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
 				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
@@ -1855,7 +1854,6 @@ $(document).ready(function() {
 		///////////////////////theme related//////// //////////////
 		g_myTheme: myTheme
 	});
-
 
     	setTimeout('global_v.loadfailed()', 10000);
 
