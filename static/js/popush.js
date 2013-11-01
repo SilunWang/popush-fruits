@@ -266,6 +266,7 @@ GlobalVariables = can.Model.extend({},{
 		else if(e.keyCode == 40)
 			$('#' + idDown).focus();
 	},
+	
 	refreshfilelist:function(error, callback) {
 		this.operationLock = true;
 		this.filelist.loading();
@@ -873,12 +874,14 @@ var DeleteControl = can.Control.extend({
 	'#delete-ok click':function(){
 		this.deletefile();
 	},
-	keydown:function(){
+	
+	'#delete keydown':function(){
 		self = this;
 		$(window).keydown(function(){
 		  m_global_v.pressenter(arguments[0],self.deletefile);
 		});
 	},
+	
 	deletefile:function(){
 		if(m_global_v.operationLock)
 			return;

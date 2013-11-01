@@ -6,7 +6,7 @@ var ToolbarController = can.Control.extend({
 	m_message_c: '',
 	m_fullscreen: '',
 	m_togglechat: '',
-	
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		m_room_v = this.options.m_room_v;
@@ -251,6 +251,30 @@ var ChatboxController = can.Control.extend({
 			m_message_c.leaveVoiceRoom();
 		}
 	}
+});
+
+var ConsoleController = can.Control.extend({
+
+	m_global_v: '',
+	m_room_v: '',
+	m_room_c: '',
+	m_fullscreen: '',
+	m_togglechat: '',
+	m_rundebug_c: '',
+
+	init: function(element, options){
+		m_global_v = this.options.m_global_v;
+		m_room_v = this.options.m_room_v;
+		m_room_c = this.options.m_room_c;
+		m_rundebug_c = this.options.m_rundebug_c;
+		this.element.append(can.view("../ejs/console.ejs", {}));
+	},
+	
+	'#console-input keydown': function() {
+		if (event.keycode == 13)
+			m_rundebug_c.stdin();
+	}
+
 });
 
 var VarlistController = can.Control.extend({

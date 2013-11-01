@@ -65,6 +65,15 @@ var RoomConstruct = can.Construct.extend ({}, {
 			m_message_c: this.messageConstruct
 		});
 
+		this.consoleController = new ConsoleController('#console', {
+			m_global_v: this.globalModel,
+			m_room_v: this.roomModel,
+			m_room_c: this,
+			m_rundebug_c: this.runCodeConstruct
+		});
+
+		
+
 		this.initModelData();
 		this.socket_on_set(this.globalModel.socket);
 		this.registereditorevent();

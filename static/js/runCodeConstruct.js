@@ -271,12 +271,12 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		var text = $('#console-input').val();
 		//当处于运行等待状态时，发送输入框数据到服务器
 		if (vars.runLock || vars.debugLock) {
-			this.globalModel.socket.emit('stdin', {
+			globalModel.socket.emit('stdin', {
 				data: text + '\n'
 			});
 			//在发送之后，也在控制台输出了内容，应当是别的函数调用了appendtoconsole
 		} else {
-			this.roomConstruct.appendtoconsole(text + '\n', 'stdin');
+			roomConstruct.appendtoconsole(text + '\n', 'stdin');
 		}
 		$('#console-input').val('');
 	},
