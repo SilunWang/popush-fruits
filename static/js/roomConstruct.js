@@ -585,7 +585,10 @@ var RoomConstruct = can.Construct.extend ({}, {
 			delete data.debugging;
 			delete data.state;
 		});
-	}
+	},
+
+	//添加断点的响应函数
+	gutterclick: function(cm, n) {}
 	
 });
 

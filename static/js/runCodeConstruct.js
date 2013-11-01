@@ -50,7 +50,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		if (ENABLE_DEBUG) {
 			vars.debugable = this.roomModel.isdebugable(ext);
 			if (vars.debugable) {
-				this.globalModel.gutterclick = function(cm, n) {
+				this.roomConstruct.gutterclick = function(cm, n) {
 					if (vars.debugLock && !vars.waiting)
 						return;
 					//如果断点删除失败（本身不存在），则增加断点，否则删除断点
@@ -59,7 +59,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 					}
 				};
 			} else {
-				this.globalModel.gutterclick = function(cm, n) {};
+				this.roomConstruct.gutterclick = function(cm, n) {};
 			}
 			this.removeallbreakpoints();
 		}
@@ -135,8 +135,8 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	runtoline: function(n) {
 		var vars = this.roomModel.vars;
 		if (vars.runningline >= 0) {
-			this.roomModel.vars.editor.removeLineClass(runningline, '*', 'running');
-			this.roomModel.vars.editor.setGutterMarker(runningline, 'runat', null);
+			this.roomModel.vars.editor.removeLineClass(vars.runningline, '*', 'running');
+			this.roomModel.vars.editor.setGutterMarker(vars.runningline, 'runat', null);
 		}
 		if (n >= 0) {
 			this.roomModel.vars.editor.addLineClass(n, '*', 'running');
@@ -363,7 +363,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	socket_on_waiting: function(socket) {
 
 		var vars = this.roomModel.vars;
-		var localThis = self;
+		var localThis = this;
 		var strings = this.globalModel.strings;
 
 		socket.on('waiting', function(data) {

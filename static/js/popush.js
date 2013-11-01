@@ -867,7 +867,6 @@ var DeleteControl = can.Control.extend({
 		m_global_v = this.options.m_global_v;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
-		this.keydown();
 	},
 
 	

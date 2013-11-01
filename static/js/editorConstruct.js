@@ -33,6 +33,12 @@ var EditorConstruct = can.Construct.extend({}, {
 		this.roomModel.vars.savetimeout = 500;
 	},
 
+	setsaved: function(){
+        this.roomModel.vars.savetimestamp = new Date().getTime();
+        setTimeout('this.setsavedthen(' + this.roomModel.vars.savetimestamp + ')', this.roomModel.vars.savetimeout);
+        this.roomModel.vars.savetimeout = 500;
+	},
+
 	//在页面上标记已经保存
 	setsavedthen: function(timestamp) {
 		if (this.roomModel.vars.savetimestamp == timestamp) {
@@ -177,7 +183,7 @@ var EditorConstruct = can.Construct.extend({}, {
 		});
 
 		this.roomModel.vars.editor.on("gutterClick", function(cm, n) {
-			this.roomConstruct.gutterclick(cm, n);
+			localThis.roomConstruct.gutterclick(cm, n);
 		});
 
 		this.roomConstruct.gutterclick = function(cm, n) {};
