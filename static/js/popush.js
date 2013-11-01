@@ -1036,8 +1036,8 @@ var FileListController = can.Control.extend({
 		});
 	},	
 	'#delete-ok click':function(o){
-		if(m_global_v.operationLock)
-			return;
+		//if(m_global_v.operationLock)
+				//return;
 		m_global_v.operationLock = true;
 		m_global_v.loading('delete-buttons');
 		m_global_v.socket.emit('delete', {
