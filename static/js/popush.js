@@ -1767,31 +1767,6 @@ function htmlescape(text) {
 		replace(/\n/gm, '<br />');
 }
 
-/*
-function togglechat(o) {
-	if (viewswitchLock)
-		return;
-	if (chatstate) {
-		$('#editormain').parent().removeClass('span12');
-		$('#editormain').parent().addClass('span9');
-		$('#chatbox').show();
-		$(o).html('<i class="icon-forward"></i>');
-		$(o).attr('title', strings['hide-title']);
-	} else {
-		$('#chatbox').hide();
-		$('#editormain').parent().removeClass('span9');
-		$('#editormain').parent().addClass('span12');
-		$(o).html('<i class="icon-backward"></i>');
-		$(o).attr('title', strings['show-title']);
-	}
-	var o = $('#chat-show').get(0);
-	o.scrollTop = o.scrollHeight;
-	editor.refresh();
-	resize();
-	chatstate = !chatstate;
-}*/
-
-
 
 /////////////////////// initialize ///////////////////////////
 
@@ -1833,7 +1808,6 @@ $(document).ready(function() {
 	expressionlist = global_v.expressionlist;
 
 	global_v.docshowfilter = {};
-
 
 	///*********************data init area**********************///
 

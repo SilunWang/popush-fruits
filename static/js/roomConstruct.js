@@ -46,7 +46,8 @@ var RoomConstruct = can.Construct.extend ({}, {
 			m_room_c: this, 
 			m_global_v: this.globalModel,
 			m_room_v: this.roomModel,
-			m_message_c: this.messageConstruct
+			m_message_c: this.messageConstruct,
+			m_fullscreen: this.editorConstruct.setFullScreen
 		});
 
 		this.varlistController = new VarlistController("#varlist", {
@@ -144,6 +145,29 @@ var RoomConstruct = can.Construct.extend ({}, {
 		this.globalModel.socket.emit('join', {
 			path: o.path
 		});
+	},
+
+	togglechat: function(o) {
+		if (this.globalModel.viewswitchLock)
+			return;
+		if (this.roomModel.vars.chatstate) {
+			$('#editormain').parent().removeClass('span12');
+			$('#editormain').parent().addClass('span9');
+			$('#chatbox').show();
+			$(o).html('<i class="icon-forward"></i>');
+			$(o).attr('title', strings['hide-title']);
+		} else {
+			$('#chatbox').hide();
+			$('#editormain').parent().removeClass('span9');
+			$('#editormain').parent().addClass('span12');
+			$(o).html('<i class="icon-backward"></i>');
+			$(o).attr('title', strings['show-title']);
+		}
+		var o = $('#chat-show').get(0);
+		o.scrollTop = o.scrollHeight;
+		this.roomModel.vars.editor.refresh();
+		this.resize();
+		this.roomModel.vars.chatstate = !this.roomModel.vars.chatstate;
 	},
 
 	//将聊天的内容显示到屏幕上
