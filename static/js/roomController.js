@@ -4,7 +4,6 @@ var ToolbarController = can.Control.extend({
 	m_room_v: '',
 	m_room_c: '',
 	m_message_c: '',
-	m_fullscreen: '',
 
 	init: function(element, options) {
 		
@@ -12,7 +11,6 @@ var ToolbarController = can.Control.extend({
 		m_room_v = this.options.m_room_v;
 		m_room_c = this.options.m_room_c;
 		m_message_c = this.options.m_message_c;
-		m_fullscreen = this.options.m_fullscreen;
 
 		this.element.append(can.view("../ejs/editor-toolbar.ejs", {}));
 	},
@@ -79,25 +77,7 @@ var ToolbarController = can.Control.extend({
 	},
 
 	'#setFullScreen click': function() {
-		var wrap = m_fullscreen.cm.getWrapperElement();
-		if (m_fullscreen.full) {
-			$('#editormain').css('position', 'static');
-			$('#editormain-inner').css('position', 'static');
-			$('#fullscreentip').fadeIn();
-			setTimeout('$(\'#fullscreentip\').fadeOut();', 1000);
-			wrap.className += " CodeMirror-fullscreen";
-			wrap.style.height = winHeight() + "px";
-			document.documentElement.style.overflow = "hidden";
-		} else {
-			$('#editormain').css('position', 'fixed');
-			$('#editormain-inner').css('position', 'relative');
-			$('#fullscreentip').hide();
-			wrap.className = wrap.className.replace(" CodeMirror-fullscreen", "");
-			wrap.style.height = "";
-			document.documentElement.style.overflow = "";
-		}
-		m_fullscreen.cm.refresh();
-		m_fullscreen.cm.focus();
+		m_room_c.editorConstruct.setFullScreen(m_room_v.vars.editor, true);
 	}
 
 });

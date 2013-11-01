@@ -34,10 +34,10 @@ var MessageConstruct = can.Construct.extend({}, {
 
 		socket.on('chat', function(data) {
 
-			var text = this.globalModel.htmlescape(data.text);
+			var text = mother.globalModel.htmlescape(data.text);
 			var time = new Date(data.time);
 
-			mother.roomConstruct.appendtochatbox(data.name, (data.name == currentUser.name ? 'self' : ''), text, time);
+			mother.roomConstruct.appendtochatbox(data.name, (data.name == mother.globalModel.currentUser.name ? 'self' : ''), text, time);
 		});
 	},
 
@@ -56,7 +56,7 @@ var MessageConstruct = can.Construct.extend({}, {
 		var mother = this;
 
 		socket.on('unshared', function(data) {
-			if (data.name == currentUser.name) {
+			if (data.name == mother.globalModel.currentUser.name) {
 				mother.roomConstruct.closeeditor();
 				mother.globalModel.showmessagebox('info', 'you unshared', 1);
 			} else {
