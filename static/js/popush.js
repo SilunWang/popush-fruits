@@ -1069,9 +1069,6 @@ var ReNameControl = can.Control.extend({
 			$('#rename').modal('hide');
 			return;
 		}
-		//if(m_global_v.operationLock)
-		//return;
-		m_global_v.operationLock = true;
 		m_global_v.loading('rename-buttons');
 		m_global_v.movehandler = this.renamedone;
 		m_global_v.socket.emit('move', {
