@@ -29,14 +29,14 @@ var EditorConstruct = can.Construct.extend({}, {
 	//标记已经保存
 	setsave: function() {
 		this.roomModel.vars.savetimestamp = new Date().getTime();
-		setTimeout('this.setsavedthen(' + this.roomModel.vars.savetimestamp + ')', this.roomModel.vars.savetimeout);
-		this.roomModel.vars.savetimeout = 500;
+		setTimeout(this.setsavedthen(this.roomModel.vars.savetimestamp), this.roomModel.vars.savetimeout);
+		this.roomModel.vars.savetimeout = 5000;
 	},
 
 	setsaved: function(){
         this.roomModel.vars.savetimestamp = new Date().getTime();
-        setTimeout('this.setsavedthen(' + this.roomModel.vars.savetimestamp + ')', this.roomModel.vars.savetimeout);
-        this.roomModel.vars.savetimeout = 500;
+        setTimeout(this.setsavedthen(this.roomModel.vars.savetimestamp), this.roomModel.vars.savetimeout);
+        this.roomModel.vars.savetimeout = 5000;
 	},
 
 	//在页面上标记已经保存
@@ -120,15 +120,7 @@ var EditorConstruct = can.Construct.extend({}, {
 		if (vars.timer != null) {
 			clearTimeout(vars.timer);
 		}
-		vars.timer = setTimeout("this.sendbuffer", vars.buffertimeout);
-	},
-
-	//在按下ctrl+s之后调用的处理函数
-	saveevent: function(cm) {
-		var vars = this.roomModel.vars;
-		if (vars.savetimestamp != 0)
-			this.setsavedthen(vars.savetimestamp);
-		vars.savetimestamp = 0;
+		vars.timer = setTimeout(this.sendbuffer(), vars.buffertimeout);
 	},
 
 	winHeight: function() {
@@ -177,7 +169,12 @@ var EditorConstruct = can.Construct.extend({}, {
 					if (localThis.roomConstruct.isFullScreen(cm)) localThis.setFullScreen(cm, false);
 					localThis.roomConstruct.resize();
 				},
-				"Ctrl-S": this.saveevent
+				"Ctrl-S": function(cm) {
+					var vars = localThis.roomModel.vars;
+					if (vars.savetimestamp != 0)
+						localThis.setsavedthen(vars.savetimestamp);
+					vars.savetimestamp = 0;
+				}
 			},
 			gutters: ["rfunat", "CodeMirror-linenumbers", "breakpoints"]
 		});

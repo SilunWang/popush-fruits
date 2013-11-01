@@ -473,6 +473,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
 		var vars = this.roomModel.vars;
 		var localRoom = this.roomConstruct;
+		var localThis = this;
 
 		socket.on('bpsok', function(data) {
 			var chg = vars.bq.shift();
@@ -494,10 +495,10 @@ var RunCodeConstruct = can.Construct.extend({}, {
 				vars.bq[i].version = vars.bq[i].version % 65536;
 			}
 			if (vars.q.length > 0) {
-				this.globalModel.socket.emit('change', vars.q[0]);
+				localThis.globalModel.socket.emit('change', vars.q[0]);
 			}
 			if (vars.bq.length > 0) {
-				this.globalModel.socket.emit('bps', vars.bq[0]);
+				localThis.globalModel.socket.emit('bps', vars.bq[0]);
 			}
 		});
 	},
