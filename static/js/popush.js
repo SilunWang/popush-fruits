@@ -1,7 +1,8 @@
 ////////////////////////// vars ///////////////////////////////
 var global_v;
 
-var gutterclick;
+
+
 
 
 /////////////////////// Check Browser //////////////////////////
@@ -54,7 +55,9 @@ function getCookie(name)
 
 /********************全局变量Model*********************/
 GlobalVariables = can.Model.extend({},{
+
 	self:this,
+
 	init:function(global_data){
 		////////////////////////// vars ///////////////////////////////
 		this.currentUser = [];
@@ -84,8 +87,6 @@ GlobalVariables = can.Model.extend({},{
 		this.failed = false;
 
 		this.loadings = {};
-
-		this.gutterclick = function(cm, n) {};
 
 		this.firstconnect = true;
 
@@ -140,7 +141,7 @@ GlobalVariables = can.Model.extend({},{
 			var p = t.split('/');
 			if (p.length > 1)
 				t = p[1] + '@' + p[0];
-			if (i == 0 && this.dirMode == 'shared')
+			if(i == 0 && this.dirMode == 'shared')
 				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
 				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
@@ -1260,8 +1261,10 @@ var ShareController = can.Control.extend({
 var FileListController = can.Control.extend({
 	m_global_v: '',
 	m_object: '',
+	m_room_Construct: '',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
+		m_room_Construct = this.options.m_room_Construct;
 		this.element.append(can.view("../ejs/filelist.ejs", {}));
 		this.initfilelistevent(m_global_v.filelist);
 		$('#rename').on('shown', function() {
@@ -1290,10 +1293,10 @@ var FileListController = can.Control.extend({
 					m_global_v.currentDirString = m_global_v.getdirstring();
 				});
 			}
-			/* 
+			
 			else if(o.type == 'doc') {
-				openeditor(o);
-			}*/
+				m_room_Construct.openeditor(o);
+			}
 		};
 
 		fl.ondelete = function(o) {
@@ -1745,72 +1748,6 @@ function htmlescape(text) {
 		replace(/ /gm, '&nbsp;').
 		replace(/\n/gm, '<br />');
 }
-/*************************************Editor Initialization Related***************************/
-
-var editor;
-//var chatstate = false;
-//var oldwidth;
-
-function winHeight() {
-	return window.innerHeight || (document.documentElement || document.body).clientHeight;
-}
-
-function isFullScreen(cm) {
-	return /\bCodeMirror-fullscreen\b/.test(cm.getWrapperElement().className);
-}
-
-function setFullScreen(cm, full) {
-	var wrap = cm.getWrapperElement();
-	if (full) {
-		$('#editormain').css('position', 'static');
-		$('#editormain-inner').css('position', 'static');
-		$('#fullscreentip').fadeIn();
-		setTimeout('$(\'#fullscreentip\').fadeOut();', 1000);
-		wrap.className += " CodeMirror-fullscreen";
-		wrap.style.height = winHeight() + "px";
-		document.documentElement.style.overflow = "hidden";
-	} else {
-		$('#editormain').css('position', 'fixed');
-		$('#editormain-inner').css('position', 'relative');
-		$('#fullscreentip').hide();
-		wrap.className = wrap.className.replace(" CodeMirror-fullscreen", "");
-		wrap.style.height = "";
-		document.documentElement.style.overflow = "";
-	}
-	cm.refresh();
-	cm.focus();
-}
-
-function InitEditor(){	
-    CodeMirror.on(window, "resize", function() {
-		var showing = document.getElementsByClassName("CodeMirror-fullscreen")[0];
-		if (!showing) return;
-		showing.CodeMirror.getWrapperElement().style.height = winHeight() + "px";
-    });
-
-	editor = CodeMirror.fromTextArea($('#editor-textarea').get(0), {
-		lineNumbers: true,
-		lineWrapping: true,
-		indentUnit: 4,
-		indentWithTabs: true,
-		extraKeys: {
-			"Esc": function(cm) {
-				if (isFullScreen(cm)) setFullScreen(cm, false);
-				resize();
-			},
-			"Ctrl-S": saveevent
-		},
-		gutters: ["runat", "CodeMirror-linenumbers", "breakpoints"]
-	});
-	
-	editor.on("gutterClick", function(cm, n) {
-		gutterclick(cm, n);
-	});
-	
-	gutterclick = function(cm, n) {};
-}
-
-/*************************************Editor Initialization Related***************************/
 
 /*
 function togglechat(o) {
@@ -1855,6 +1792,7 @@ $(document).ready(function() {
 		g_myTheme: myTheme
 	});
 
+
     	setTimeout('global_v.loadfailed()', 10000);
 
 	//filelist init
@@ -1875,9 +1813,6 @@ $(document).ready(function() {
 
 	global_v.docshowfilter = {};
 
-	InitEditor();
-	registereditorevent();
-
 
 	///*********************data init area**********************///
 
@@ -1889,6 +1824,13 @@ $(document).ready(function() {
 	var login_information = new LoginInformation({
 		login_name: '',
 		login_password: ''
+	});
+
+	//创建Model和Controller
+	room_Model = new RoomModel({});
+	room_Construct = new RoomConstruct({
+		roomModel: room_Model,
+		globalModel: global_v
 	});
 
 	///******************data init area end**********************///
@@ -1921,8 +1863,9 @@ $(document).ready(function() {
 		});
 	}
 
-	resize();
-	$(window).resize(resize);
+	room_Construct.resize();
+
+	$(window).resize(room_Construct.resize);
 	$(window).scroll(function() {
 		$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
 	});
@@ -1935,6 +1878,7 @@ $(document).ready(function() {
 		m_global_v: global_v
 	});
 	var file_list_control = new FileListController('#file-list-table', {
+		m_room_Construct: room_Construct,
 		m_global_v: global_v
 	});
 	var new_file_control = new NewFileController('#newfile', {
