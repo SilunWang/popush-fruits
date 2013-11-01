@@ -2,7 +2,6 @@
 ////////////////////////// vars ///////////////////////////////
 var global_v;
 
-
 var gutterclick;
 
 
@@ -752,6 +751,9 @@ var NewFileController = can.Control.extend({
 			control_new_file: m_new_file
 		}));
 		this.socket_io();
+		$('#newfile').on('shown', function() {
+			$('#newfile-inputName').focus();
+		});
 	},
 
 	//reaction area
@@ -815,6 +817,13 @@ var ReNameControl = can.Control.extend({
 		this.socket_io();
 	},
 	'#rename-ok click':function(){
+		this.renamefile();
+	},
+
+	renamefile:function(){
+		if(m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
 		var name = $('#rename-inputName').val();
 		name = $.trim(name);
 		if(name == '') {
@@ -829,9 +838,7 @@ var ReNameControl = can.Control.extend({
 			$('#rename').modal('hide');
 			return;
 		}
-		//if(m_global_v.operationLock)
-			//return;
-		m_global_v.operationLock = true;
+
 		m_global_v.loading('rename-buttons');
 		m_global_v.movehandler = this.renamedone;
 		m_global_v.socket.emit('move', {
@@ -839,6 +846,7 @@ var ReNameControl = can.Control.extend({
 			newPath: m_global_v.currentDirString + '/' + name
 		});
 	},
+
 	renamedone: function(data) {
 		if(data.err){
 			m_global_v.showmessageindialog('rename', data.err, 0);
@@ -874,8 +882,8 @@ var DeleteControl = can.Control.extend({
 		this.deletefile();
 	},
 	keydown:function(){
-		self = this;
-		$(window).keydown(function(){
+		var self = this;
+		$("#delete").keydown(function(){
 		  m_global_v.pressenter(arguments[0],self.deletefile);
 		});
 	},
@@ -912,6 +920,9 @@ var ShareController = can.Control.extend({
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/share.ejs", {}));
 		this.socket_io();
+		$('#share').on('shown', function() {
+			$('#share-inputName').focus();
+		});
 	},
 
 	//events
@@ -1020,10 +1031,13 @@ var FileListController = can.Control.extend({
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/filelist.ejs", {}));
 		this.initfilelistevent(m_global_v.filelist);
+		$('#rename').on('shown', function() {
+			$('#rename-inputName').focus();
+		});
 	},	
 	'#delete-ok click':function(o){
-		//if(m_global_v.operationLock)
-				//return;
+		if(m_global_v.operationLock)
+			return;
 		m_global_v.operationLock = true;
 		m_global_v.loading('delete-buttons');
 		m_global_v.socket.emit('delete', {
@@ -1114,6 +1128,9 @@ var ChangePassControl = can.Control.extend({
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/changepass.ejs", {}));
+		$('#changepassword').on('shown', function() {
+			$('#changepassword-old').focus();
+		});
 	},
 	'#changepass-ok click':function(){
 		var old = $('#changepassword-old').val();
@@ -1439,20 +1456,6 @@ function htmlescape(text) {
 		replace(/ /gm, '&nbsp;').
 		replace(/\n/gm, '<br />');
 }
-
-
-
-
-
-
-
-
-
-////////////////////// click event //////////////////////////////
-
-
-
-
 /*************************************Editor Initialization Related***************************/
 
 var editor;
@@ -1517,10 +1520,10 @@ function InitEditor(){
 	
 	gutterclick = function(cm, n) {};
 }
+
 /*************************************Editor Initialization Related***************************/
 
 /*
-
 function togglechat(o) {
 	if(viewswitchLock)
 		return;
@@ -1566,10 +1569,6 @@ $(document).ready(function() {
 
     	setTimeout('global_v.loadfailed()', 10000);
 
-
-	InitEditor();
-	registereditorevent();
-
 	//filelist init
 	global_v.filelist = fileList('#file-list-table');
 	global_v.filelist.clear();
@@ -1588,24 +1587,15 @@ $(document).ready(function() {
 	
 	global_v.docshowfilter = {};
 
-	$('#newfile').on('shown', function() {
-		$('#newfile-inputName').focus();
-	});
+	InitEditor();
+	registereditorevent();
 
-	$('#changepassword').on('shown', function() {
-		$('#changepassword-old').focus();
-	});
-
-	$('#rename').on('shown', function() {
-		$('#rename-inputName').focus();
-	});
-
-	$('#share').on('shown', function() {
-		$('#share-inputName').focus();
-	});
 
 	///*********************data init area**********************///
 	
+
+
+
 
 	//login
 	var login_information = new LoginInformation({
