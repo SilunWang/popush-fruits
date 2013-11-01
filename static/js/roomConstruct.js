@@ -53,7 +53,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 			m_room_c: this, 
 			m_global_v: this.globalModel,
 			m_room_v: this.roomModel,
-			m_rundebug_c:this.runCodeConstruct,
+			m_rundebug_c: this.runCodeConstruct,
 			m_message_c: this.messageConstruct
 		});
 
@@ -61,7 +61,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 			m_room_c: this, 
 			m_global_v: this.globalModel,
 			m_room_v: this.roomModel,
-			m_rundebug_c:this.runCodeConstruct,
+			m_rundebug_c: this.runCodeConstruct,
 			m_message_c: this.messageConstruct
 		});
 
@@ -72,8 +72,6 @@ var RoomConstruct = can.Construct.extend ({}, {
 			m_rundebug_c: this.runCodeConstruct
 		});
 
-		
-
 		this.initModelData();
 		this.socket_on_set(this.globalModel.socket);
 		this.registereditorevent();
@@ -81,13 +79,16 @@ var RoomConstruct = can.Construct.extend ({}, {
 
 	//初始化模型中的一些数据
 	initModelData: function() {
+
+		var localThis = this;
+
 		//将修改出队的函数
 		this.roomModel.vars.q._shift = this.roomModel.vars.q.shift;
 		this.roomModel.vars.q.shift = function() {
 			var r = this._shift();
-			if (this.length == 0 && this.roomModel.vars.bufferfrom == -1) { // buffertext == "") {
+			if (this.length == 0 && localThis.roomModel.vars.bufferfrom == -1) {
 				//如果本地的修改已经处理完毕，则标记已保存
-				this.editorConstruct.setsaved();
+				localThis.editorConstruct.setsaved();
 			}
 			return r;
 		}
@@ -95,7 +96,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 		this.roomModel.vars.q._push = this.roomModel.vars.q.push;
 		this.roomModel.vars.q._push = function(element) {
 			this._push(element);
-			this.editorConstruct.setsaving();
+			localThis.editorConstruct.setsaving();
 		}
 	},
 
@@ -168,7 +169,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 			type = '';
 		}
 		$('#console-inner').append(
-			'<span' + type + '">' + htmlescape(content) + '</span>'
+			'<span' + type + '">' + this.globalModel.htmlescape(content) + '</span>'
 		);
 		var o = $('#console-inner').get(0);
 		o.scrollTop = o.scrollHeight;
@@ -310,7 +311,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 			var bto = chg.to.line;
 
 			if (chg.text.length != (bto - bfrom + 1)) {
-				this.editorConstruct.sendbuffer();
+				localThis.editorConstruct.sendbuffer();
 				var req = {
 					version: vars.doc.version,
 					from: cfrom,
@@ -323,9 +324,9 @@ var RoomConstruct = can.Construct.extend ({}, {
 				vars.q.push(req);
 				var btext = "";
 				for (var i = 0; i < chg.text.length; i++) {
-					btext += this.runCodeConstruct.havebreakat(editor, bfrom + i);
+					btext += localThis.runCodeConstruct.havebreakat(editor, bfrom + i);
 				}
-				this.runCodeConstruct.sendbreak(bfrom, bto + 1, btext);
+				localThis.runCodeConstruct.sendbreak(bfrom, bto + 1, btext);
 				return;
 			}
 			if (chg.text.length > 1) {
@@ -339,7 +340,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 				} else {
 					vars.buffertext += cattext;
 				}
-				this.editorConstruct.save();
+				localThis.editorConstruct.save();
 				return;
 			} else if (vars.bufferto == -1 && chg.origin == "+delete" &&
 				vars.bufferfrom != -1 && cto == vars.bufferfrom + vars.buffertext.length && cfrom >= vars.bufferfrom) {
@@ -347,31 +348,31 @@ var RoomConstruct = can.Construct.extend ({}, {
 				if (vars.buffertext.length == 0) {
 					vars.bufferfrom = -1;
 					if (vars.q.length == 0) {
-						this.editorConstruct.setsaved();
+						localThis.editorConstruct.setsaved();
 					}
 					return;
 				}
-				this.editorConstruct.save();
+				localThis.editorConstruct.save();
 				return;
 			} else if (chg.origin == "+delete" &&
 				vars.bufferfrom == -1) {
 				vars.bufferfrom = cfrom;
 				vars.bufferto = cto;
 				vars.buffertext = "";
-				this.editorConstruct.save();
+				localThis.editorConstruct.save();
 				return;
 			} else if (vars.bufferto != -1 && chg.origin == "+delete" &&
 				cto == vars.bufferfrom) {
 				vars.bufferfrom = cfrom;
-				this.editorConstruct.save();
+				localThis.editorConstruct.save();
 				return;
 			} else if (vars.bufferfrom != -1) {
 				if (vars.bufferto == -1) {
 					var req = {
 						version: vars.doc.version,
-							from: vars.bufferfrom,
-							to: vars.bufferfrom,
-							text: vars.buffertext
+						from: vars.bufferfrom,
+						to: vars.bufferfrom,
+						text: vars.buffertext
 					};
 					if (vars.q.length == 0) {
 						socket.emit('change', req);
@@ -416,15 +417,12 @@ var RoomConstruct = can.Construct.extend ({}, {
 
 		this.globalModel.socket.emit('leave', {});
 
-		var localThis = self;
+		var localThis = this;
 
 		this.globalModel.refreshfilelist(function() {;
 		}, function() {
-
-			var localLocalThis = localThis;
-
 			$("body").animate({
-				scrollTop: localLocalThis.roomModel.vars.oldscrolltop
+				scrollTop: localThis.roomModel.vars.oldscrolltop
 			});
 		});
 
@@ -447,7 +445,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 	setdebug: function() {
 		this.roomModel.vars.debugLock = true;
 		$('#editor-debug').html('<i class="icon-eye-close"></i>');
-		$('#editor-debug').attr('title', strings['stop-debug-title']);
+		$('#editor-debug').attr('title', this.globalModel.strings['stop-debug-title']);
 		$('#console-inner').html('');
 		$('#console-input').val('');
 		$('#editor-run').addClass('disabled');
@@ -473,10 +471,9 @@ var RoomConstruct = can.Construct.extend ({}, {
 	socket_on_set: function(socket) {
 
 		var localThis = this;
+		var vars = this.roomModel.vars;
 
 		socket.on('set', function(data) {
-
-			var vars = localThis.roomModel.vars;
 
 			vars.savetimestamp = 1;
 			localThis.editorConstruct.setsavedthen(1);
@@ -491,7 +488,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 			vars.debugLock = false;
 			vars.waiting = false;
 
-			$('#current-doc').html(htmlescape(vars.docobj.showname));
+			$('#current-doc').html(localThis.globalModel.htmlescape(vars.docobj.showname));
 			$('#chat-input').val('');
 			$('#chat-show-inner').text('');
 			$('#editor').show();
@@ -555,8 +552,8 @@ var RoomConstruct = can.Construct.extend ({}, {
 			localThis.closeconsole();
 			localThis.globalModel.expressionlist.clear();
 			for (var k in data.exprs) {
-				localThis.globalModelexpressionlist.addExpression(k);
-				localThis.globalModelexpressionlist.setValue(k, data.exprs[k]);
+				localThis.globalModel.expressionlist.addExpression(k);
+				localThis.globalModel.expressionlist.setValue(k, data.exprs[k]);
 			}
 
 			$('#console-title').text(localThis.globalModel.strings['console']);
@@ -565,11 +562,11 @@ var RoomConstruct = can.Construct.extend ({}, {
 			$('body').scrollTop(99999);
 
 			if (data.running) {
-				localThis.runCodeConstruct.setrun();
+				localThis.setrun();
 			}
 			if (data.debugging) {
-				localThis.runCodeConstruct.setdebug();
-				localthis.roomModel.vars.editor.setOption('readOnly', true);
+				localThis.setdebug();
+				localThis.roomModel.vars.editor.setOption('readOnly', true);
 				vars.old_text = data.text;
 				vars.old_bps = data.bps;
 				if (data.state == 'waiting') {
@@ -591,6 +588,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 	}
 	
 });
+
 
 /********************SilunWang*****************/
 /*
