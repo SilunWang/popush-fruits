@@ -5,15 +5,22 @@ var ToolbarController = can.Control.extend({
 	m_room_c: '',
 	m_message_c: '',
 	m_fullscreen: '',
-	m_togglechat: '',
 
 	init: function(element, options) {
+		
 		m_global_v = this.options.m_global_v;
 		m_room_v = this.options.m_room_v;
 		m_room_c = this.options.m_room_c;
 		m_message_c = this.options.m_message_c;
+		m_fullscreen = this.options.m_fullscreen;
+
 		this.element.append(can.view("../ejs/editor-toolbar.ejs", {}));
 	},
+
+	'#togglechat click': function() {
+		m_room_c.togglechat(this);
+	},
+
 	'#editor-debug click': function() {
 		if (!m_room_v.debugenabled())
 			return;
@@ -29,6 +36,7 @@ var ToolbarController = can.Control.extend({
 			});
 		}
 	},
+
 	'#editor-console click': function() {
 		if (m_room_v.vars.consoleopen) {
 			m_room_c.closeconsole();
@@ -36,6 +44,7 @@ var ToolbarController = can.Control.extend({
 			m_room_c.openconsole();
 		}
 	},
+
 	'#editor-back click': function() {
 		$('#editor').hide();
 		$('#filecontrol').show();
@@ -52,6 +61,7 @@ var ToolbarController = can.Control.extend({
 
 		m_message_c.leaveVoiceRoom();
 	},
+
 	'#editor-run click': function() {
 		if (!m_room_v.runenabled())
 			return;
@@ -67,6 +77,7 @@ var ToolbarController = can.Control.extend({
 			});
 		}
 	},
+
 	'#setFullScreen click': function() {
 		var wrap = m_fullscreen.cm.getWrapperElement();
 		if (m_fullscreen.full) {
@@ -87,29 +98,8 @@ var ToolbarController = can.Control.extend({
 		}
 		m_fullscreen.cm.refresh();
 		m_fullscreen.cm.focus();
-	},
-	'#togglechat click': function() {
-		if (m_global_v.viewswitchLock)
-			return;
-		if (m_room_v.vars.chatstate) {
-			$('#editormain').parent().removeClass('span12');
-			$('#editormain').parent().addClass('span9');
-			$('#chatbox').show();
-			$(m_togglechat.o).html('<i class="icon-forward"></i>');
-			$(m_togglechat.o).attr('title', strings['hide-title']);
-		} else {
-			$('#chatbox').hide();
-			$('#editormain').parent().removeClass('span9');
-			$('#editormain').parent().addClass('span12');
-			$(m_togglechat.o).html('<i class="icon-backward"></i>');
-			$(m_togglechat.o).attr('title', strings['show-title']);
-		}
-		var o = $('#chat-show').get(0);
-		o.scrollTop = o.scrollHeight;
-		m_global_v.editor.refresh();
-		m_room_c.resize();
-		m_room_v.vars.chatstate = !m_room_v.vars.chatstate;
 	}
+
 });
 
 var ChatboxController = can.Control.extend({
@@ -259,7 +249,6 @@ var ConsoleController = can.Control.extend({
 	m_room_v: '',
 	m_room_c: '',
 	m_fullscreen: '',
-	m_togglechat: '',
 	m_rundebug_c: '',
 
 	init: function(element, options){
@@ -278,20 +267,24 @@ var ConsoleController = can.Control.extend({
 });
 
 var VarlistController = can.Control.extend({
+
 	m_global_v: '',
 	m_room_v: '',
 	m_room_c: '',
 	m_rundebug_c: '',
 	m_message_c: '',
 	m_fullscreen: '',
-	m_togglechat: '',
+
 	init: function(element, options) {
+
 		m_global_v = this.options.m_global_v;
 		m_room_v = this.options.m_room_v;
 		m_room_c = this.options.m_room_c;
 		m_rundebug_c = this.m_rundebug_c;
 		m_message_c = this.m_message_c;
+
 		this.element.append(can.view("../ejs/varlist.ejs", {}));
+
 	},
 	'#debugstep click': function() {
 		if (m_room_v.vars.debugLock && m_room_v.vars.waiting) {

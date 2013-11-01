@@ -122,7 +122,6 @@ var MessageConstruct = can.Construct.extend({}, {
 	},
 
 	//向服务器发送聊天的数据
-
 	chat: function() {
 		var text = $('#chat-input').val();
 		if (text == '')
@@ -287,43 +286,6 @@ var MessageConstruct = can.Construct.extend({}, {
 		window.voiceConnection.leave();
 		delete window.voiceConnection;
 	}
-
-	/*//?移动文件？没看到这个功能啊
-	socket_on_moved: function(socket, data){
-		var mother = this;
-
-		socket.on('moved', function(data) {
-			
-			var thepath = data.newPath.split('/');
-			thepath.shift();
-			var thename;
-			var realname;
-			if (dirMode == 'owned') {
-				realname = thename = thepath.pop();
-				mother.globalModel.currentDir = thepath;
-			} else {
-				var name = mother.globalModel.currentDir.shift();
-				if (thepath.length == 2) {
-					thename = thepath[1] + '@' + thepath[0];
-					realname = thepath[1];
-					mother.globalModel.currentDir = [];
-				} else {
-					realname = thename = thepath.pop();
-					thepath.unshift(thepath.shift() + '/' + thepath.shift());
-					mother.globalModel.currentDir = thepath;
-				}
-				mother.globalModel.currentDir.unshift(name);
-			}
-			var filepart = realname.split('.');
-
-			mother.roomModel.ext = filepart[filepart.length - 1];
-			mother.globalModel.changelanguage(ext);
-			mother.roomControl.checkrunanddebug(ext);
-
-			mother.globalModel.appendtochatbox(strings['systemmessage'], 'system', strings['movedto'] + thename, new Date(data.time));
-			$('#current-doc').html(htmlescape(thename));
-		});
-	},*/
 
 });
 
