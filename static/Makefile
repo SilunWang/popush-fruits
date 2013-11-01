@@ -30,7 +30,7 @@ index.css:$(wildcard css/*.css)
 
 index.js:$(wildcard js/*.js)
 	@echo ">  make index.js"
-	@cd js && ../lib/uglify-js/bin/uglifyjs conf.js jquery.min.js jquery.wheelmenu.js jquery.cookie.js socket.io.min.js firebase.js newMultiConnection.js bootstrap.min.js codemirror.js loadmode.js localization/zh-cn.js localization/zh-en.js ie.js filelist.js userlist.js expressionlist.js loadtheme.js can.jquery.js popush.js room.js > ../index.js 2>/dev/null
+	@cd js && ../lib/uglify-js/bin/uglifyjs conf.js jquery.min.js jquery.wheelmenu.js jquery.cookie.js socket.io.min.js firebase.js newMultiConnection.js bootstrap.min.js codemirror.js loadmode.js localization/zh-cn.js localization/zh-en.js ie.js filelist.js userlist.js expressionlist.js loadtheme.js can.jquery.js popush.js roomModel.js roomConstruct.js runCodeConstruct.js messageConstruct.js editorConstruct.js> ../index.js 2>/dev/null
 
 clean:
 	@rm -rf indexx.html index.css index.js inline.html split.html
