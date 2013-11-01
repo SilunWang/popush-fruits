@@ -1,5 +1,6 @@
 ////////////////////////// vars ///////////////////////////////
 var global_v;
+var fileModel;
 
 
 
@@ -59,9 +60,6 @@ GlobalVariables = can.Model.extend({},{
 	self:this,
 
 	init:function(global_data){
-		////////////////////////// vars ///////////////////////////////
-		this.currentUser = [];
-		this.currentDir = [];
 		this.currentDirString = '';
 		this.dirMode = global_data.g_dirMode;
 
@@ -106,7 +104,6 @@ GlobalVariables = can.Model.extend({},{
 		///////////////////////theme related//////////////////////
 		this.myTheme = global_data.g_myTheme;
 
-		this.doc_on();
 		this.delete_obj = '';
 		this.rename_obj = '';
 	},
@@ -144,7 +141,7 @@ GlobalVariables = can.Model.extend({},{
 			if(i == 0 && this.dirMode == 'shared')
 				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
-				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
+				s += ' / <a href="javascript:;" onclick="' + before + 'fileModel.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
 		}
 		return s;
 	},
@@ -155,22 +152,6 @@ GlobalVariables = can.Model.extend({},{
 		replace(/>/gm, '&gt;').
 		replace(/ /gm, '&nbsp;').
 		replace(/\n/gm, '<br />');
-	},
-	backto: function(n) {
-		if (this.operationLock)
-			return;
-		this.operationLock = true;
-		var temp = [];
-		for (var i = 0; i < n; i++) {
-			temp.push(this.currentDir.pop());
-		}
-		this.currentDirString = this.getdirstring();
-		this.refreshfilelist(function() {
-			for (var i = 0; i < n; i++) {
-				this.currentDir.push(temp.pop());
-			}
-			this.currentDirString = this.getdirstring();
-		});
 	},
 	backtologin: function() {
 		$('#big-one .container').removeAttr('style');
@@ -274,14 +255,40 @@ GlobalVariables = can.Model.extend({},{
 			$('#' + idUp).focus();
 		else if (e.keyCode == 40)
 			$('#' + idDown).focus();
+	}
+});
+/****************************************************/
+
+var RefreshFilelist = can.Construct({},{
+
+	init:function(data){
+		this.m_global_v = data.m_global_v;
+		this.doc_on();
+	},
+
+	backto: function(n) {
+		if (this.m_global_v.operationLock)
+			return;
+		this.m_global_v.operationLock = true;
+		var temp = [];
+		for (var i = 0; i < n; i++) {
+			temp.push(this.m_global_v.currentDir.pop());
+		}
+		this.m_global_v.currentDirString = this.m_global_v.getdirstring();
+		this.refreshfilelist(function() {
+			for (var i = 0; i < n; i++) {
+				this.m_global_v.currentDir.push(temp.pop());
+			}
+			this.m_global_v.currentDirString = this.m_global_v.getdirstring();
+		});
 	},
 	refreshfilelist: function(error, callback) {
-		this.operationLock = true;
-		this.filelist.loading();
-		this.dochandler = this.refreshlistdone;
-		this.doccallback = callback;
-		this.socket.emit('doc', {
-			path: this.currentDirString
+		this.m_global_v.operationLock = true;
+		this.m_global_v.filelist.loading();
+		this.m_global_v.dochandler = this.refreshlistdone;
+		this.m_global_v.doccallback = callback;
+		this.m_global_v.socket.emit('doc', {
+			path: this.m_global_v.currentDirString
 		});
 		this.filelisterror = error;
 	},
@@ -314,14 +321,12 @@ GlobalVariables = can.Model.extend({},{
 		this.operationLock = false;
 	},
 	doc_on: function() {
-		var self = this;
-		this.socket.on('doc', function(data) {
+		var self = this.m_global_v;
+		this.m_global_v.socket.on('doc', function(data) {
 			self.dochandler(data);
 		});
 	}
 });
-/****************************************************/
-
 
 /*********************Login part*********************/
 
@@ -404,6 +409,7 @@ var LoginControl = can.Control.extend({
 	resize: function() {
 		var w = $('#login-box').parent('*').width();
 		$('#login-box').css('left', ((w - 420) / 2 - 30) + 'px');
+		$('#login-inputName').focus();
 	},
 
 	socket_io: function() {
@@ -694,15 +700,16 @@ var RegisterController = can.Control.extend({
 			m_global_v.operationLock = false;
 		});
 	}
-
 });
 
 /*******************fileTabs*************************/
 var FileTabsContorl = can.Control.extend({
 	m_global_v: '',
+	m_fileModel:'',
 	self: this,
 	init: function(element, options) {
 		self.m_global_v = this.options.m_global_v;
+		self.m_fileModel = this.options.m_fileModel;		
 		this.element.append(can.view("../ejs/filetab.ejs", {}));
 	},
 	'#new-file click': function() {
@@ -851,7 +858,7 @@ var FileTabsContorl = can.Control.extend({
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		m_global_v.docshowfilter = {flag:1,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		$('#current-dir').html(m_global_v.getdirlink());
-		m_global_v.refreshfilelist(function() {;
+		m_fileModel.refreshfilelist(function() {;
 		});
 
 		$('#ownedfile').show();
@@ -874,7 +881,7 @@ var FileTabsContorl = can.Control.extend({
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		m_global_v.docshowfilter = {flag:0,currentDir:m_global_v.currentDir,currentUser:m_global_v.currentUser}
 		$('#current-dir').html(m_global_v.getdirlink());
-		m_global_v.refreshfilelist(function() {;
+		m_fileModel.refreshfilelist(function() {;
 		});
 
 		$('#ownedfile').hide();
@@ -889,11 +896,13 @@ var FileTabsContorl = can.Control.extend({
 //Control
 var NewFileController = can.Control.extend({
 	m_global_v: '',
+	m_fileModel:'',
 	m_filename: '',
 	m_filenameId: '#newfile-inputName',
 	init: function(element, options) {
 		m_new_file = this.options.m_new_file;
 		m_global_v = this.options.m_global_v;
+		m_fileModel = this.options.m_fileModel;
 		this.element.append(can.view("../ejs/newfile.ejs", {
 			control_new_file: m_new_file
 		}));
@@ -1033,7 +1042,7 @@ var NewFileController = can.Control.extend({
 			}
 			m_global_v.removeloading('newfile-buttons');
 			m_global_v.operationLock = false;
-			m_global_v.refreshfilelist(function() {;});
+			m_fileModel.refreshfilelist(function() {;});
 		});
 	}
 });
@@ -1043,8 +1052,10 @@ var NewFileController = can.Control.extend({
 /*********************rename*************************/
 var ReNameControl = can.Control.extend({
 	m_global_v: '',
+	m_fileModel:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
+		m_fileModel = this.options.m_fileModel;
 		this.element.html(can.view("../ejs/rename.ejs", {}));
 		this.socket_io();
 	},
@@ -1085,7 +1096,7 @@ var ReNameControl = can.Control.extend({
 		} else {
 			$('#rename').modal('hide');
 			m_global_v.operationLock = false;
-			m_global_v.refreshfilelist(function() {;
+			m_fileModel.refreshfilelist(function() {;
 			});
 		}
 		m_global_v.removeloading('rename-buttons');
@@ -1102,8 +1113,10 @@ var ReNameControl = can.Control.extend({
 /********************deletefile**********************/
 var DeleteControl = can.Control.extend({
 	m_global_v: '',
+	m_fileModel:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
+		m_fileModel = this.options.m_fileModel;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
 		this.keydown();
@@ -1136,7 +1149,7 @@ var DeleteControl = can.Control.extend({
 				m_global_v.operationLock = false;
 			} else {
 				m_global_v.operationLock = false;
-				m_global_v.refreshfilelist(function() {;
+				m_fileModel.refreshfilelist(function() {;
 				});
 			}
 			m_global_v.removeloading('delete-buttons');
@@ -1149,8 +1162,10 @@ var DeleteControl = can.Control.extend({
 /*********************Share Files********************/
 var ShareController = can.Control.extend({
 	m_global_v: '',
+	m_fileModel:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
+		m_fileModel = this.options.m_fileModel;
 		this.element.append(can.view("../ejs/share.ejs", {}));
 		this.socket_io();
 		$('#share').on('shown', function() {
@@ -1162,7 +1177,7 @@ var ShareController = can.Control.extend({
 	".close-share click": function() {
 		if (m_global_v.operationLock)
 			return;
-		m_global_v.refreshfilelist(function() {;
+		m_fileModel.refreshfilelist(function() {;
 		});
 		$('#share').modal('hide');
 	},
@@ -1260,11 +1275,13 @@ var ShareController = can.Control.extend({
 
 var FileListController = can.Control.extend({
 	m_global_v: '',
+	m_fileModel:'',
 	m_object: '',
 	m_room_Construct: '',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		m_room_Construct = this.options.m_room_Construct;
+		m_fileModel = this.options.m_fileModel;
 		this.element.append(can.view("../ejs/filelist.ejs", {}));
 		this.initfilelistevent(m_global_v.filelist);
 		$('#rename').on('shown', function() {
@@ -1288,7 +1305,7 @@ var FileListController = can.Control.extend({
 			if (o.type == 'dir') {
 				m_global_v.currentDir.push(o.name);
 				m_global_v.currentDirString = m_global_v.getdirstring();
-				m_global_v.refreshfilelist(function() {
+				m_fileModel.refreshfilelist(function() {
 					m_global_v.currentDir.pop();
 					m_global_v.currentDirString = m_global_v.getdirstring();
 				});
@@ -1337,8 +1354,10 @@ var FileListController = can.Control.extend({
 
 var DownloadControl = can.Control.extend({
 	m_global_v: '',
+	m_fileModel:'',
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
+		m_fileModel = this.options.m_fileModel;
 		this.socket_io();
 	},
 
@@ -1392,7 +1411,7 @@ var DownloadControl = can.Control.extend({
 
 		m_global_v.socket.on('uploadzip', function(data) {
 			m_global_v.showmessagebox('zip', 'upload finished. Error number:' + data.e, 1);
-			m_global_v.refreshfilelist(function() {;
+			m_fileModel.refreshfilelist(function() {;
 			});
 		});
 	},
@@ -1739,7 +1758,6 @@ var modemap = {
 };
 
 
-
 function htmlescape(text) {
 	return text.
 		replace(/&/gm, '&amp;').
@@ -1792,6 +1810,9 @@ $(document).ready(function() {
 		g_myTheme: myTheme
 	});
 
+	fileModel = new RefreshFilelist({
+		m_global_v: global_v
+	});
 
     	setTimeout('global_v.loadfailed()', 10000);
 
@@ -1815,9 +1836,6 @@ $(document).ready(function() {
 
 
 	///*********************data init area**********************///
-
-
-
 
 
 	//login
@@ -1847,7 +1865,6 @@ $(document).ready(function() {
 	}
 
 	$('body').show();
-	$('#login-inputName').focus();
 	
 	if((!Browser.chrome || parseInt(Browser.chrome) < 18) &&
 		(!Browser.opera || parseInt(Browser.opera) < 12)) {
@@ -1879,13 +1896,16 @@ $(document).ready(function() {
 	});
 	var file_list_control = new FileListController('#file-list-table', {
 		m_room_Construct: room_Construct,
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_fileModel: fileModel
 	});
 	var new_file_control = new NewFileController('#newfile', {
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_fileModel: fileModel
 	});
 	var file_tabs_control = new FileTabsContorl('#file-tabs', {
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_fileModel: fileModel
 	});
 	var change_pass_control = new ChangePassControl('#changepassword', {
 		m_global_v: global_v
@@ -1897,23 +1917,28 @@ $(document).ready(function() {
 		m_global_v: global_v
 	});
 	var share_control = new ShareController('#share', {
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_fileModel: fileModel
 	});
 	var delete_controller = new DeleteControl('#delete', {
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_fileModel: fileModel
 	});
 	var rename_controller = new ReNameControl('#rename', {
 		m_global_v: global_v
 	});
 	var register_control = new RegisterController('#register', {
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_fileModel: fileModel
 	});
 	var login_control = new LoginControl('#login-box', {
 		m_global_v: global_v,
+		m_fileModel: fileModel,
 		m_login_information: login_information
 	});
 	var load_control = new DownloadControl('', {
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_fileModel: fileModel
 	});
 
 	$('[localization]').html(function(index, old) {
