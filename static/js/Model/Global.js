@@ -22,9 +22,6 @@ GlobalVariables = can.Model.extend({},{
 
 		this.movehandler = '';
 
-		this.dochandler = '';
-		this.doccallback = '';
-
 		this.backhome = '';
 
 		this.loadDone = false;
@@ -121,6 +118,9 @@ GlobalVariables = can.Model.extend({},{
 		$('.modal').modal('hide');
 	},
 
+
+	/********loading*******/
+
 	loading: function(id) {
 		if (this.loadings[id])
 			return;
@@ -132,7 +132,6 @@ GlobalVariables = can.Model.extend({},{
 			loading: $('#' + id + '-loading')
 		};
 	},
-
 	removeloading: function(id) {
 		if (!this.loadings[id])
 			return;
@@ -145,6 +144,17 @@ GlobalVariables = can.Model.extend({},{
 			this.removeloading(k);
 		}
 	},
+	loadfailed: function() {
+		if (this.loadDone)
+			return;
+		this.failed = true;
+		$('#loading-init').remove();
+		this.showmessage('login-message', 'loadfailed');
+	},
+
+
+	/*************show message***********/	
+
 	showmessage: function(id, stringid, type) {
 		var o = $('#' + id);
 		o.removeClass('alert-error');
@@ -173,7 +183,6 @@ GlobalVariables = can.Model.extend({},{
 				$('#' + id + ' .help-inline:eq(' + index + ')').text(stringid);
 		}
 	},
-
 	showmessagebox: function(title, content, timeout) {
 		if (strings[title])
 			$('#messagedialogLabel').html(strings[title]);
@@ -185,13 +194,7 @@ GlobalVariables = can.Model.extend({},{
 			$('#messagedialogContent').html(content);
 		$('#messagedialog').modal('show');
 		t = setTimeout('$(\'#messagedialog\').modal(\'hide\');', timeout * 1000);
-	},
-	loadfailed: function() {
-		if (this.loadDone)
-			return;
-		this.failed = true;
-		$('#loading-init').remove();
-		this.showmessage('login-message', 'loadfailed');
 	}
+
 });
 /****************************************************/

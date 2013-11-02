@@ -131,7 +131,6 @@ var LoginControl = can.Control.extend({
 				};
 				//获取当前的link
 				$('#current-dir').html(m_global_v.getdirlink());
-				//
 				m_global_v.filelist.setmode(3);
 				m_global_v.filelist.formdocs(data.user.docs, m_global_v.docshowfilter);
 
