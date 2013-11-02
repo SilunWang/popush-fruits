@@ -34,8 +34,25 @@ var ChangePassControl = can.Control.extend({
 		$('#changepassword').on('shown', function() {
 			$('#changepassword-old').focus();
 		});
+		this.socket_io();
 	},
 	'#changepass-ok click': function() {
+		this.changePassword();
+	},
+	
+	'#changepassword-old keydown': function() {
+		if (event.keyCode == 13)
+			$("#changepassword-new").focus();
+	},
+	'#changepassword-new keydown': function(){
+		if (event.keyCode == 13)
+			$("#changepassword-confirm").focus();
+	},
+	'#changepassword-confirm keydown': function(){
+		if (event.keyCode == 13)
+			this.changePassword();
+	},
+	changePassword:function(){
 		var old = $('#changepassword-old').val();
 		var pass = $('#changepassword-new').val();
 		var confirm = $('#changepassword-confirm').val();
@@ -52,8 +69,20 @@ var ChangePassControl = can.Control.extend({
 		m_global_v.socket.emit('password', {
 			password: old,
 			newPassword: pass
-		});
+		});		
 	},
+	socket_io:function(){
+		m_global_v.socket.on('password', function(data) {
+			if (data.err) {
+				m_global_v.showmessageindialog('changepassword', data.err, 0);
+			} else {
+				$('#changepassword').modal('hide');
+				m_global_v.showmessagebox('changepassword', 'changepassworddone', 1);
+			}
+			m_global_v.removeloading('changepassword-buttons');
+			m_global_v.operationLock = false;
+		});
+	}
 });
 /****************************************************/
 
@@ -69,6 +98,7 @@ var ChangeAvatarControl = can.Control.extend({
 	'#changeavatar-input change': function() {
 		this.changeavatar($('#changeavatar-input')[0]);
 	},
+
 	changeavatar: function(o) {
 		if (o.files.length < 0) {
 			m_global_v.showmessage('changeavatar-message', 'selectuser', 'error');
