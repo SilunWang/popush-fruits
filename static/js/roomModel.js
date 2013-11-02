@@ -79,8 +79,7 @@ var RoomModel = can.Model.extend({}, {
 
 	//初始化函数
 	init: function() {
-		//room.js中变量的一些初始化设定
-		var self = this;
+		
 	},
 
 	//根据各种状态判断现在是否可运行
@@ -112,5 +111,5 @@ var RoomModel = can.Model.extend({}, {
 		}
 		return false;
 	}
-	
+
 });

@@ -77,14 +77,7 @@ var ChatboxController = can.Control.extend({
 	},
 
 	'#chat click': function() {
-		var text = $('#chat-input').val();
-		if (text == '')
-			return;
-
-		globalModel.socket.emit('chat', {
-			text: text
-		});
-		$('#chat-input').val('');
+		msgObj.chat();
 	},
 
 	'#voice-on click': function() {
@@ -92,16 +85,8 @@ var ChatboxController = can.Control.extend({
 	},
 
 	'#chat-input keydown': function(){
-		if(event.keyCode == 13){
-			var text = $('#chat-input').val();
-		if (text == '')
-			return;
-
-		globalModel.socket.emit('chat', {
-			text: text
-		});
-		$('#chat-input').val('');
-		}
+		if(event.keyCode == 13)
+			msgObj.chat();
 	}
 
 });
@@ -135,8 +120,6 @@ var VarlistController = can.Control.extend({
 	roomObj: '',
 	runObj: '',
 	msgObj: '',
-	m_fullscreen: '',
-	self: this,
 
 	init: function(element, options) {
 
