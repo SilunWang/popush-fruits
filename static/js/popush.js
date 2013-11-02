@@ -247,7 +247,7 @@ GlobalVariables = can.Model.extend({},{
 		this.showmessage('login-message', 'loadfailed');
 	},
 
-	pressenter: function(e, func, idUp, idDown) {
+	/*pressenter: function(e, func, idUp, idDown) {
 		e = e || event;
 		if (e.keyCode == 13 && this.loadDone)
 			func();
@@ -255,7 +255,7 @@ GlobalVariables = can.Model.extend({},{
 			$('#' + idUp).focus();
 		else if (e.keyCode == 40)
 			$('#' + idDown).focus();
-	}
+	}*/
 });
 /****************************************************/
 
