@@ -34,10 +34,10 @@ var MessageConstruct = can.Construct.extend({}, {
 
 		socket.on('chat', function(data) {
 
-			var text = this.globalModel.htmlescape(data.text);
+			var text = mother.globalModel.htmlescape(data.text);
 			var time = new Date(data.time);
 
-			mother.roomConstruct.appendtochatbox(data.name, (data.name == currentUser.name ? 'self' : ''), text, time);
+			mother.roomConstruct.appendtochatbox(data.name, (data.name == mother.globalModel.currentUser.name ? 'self' : ''), text, time);
 		});
 	},
 
