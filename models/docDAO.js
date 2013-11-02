@@ -1702,10 +1702,13 @@ DocDAO.prototype.save = function(userId, docId, content, callback) {
 		});
 	});
 };
+//get newest revision of file forder
+//add by Xu Wang
 DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 	var that = this;
 	var paths = path.split('/');
 	var rootPath = "/" + paths[1] + "/" + paths[2];
+	var _name = paths[paths.length - 1];
 	var flag = 0;
 	var dId = userId.toString();
 	//console.log(rootPath+userId);
@@ -1740,6 +1743,12 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 			}
 			//console.log("2"+"hele");
 			//debugger;
+		//if the path means a folder, get the folder object
+		//define folder object:{
+		//				file_path:content,
+		//				folder_path:folder_object,
+		//				...
+		//                     }
 			if (result.type == "dir") {
 				var get_dir_files = function(dir, flag, result) {
 					var docs = dir.docs;
@@ -1782,10 +1791,10 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 									} else if (!result) {
 										return callback("unauthorized");
 									}
-									console.log(name + "hello");
+									//console.log(name + "hello");
 									result[name] = data.content;
 									if (flag && curIndex == docs.length - 1) {
-										return callback({result:res, type:"dir"}, paths[2] + ".zip");
+										return callback({result:res, type:"dir"}, _name + ".zip");
 									}else{
 										get_file(docs, curIndex  + 1);
 									}
@@ -1820,7 +1829,7 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 						return callback("unauthorized");
 					}
 					//console.log("3"+versionId);
-					return callback({result:result.content, type:"file"}, paths[2]);
+					return callback({result:result.content, type:"file"}, _name);
 				});
 			}
 		});

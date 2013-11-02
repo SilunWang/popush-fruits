@@ -7,11 +7,11 @@ var RoomConstruct = can.Construct.extend ({}, {
         //全局模型
         globalModel: undefined,
         //处理一些socket消息的Construct
-        messageConstruct: undefined,
+        msgObj: undefined,
         //控制运行和调试的Construct
-        runCodeConstruct: undefined,
+        runObj: undefined,
         //控制编辑区的Construct
-        editorConstruct: undefined,
+        editorObj: undefined,
         //toolbar
         toolbarController: undefined,
         //chatbox + console
@@ -24,53 +24,54 @@ var RoomConstruct = can.Construct.extend ({}, {
                 this.roomModel = options.roomModel;
                 this.globalModel = options.globalModel;
                 
-                this.messageConstruct = new MessageConstruct({
+                this.msgObj = new MessageConstruct({
                         roomModel: this.roomModel,
                         globalModel: this.globalModel,
-                        roomConstruct: this
+                        roomObj: this
                 });
 
-                this.runCodeConstruct = new RunCodeConstruct({
+                this.runObj = new RunCodeConstruct({
                         roomModel: this.roomModel,
                         globalModel: this.globalModel,
-                        roomConstruct: this
+                        roomObj: this
                 });
 
-                this.editorConstruct = new EditorConstruct({
+                this.editorObj = new EditorConstruct({
                         roomModel:this.roomModel,
                         globalModel:this.globalModel,
-                        roomConstruct:this
+                        roomObj:this
                 });
 
                 this.toolbarController = new ToolbarController("#over-editor", {
-                        m_room_c: this,
-                        m_global_v: this.globalModel,
-                        m_room_v: this.roomModel,
-                        m_message_c: this.messageConstruct,
-                        m_fullscreen: this.editorConstruct.setFullScreen
+                        roomObj: this,
+                        globalModel: this.globalModel,
+                        roomModel: this.roomModel,
+                        msgObj: this.msgObj,
+                        runObj: this.runObj,
+                        editorObj: this.editorObj
                 });
 
                 this.varlistController = new VarlistController("#varlist", {
-                        m_room_c: this,
-                        m_global_v: this.globalModel,
-                        m_room_v: this.roomModel,
-                        m_rundebug_c: this.runCodeConstruct,
-                        m_message_c: this.messageConstruct
+                        roomObj: this,
+                        globalModel: this.globalModel,
+                        roomModel: this.roomModel,
+                        runObj: this.runObj,
+                        msgObj: this.msgObj
                 });
 
                 this.chatboxController = new ChatboxController('#chatbox', {
-                        m_room_c: this,
-                        m_global_v: this.globalModel,
-                        m_room_v: this.roomModel,
-                        m_rundebug_c: this.runCodeConstruct,
-                        m_message_c: this.messageConstruct
+                        roomObj: this,
+                        globalModel: this.globalModel,
+                        roomModel: this.roomModel,
+                        runObj: this.runObj,
+                        msgObj: this.msgObj
                 });
 
                 this.consoleController = new ConsoleController('#console', {
-                        m_global_v: this.globalModel,
-                        m_room_v: this.roomModel,
-                        m_room_c: this,
-                        m_rundebug_c: this.runCodeConstruct
+                        globalModel: this.globalModel,
+                        roomModel: this.roomModel,
+                        roomObj: this,
+                        runObj: this.runObj
                 });
 
                 this.initModelData();
@@ -89,7 +90,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                         var r = this._shift();
                         if (this.length == 0 && localThis.roomModel.vars.bufferfrom == -1) {
                                 //如果本地的修改已经处理完毕，则标记已保存
-                                localThis.editorConstruct.setsaved();
+                                localThis.editorObj.setsaved();
                         }
                         return r;
                 }
@@ -97,7 +98,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                 this.roomModel.vars.q._push = this.roomModel.vars.q.push;
                 this.roomModel.vars.q._push = function(element) {
                         this._push(element);
-                        localThis.editorConstruct.setsaving();
+                        localThis.editorObj.setsaving();
                 }
         },
 
@@ -116,6 +117,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 
         //新建一个光标
         newcursor: function(content) {
+                
                 var cursor = $(
                         '<div class="cursor">' +
                         '<div class="cursor-not-so-inner">' +
@@ -126,6 +128,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                         '</div>' +
                         '</div>'
                 ).get(0);
+
                 $(cursor).find('.cursor-inner').popover({
                         html: true,
                         content: '<b>' + content + '</b>',
@@ -148,26 +151,27 @@ var RoomConstruct = can.Construct.extend ({}, {
         },
 
         togglechat: function(o) {
+                var roomVars = this.roomModel.vars;
                 if (this.globalModel.viewswitchLock)
                         return;
-                if (this.roomModel.vars.chatstate) {
+                if (roomVars.chatstate) {
                         $('#editormain').parent().removeClass('span12');
                         $('#editormain').parent().addClass('span9');
                         $('#chatbox').show();
                         $(o).html('<i class="icon-forward"></i>');
-                        $(o).attr('title', strings['hide-title']);
+                        $(o).attr('title', this.globalModel.strings['hide-title']);
                 } else {
                         $('#chatbox').hide();
                         $('#editormain').parent().removeClass('span9');
                         $('#editormain').parent().addClass('span12');
                         $(o).html('<i class="icon-backward"></i>');
-                        $(o).attr('title', strings['show-title']);
+                        $(o).attr('title', this.globalModel.strings['show-title']);
                 }
                 var o = $('#chat-show').get(0);
                 o.scrollTop = o.scrollHeight;
-                this.roomModel.vars.editor.refresh();
+                roomVars.editor.refresh();
                 this.resize();
-                this.roomModel.vars.chatstate = !this.roomModel.vars.chatstate;
+                roomVars.chatstate = !roomVars.chatstate;
         },
 
         //将聊天的内容显示到屏幕上
@@ -201,9 +205,11 @@ var RoomConstruct = can.Construct.extend ({}, {
 
         //点击“控制台”按钮时触发的响应函数，变更控制台的开关状态
         toggleconsole: function() {
-                if (this.roomModel.vars.consoleopen) {
+                if (this.roomModel.vars.consoleopen) 
+                {
                         this.closeconsole();
-                } else {
+                } 
+                else{
                         this.openconsole();
                 }
         },
@@ -335,7 +341,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                         var bto = chg.to.line;
 
                         if (chg.text.length != (bto - bfrom + 1)) {
-                                localThis.editorConstruct.sendbuffer();
+                                localThis.editorObj.sendbuffer();
                                 var req = {
                                         version: vars.doc.version,
                                         from: cfrom,
@@ -348,9 +354,9 @@ var RoomConstruct = can.Construct.extend ({}, {
                                 vars.q.push(req);
                                 var btext = "";
                                 for (var i = 0; i < chg.text.length; i++) {
-                                        btext += localThis.runCodeConstruct.havebreakat(editor, bfrom + i);
+                                        btext += localThis.runObj.havebreakat(editor, bfrom + i);
                                 }
-                                localThis.runCodeConstruct.sendbreak(bfrom, bto + 1, btext);
+                                localThis.runObj.sendbreak(bfrom, bto + 1, btext);
                                 return;
                         }
                         if (chg.text.length > 1) {
@@ -364,7 +370,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                                 } else {
                                         vars.buffertext += cattext;
                                 }
-                                localThis.editorConstruct.save();
+                                localThis.editorObj.save();
                                 return;
                         } else if (vars.bufferto == -1 && chg.origin == "+delete" &&
                                 vars.bufferfrom != -1 && cto == vars.bufferfrom + vars.buffertext.length && cfrom >= vars.bufferfrom) {
@@ -372,23 +378,23 @@ var RoomConstruct = can.Construct.extend ({}, {
                                 if (vars.buffertext.length == 0) {
                                         vars.bufferfrom = -1;
                                         if (vars.q.length == 0) {
-                                                localThis.editorConstruct.setsaved();
+                                                localThis.editorObj.setsaved();
                                         }
                                         return;
                                 }
-                                localThis.editorConstruct.save();
+                                localThis.editorObj.save();
                                 return;
                         } else if (chg.origin == "+delete" &&
                                 vars.bufferfrom == -1) {
                                 vars.bufferfrom = cfrom;
                                 vars.bufferto = cto;
                                 vars.buffertext = "";
-                                localThis.editorConstruct.save();
+                                localThis.editorObj.save();
                                 return;
                         } else if (vars.bufferto != -1 && chg.origin == "+delete" &&
                                 cto == vars.bufferfrom) {
                                 vars.bufferfrom = cfrom;
-                                localThis.editorConstruct.save();
+                                localThis.editorObj.save();
                                 return;
                         } else if (vars.bufferfrom != -1) {
                                 if (vars.bufferto == -1) {
@@ -435,22 +441,17 @@ var RoomConstruct = can.Construct.extend ({}, {
 
         //关闭编辑界面后的相关操作
         closeeditor: function() {
-                $('#editor').hide();
-                $('#filecontrol').show();
-                $('#footer').show();
-
+                var localThis = this;
                 this.globalModel.socket.emit('leave', {});
 
-                var localThis = this;
-
-                this.globalModel.refreshfilelist(function() {;
-                }, function() {
+                this.globalModel.backhome.refreshfilelist(function() 
+                        {;}, function() {
                         $("body").animate({
                                 scrollTop: localThis.roomModel.vars.oldscrolltop
                         });
                 });
 
-                this.messageConstruct.leaveVoiceRoom();
+                this.msgObj.leaveVoiceRoom();
         },
 
         //点击运行时的界面控制
@@ -500,7 +501,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                 socket.on('set', function(data) {
 
                         vars.savetimestamp = 1;
-                        localThis.editorConstruct.setsavedthen(1);
+                        localThis.editorObj.setsavedthen(1);
 
                         vars.q.length = 0;
                         vars.bq.length = 0;
@@ -521,9 +522,9 @@ var RoomConstruct = can.Construct.extend ({}, {
                         var filepart = vars.docobj.name.split('.');
                         vars.ext = filepart[filepart.length - 1];
                         localThis.changelanguage(vars.ext);
-                        localThis.runCodeConstruct.checkrunanddebug(vars.ext);
+                        localThis.runObj.checkrunanddebug(vars.ext);
 
-                        localThis.roomModel.vars.editor.refresh();
+                        vars.editor.refresh();
 
                         if (localThis.globalModel.currentDir.length == 1) {
                                 localThis.globalModel.memberlistdoc.fromdoc(vars.docobj);
@@ -556,7 +557,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                         localThis.roomModel.vars.editor.setValue(vars.doc.text);
                         localThis.roomModel.vars.editor.clearHistory();
                         localThis.roomModel.vars.editor.setOption('readOnly', false);
-                        localThis.runCodeConstruct.initbreakpoints(data.bps);
+                        localThis.runObj.initbreakpoints(data.bps);
                         for (var i in data.users) {
                                 localThis.globalModel.memberlistdoc.setonline(i, true);
                                 if (i == localThis.globalModel.currentUser.name)
@@ -595,7 +596,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                                 vars.old_bps = data.bps;
                                 if (data.state == 'waiting') {
                                         vars.waiting = true;
-                                        localThis.runCodeConstruct.runtoline(data.line - 1);
+                                        localThis.runObj.runtoline(data.line - 1);
                                         $('.debugandwait').removeClass('disabled');
                                         if (data.line !== null)
                                                 $('#console-title').text(localThis.globalModel.strings['console'] + localThis.globalModel.strings['waiting']);

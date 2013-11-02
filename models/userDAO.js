@@ -1,3 +1,5 @@
+//user table
+//
 module.exports = UserDAO;
 var db = require('./db.js');
 var crypto = require('crypto');

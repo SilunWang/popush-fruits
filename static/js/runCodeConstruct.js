@@ -5,13 +5,13 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	//全局模型
 	globalModel: undefined,
 	//当前页面的主控制器
-	roomConstruct: undefined,
+	roomObj: undefined,
 
 	init: function(options) {
 
 		this.roomModel = options.roomModel;
 		this.globalModel = options.globalModel;
-		this.roomConstruct = options.roomConstruct;
+		this.roomObj = options.roomObj;
 
 		//初始化socket
 		var socket = this.globalModel.socket;
@@ -27,8 +27,6 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		this.socket_on_exit(socket);
 		this.socket_on_bpsok(socket);
 		this.socket_on_bps(socket);
-		
-		
 	},
 	
 	//根据扩展名（ext）设置代码编辑器左边边栏的点击事件
@@ -46,7 +44,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		if (ENABLE_DEBUG) {
 			vars.debugable = this.roomModel.isdebugable(ext);
 			if (vars.debugable) {
-				this.roomConstruct.gutterclick = function(cm, n) {
+				this.roomObj.gutterclick = function(cm, n) {
 					if (vars.debugLock && !vars.waiting)
 						return;
 					//如果断点删除失败（本身不存在），则增加断点，否则删除断点
@@ -55,11 +53,11 @@ var RunCodeConstruct = can.Construct.extend({}, {
 					}
 				};
 			} else {
-				this.roomConstruct.gutterclick = function(cm, n) {};
+				this.roomObj.gutterclick = function(cm, n) {};
 			}
 			this.removeallbreakpoints();
 		}
-		this.roomConstruct.setrunanddebugstate();
+		this.roomObj.setrunanddebugstate();
 	},
 
 	//向服务器发送设置的断点信息
@@ -272,7 +270,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 			});
 			//在发送之后，也在控制台输出了内容，应当是别的函数调用了appendtoconsole
 		} else {
-			roomConstruct.appendtoconsole(text + '\n', 'stdin');
+			roomObj.appendtoconsole(text + '\n', 'stdin');
 		}
 		$('#console-input').val('');
 	},
@@ -299,7 +297,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	//接收到服务器发送的运行消息
 	//data : {(uesr)name, time};
 	socket_on_run: function(socket) {
-		var localRoom = this.roomConstruct;
+		var localRoom = this.roomObj;
 		var localThis = this;
 		socket.on('run', function(data) {
 			localRoom.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['runsaprogram'], new Date(data.time));
@@ -313,7 +311,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	//data : {(uesr)name, time, text（程序）, bps(断点信息字符串)};
 	socket_on_debug: function(socket) {
 		var localThis = this;
-		var localRoom = this.roomConstruct;
+		var localRoom = this.roomObj;
 		var strings = this.globalModel.strings;
 		socket.on('debug', function(data) {
 			localRoom.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['startdebug'], new Date(data.time));
@@ -387,7 +385,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
 	//处理输出
 	socket_on_stdout: function(socket) {
-		var localRoom = this.roomConstruct;
+		var localRoom = this.roomObj;
 		socket.on('stdout', function(data) {
 			localRoom.appendtoconsole(data.data);
 		});
@@ -395,7 +393,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
 	//处理输入
 	socket_on_stdin: function(socket) {
-		var localRoom = this.roomConstruct;
+		var localRoom = this.roomObj;
 		socket.on('stdin', function(data) {
 			localRoom.appendtoconsole(data.data, 'stdin');
 		});
@@ -403,7 +401,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
 	//处理错误流
 	socket_on_stderr: function(socket) {
-		var localRoom = this.roomConstruct;
+		var localRoom = this.roomObj;
 		socket.on('stderr', function(data) {
 			localRoom.appendtoconsole(data.data, 'stderr');
 		});
@@ -414,7 +412,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	socket_on_exit: function(socket) {
 
 		var localThis = this;
-		var localRoom = this.roomConstruct;
+		var localRoom = this.roomObj;
 		var vars = this.roomModel.vars;
 		var strings = this.globalModel.strings;
 
@@ -468,7 +466,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	socket_on_bpsok: function(socket) {
 
 		var vars = this.roomModel.vars;
-		var localRoom = this.roomConstruct;
+		var localRoom = this.roomObj;
 		var localThis = this;
 
 		socket.on('bpsok', function(data) {

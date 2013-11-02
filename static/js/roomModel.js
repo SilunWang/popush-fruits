@@ -6,6 +6,7 @@ var RoomModel = can.Model.extend({}, {
 
 	//room.js相关的变量
 	vars: {
+
 		//标记是否处于运行状态
 		runLock: false,
 		//标记是否处于调试状态
@@ -69,7 +70,7 @@ var RoomModel = can.Model.extend({}, {
 		//标记当前是否正在保存
 		issaving: false,
 		//从本地完全出队到更新视图的延时，用途待定
-		savetimeout: 5000,
+		savetimeout: 500,
 
 		chatstate:undefined,
 
@@ -78,8 +79,7 @@ var RoomModel = can.Model.extend({}, {
 
 	//初始化函数
 	init: function() {
-		//room.js中变量的一些初始化设定
-		var self = this;
+		
 	},
 
 	//根据各种状态判断现在是否可运行
@@ -111,4 +111,5 @@ var RoomModel = can.Model.extend({}, {
 		}
 		return false;
 	}
+
 });

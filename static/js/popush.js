@@ -27,7 +27,7 @@ $(document).ready(function() {
 	$('body').show();
 
 	//set timeout
-    	setTimeout('global_v.loadfailed()', 10000);
+    setTimeout('global_v.loadfailed()', 10000);
 
 	//resize
 	mainResize();

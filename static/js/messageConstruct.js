@@ -3,7 +3,7 @@
 /************************************************************************
 |    函数名称： SocketController                                                
 |    函数功能： 包装了与系统消息、聊天、语音有关的socket.on和相关函数                                            
-|    引用： globalModel roomModel roomConstruct     
+|    引用： globalModel roomModel roomObj     
 |	 Author: SilunWang              
 *************************************************************************/
 
@@ -11,13 +11,13 @@ var MessageConstruct = can.Construct.extend({}, {
 
 	globalModel: undefined,
 	roomModel: undefined,
-	roomConstruct: undefined,
+	roomObj: undefined,
 
 	init: function(options) {
 
 		this.globalModel = options.globalModel;
 		this.roomModel = options.roomModel;
-		this.roomConstruct = options.roomConstruct;
+		this.roomObj = options.roomObj;
 		
 		this.socket_on_chat(this.globalModel.socket);
 		this.socket_on_deleted(this.globalModel.socket);
@@ -30,14 +30,14 @@ var MessageConstruct = can.Construct.extend({}, {
 
 	//接收聊天消息，并显示在屏幕上，data：包含信息内容，发送者，时间
 	socket_on_chat: function(socket){
-		var mother = this;
 
+		var mother = this;
 		socket.on('chat', function(data) {
 
-			var text = this.globalModel.htmlescape(data.text);
+			var text = mother.globalModel.htmlescape(data.text);
 			var time = new Date(data.time);
 
-			mother.roomConstruct.appendtochatbox(data.name, (data.name == currentUser.name ? 'self' : ''), text, time);
+			mother.roomObj.appendtochatbox(data.name, (data.name == mother.globalModel.currentUser.name ? 'self' : ''), text, time);
 		});
 	},
 
@@ -46,7 +46,7 @@ var MessageConstruct = can.Construct.extend({}, {
 		var mother = this;
 		
 		socket.on('deleted', function(data) {
-			mother.roomConstruct.closeeditor();
+			mother.roomObj.closeeditor();
 			mother.globalModel.showmessagebox('info', 'deleted', 1);
 		});
 	},
@@ -57,11 +57,11 @@ var MessageConstruct = can.Construct.extend({}, {
 
 		socket.on('unshared', function(data) {
 			if (data.name == currentUser.name) {
-				mother.roomConstruct.closeeditor();
+				mother.roomObj.closeeditor();
 				mother.globalModel.showmessagebox('info', 'you unshared', 1);
 			} else {
 				mother.globalModel.memberlistdoc.remove(data.name);
-				mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['unshared'], new Date(data.time));
+				mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['unshared'], new Date(data.time));
 			}
 		});
 	},
@@ -74,7 +74,7 @@ var MessageConstruct = can.Construct.extend({}, {
 			mother.globalModel.memberlistdoc.add(data);
 			mother.globalModel.memberlistdoc.setonline(data.name, false);
 			mother.globalModel.memberlistdoc.sort();
-			mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
+			mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
 		});
 	},
 
@@ -94,8 +94,8 @@ var MessageConstruct = can.Construct.extend({}, {
 			} else {
 				mother.globalModel.memberlistdoc.setonline(data.name, true);
 				mother.globalModel.memberlistdoc.sort();
-				mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
-				var cursor = mother.roomConstruct.newcursor(data.name);
+				mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
+				var cursor = mother.roomObj.newcursor(data.name);
 				if (vars.cursors[data.name] && vars.cursors[data.name].element)
 					$(vars.cursors[data.name].element).remove();
 					vars.cursors[data.name] = {
@@ -115,7 +115,7 @@ var MessageConstruct = can.Construct.extend({}, {
 		socket.on('leave', function(data) {
 			mother.globalModel.memberlistdoc.setonline(data.name, false);
 			mother.globalModel.memberlistdoc.sort();
-			mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
+			mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
 			if (vars.cursors[data.name]) {
 				if (vars.cursors[data.name].element)
 					$(vars.cursors[data.name].element).remove();
@@ -125,15 +125,12 @@ var MessageConstruct = can.Construct.extend({}, {
 	},
 
 	//向服务器发送聊天的数据
-
 	chat: function() {
+
 		var text = $('#chat-input').val();
 		if (text == '')
 			return;
-
-		this.globalModel.socket.emit('chat', {
-			text: text
-		});
+		this.globalModel.socket.emit('chat', {text: text});
 		$('#chat-input').val('');
 	},
 
@@ -294,43 +291,6 @@ var MessageConstruct = can.Construct.extend({}, {
 		window.voiceConnection.leave();
 		delete window.voiceConnection;
 	}
-
-	/*//?移动文件？没看到这个功能啊
-	socket_on_moved: function(socket, data){
-		var mother = this;
-
-		socket.on('moved', function(data) {
-			
-			var thepath = data.newPath.split('/');
-			thepath.shift();
-			var thename;
-			var realname;
-			if (dirMode == 'owned') {
-				realname = thename = thepath.pop();
-				mother.globalModel.currentDir = thepath;
-			} else {
-				var name = mother.globalModel.currentDir.shift();
-				if (thepath.length == 2) {
-					thename = thepath[1] + '@' + thepath[0];
-					realname = thepath[1];
-					mother.globalModel.currentDir = [];
-				} else {
-					realname = thename = thepath.pop();
-					thepath.unshift(thepath.shift() + '/' + thepath.shift());
-					mother.globalModel.currentDir = thepath;
-				}
-				mother.globalModel.currentDir.unshift(name);
-			}
-			var filepart = realname.split('.');
-
-			mother.roomModel.ext = filepart[filepart.length - 1];
-			mother.globalModel.changelanguage(ext);
-			mother.roomControl.checkrunanddebug(ext);
-
-			mother.globalModel.appendtochatbox(strings['systemmessage'], 'system', strings['movedto'] + thename, new Date(data.time));
-			$('#current-doc').html(htmlescape(thename));
-		});
-	},*/
 
 });
 
