@@ -18,6 +18,15 @@ var LoginControl = can.Control.extend({
 		this.registerview();
 	},
 
+	'#login-inputName keydown': function() {
+		if (event.keyCode == 13)
+			$("#login-inputPassword").focus();
+	},
+	'#login-inputPassword keydown': function() {
+		if (event.keyCode == 13)
+			this.login();
+	},
+
 	//business
 	login: function() {
 		console.log("a");
@@ -189,7 +198,6 @@ var RegisterController = can.Control.extend({
 		self.m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/register.ejs", {}));
 		this.socket_io();
-		this.keyup();
 		this.focus();
 	},
 
@@ -201,11 +209,21 @@ var RegisterController = can.Control.extend({
 		this.loginview();
 	},
 
-	keyup: function() {
-		self = this;
-		$('#register-inputName').keyup(function() {
-			self.checkusername();
-		});
+	'#register-inputName keydown': function() {
+		if (event.keyCode == 13)
+			$("#register-inputPassword").focus();
+	},
+	'#register-inputPassword keydown': function() {
+		if (event.keyCode == 13)
+			$("#register-confirmPassword").focus();
+	},
+	'#register-confirmPassword keydown': function() {
+		if (event.keyCode == 13)
+			this.register();
+	},
+
+	'#register-inputName keyup':function() {
+		this.checkusername();
 	},
 
 	focus:function(){
@@ -347,17 +365,6 @@ var RegisterController = can.Control.extend({
 			}
 			m_global_v.removeloading('register-control');
 			m_global_v.registerLock = false;
-		});
-
-		m_global_v.socket.on('password', function(data) {
-			if (data.err) {
-				m_global_v.showmessageindialog('changepassword', data.err, 0);
-			} else {
-				$('#changepassword').modal('hide');
-				m_global_v.showmessagebox('changepassword', 'changepassworddone', 1);
-			}
-			m_global_v.removeloading('changepassword-buttons');
-			m_global_v.operationLock = false;
 		});
 	}
 });

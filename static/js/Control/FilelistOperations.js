@@ -11,19 +11,7 @@ var FileListController = can.Control.extend({
 		m_fileModel = this.options.m_fileModel;
 		this.element.append(can.view("../ejs/filelist.ejs", {}));
 		this.initfilelistevent(m_global_v.filelist);
-		$('#rename').on('shown', function() {
-			$('#rename-inputName').focus();
-		});
 	},	
-	'#delete-ok click':function(o){
-		//if(m_global_v.operationLock)
-				//return;
-		m_global_v.operationLock = true;
-		m_global_v.loading('delete-buttons');
-		m_global_v.socket.emit('delete', {
-			path: m_object.path
-		});
-	},
 	initfilelistevent: function(fl) {
 		var self = this;
 		fl.onname = function(o) {
@@ -89,11 +77,18 @@ var ReNameControl = can.Control.extend({
 		m_fileModel = this.options.m_fileModel;
 		this.element.html(can.view("../ejs/rename.ejs", {}));
 		this.socket_io();
+		$('#rename').on('shown', function() {
+			$('#rename-inputName').focus();
+		});
 	},
 	'#rename-ok click': function() {
 		this.renamefile();
 	},
 
+	'#rename-inputName keydown': function() {
+		if (event.keyCode == 13)
+			this.renamefile();
+	},
 	renamefile:function(){
 		if(m_global_v.operationLock)
 			return;
@@ -150,18 +145,13 @@ var DeleteControl = can.Control.extend({
 		m_fileModel = this.options.m_fileModel;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
-		this.keydown();
 	},
-
-
 	'#delete-ok click': function() {
 		this.deletefile();
 	},
-	keydown:function(){
-		var self = this;
-		$("#delete").keydown(function(){
-		  m_global_v.pressenter(arguments[0],self.deletefile);
-		});
+	'#delete keydown': function() {
+		if (event.keyCode == 13)
+			this.deletefile();
 	},
 	deletefile: function() {
 		if (m_global_v.operationLock)
@@ -220,7 +210,8 @@ var ShareController = can.Control.extend({
 		this.unshare();
 	},
 	'#share-inputName keydown': function() {
-		//m_global_v.pressenter(arguments[0], this.share);
+		if (event.keyCode == 13)
+			this.share();
 	},
 
 	unshare: function() {
