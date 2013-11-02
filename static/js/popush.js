@@ -1,7 +1,8 @@
 ////////////////////////// vars ///////////////////////////////
 var global_v;
 var fileModel;
-
+var room_Model;
+var room_Construct;
 
 
 
@@ -1789,7 +1790,20 @@ $(document).ready(function() {
 		m_global_v: global_v
 	});
 
-    	setTimeout('global_v.loadfailed()', 10000);
+	//login
+	var login_information = new LoginInformation({
+		login_name: '',
+		login_password: ''
+	});
+
+	//创建Model和Controller
+	room_Model = new RoomModel({});
+	room_Construct = new RoomConstruct({
+		roomModel: room_Model,
+		globalModel: global_v
+	});
+
+    setTimeout('global_v.loadfailed()', 10000);
 
 	//filelist init
 	global_v.filelist = fileList('#file-list-table');
@@ -1803,27 +1817,12 @@ $(document).ready(function() {
 	global_v.memberlist = userListAvatar('#member-list');
 	global_v.memberlistdoc = userListAvatar('#member-list-doc');
 
-	//expressionlist init
-	global_v.expressionlist = expressionList('#varlist-table');
-	expressionlist = global_v.expressionlist;
-
 	global_v.docshowfilter = {};
 
 	///*********************data init area**********************///
 
 
-	//login
-	var login_information = new LoginInformation({
-		login_name: '',
-		login_password: ''
-	});
-
-	//创建Model和Controller
-	room_Model = new RoomModel({});
-	room_Construct = new RoomConstruct({
-		roomModel: room_Model,
-		globalModel: global_v
-	});
+	
 
 	///******************data init area end**********************///
 

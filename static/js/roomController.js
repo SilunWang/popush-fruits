@@ -61,19 +61,7 @@ var ToolbarController = can.Control.extend({
 	},
 
 	'#editor-run click': function() {
-		if (!m_room_v.runenabled())
-			return;
-		if (m_global_v.operationLock)
-			return;
-		m_global_v.operationLock = true;
-		if (m_room_v.vars.runLock) {
-			m_global_v.socket.emit('kill');
-		} else {
-			m_global_v.socket.emit('run', {
-				version: m_room_v.vars.doc.version,
-				type: m_room_v.vars.ext
-			});
-		}
+		m_room_c.runCodeConstruct.run();
 	},
 
 	'#setFullScreen click': function() {
@@ -254,18 +242,37 @@ var VarlistController = can.Control.extend({
 	m_rundebug_c: '',
 	m_message_c: '',
 	m_fullscreen: '',
-
+	self: this,
 	init: function(element, options) {
 
 		m_global_v = this.options.m_global_v;
 		m_room_v = this.options.m_room_v;
 		m_room_c = this.options.m_room_c;
-		m_rundebug_c = this.m_rundebug_c;
-		m_message_c = this.m_message_c;
+		m_rundebug_c = this.options.m_rundebug_c;
+		m_message_c = this.options.m_message_c;
 
 		this.element.append(can.view("../ejs/varlist.ejs", {}));
+		//expressionlist init
+		m_global_v.expressionlist = expressionList('#varlist-table');
+		
+		//初始化expressionList
+		expressionlist = m_global_v.expressionlist;
+		var localRunDebugC = m_rundebug_c;
+
+		expressionlist.renameExpression = function(id) {
+			localRunDebugC.expressionlist_renameExpression(id);
+		};
+		
+		expressionlist.renameExpressionDone = function(id) {
+			localRunDebugC.expressionlist_renameExpressionDone(id);
+		};
+
+		expressionlist.removeExpression = function(id) {
+			localRunDebugC.expressionlist_removeExpression(id);
+		};
 
 	},
+
 	'#debugstep click': function() {
 		if (m_room_v.vars.debugLock && m_room_v.vars.waiting) {
 			m_global_v.socket.emit('step', {});
