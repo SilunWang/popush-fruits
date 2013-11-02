@@ -108,7 +108,7 @@ GlobalVariables = can.Model.extend({},{
 			$('#big-one').removeAttr('style');
 			$('#big-one .container').css('margin', 'auto');
 			$('#login-inputName').focus();
-			resize();
+			//resize();
 		});
 		$('#nav-head').fadeOut('fast');
 		$('#filecontrol').hide();
