@@ -74,7 +74,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 			text: text
 		};
 		if (this.roomModel.vars.bq.length == 0) {
-			socket.emit('bps', req);
+			this.globalModel.socket.emit('bps', req);
 		}
 		this.roomModel.vars.bq.push(req);
 	},
@@ -547,7 +547,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 				vars.q[i].version++;
 				vars.q[i].version = vars.q[i].version % 65536;
 			}
-			vars.bps = vars.bps.substr(0, data.from) + data.text + bps.substr(data.to);
+			vars.bps = vars.bps.substr(0, data.from) + data.text + vars.bps.substr(data.to);
 			if (vars.debugLock)
 				vars.old_bps = vars.old_bps.substr(0, data.from) + data.text + vars.old_bps.substr(data.to);
 			if (data.to == data.from + 1) {
