@@ -8,7 +8,6 @@
 *************************************************************************/
 
 var EditorConstruct = can.Construct.extend({}, {
-
 	//全局变量
 	globalModel: undefined,
 	//room Model
@@ -190,6 +189,7 @@ var EditorConstruct = can.Construct.extend({}, {
 	
 	//当对代码的修改已保存时对应的响应函数，用于版本控制
 	//?data : undefined , 貌似没用
+	
 	socket_on_ok: function(socket) {
 
 		var vars = this.roomModel.vars;
@@ -221,6 +221,7 @@ var EditorConstruct = can.Construct.extend({}, {
 	//协同编辑算法
 	//object : {version: 57, from: 150, to: 150, text: "fdfd", name: "hongshaoyu2008"}
 	//别人更改代码时才会调用
+	
 	socket_on_change: function(socket){
 
 		var localThis = this;

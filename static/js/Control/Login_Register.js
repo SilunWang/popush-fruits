@@ -1,26 +1,16 @@
 /*********************Login part*********************/
 
-var LoginInformation = can.Model.extend({});
-
 var LoginControl = can.Control.extend({
 	m_global_v: '',
-	m_login_information: '',
-	self: this,
 	init: function(element, options) {
-		self.m_global_v = this.options.m_global_v;
-		self.m_login_information = this.options.m_login_information;
-		this.element.append(can.view("../ejs/login.ejs", {
-			control_login_information: self.m_login_information
-		}));
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/login.ejs", {}));
 		this.socket_io();
 		this.resize();
 	},
 
 	//reaction area
 	'#login-submit click': function() {
-		self.m_login_information.attr('login_name', $('#login-inputName').val());
-		self.m_login_information.attr('login_password', $('#login-inputPassword').val());
-		//self.m_login_information.save();
 		this.login();
 	},
 
@@ -32,8 +22,8 @@ var LoginControl = can.Control.extend({
 	login: function() {
 		console.log("a");
 		//获取输入框的数据
-		var login_name = self.m_login_information.login_name;
-		var login_pass = self.m_login_information.login_password;
+		var login_name = $('#login-inputName').val();
+		var login_pass = $('#login-inputPassword').val();
 		//名字输入为空
 		if (login_name == '') {
 			m_global_v.showmessage('login-message', 'pleaseinput', 'error');
