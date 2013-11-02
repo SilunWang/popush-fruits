@@ -50,8 +50,8 @@ var ToolbarController = can.Control.extend({
 
 		m_global_v.socket.emit('leave', {});
 
-		m_global_v.refreshfilelist(function() {;
-		}, function() {
+		m_global_v.backhome.refreshfilelist(function() 
+			{;}, function() {
 			$("body").animate({
 				scrollTop: m_room_v.vars.oldscrolltop
 			});

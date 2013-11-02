@@ -4,7 +4,7 @@ var RefreshFilelist = can.Construct({},{
 	init:function(data){
 		this.m_global_v = data.m_global_v;
 		this.doc_on();
-		this.m_global_v.backhome = this.refreshfilelist;
+		this.m_global_v.backhome = this;
 	},
 
 	backto: function(n) {

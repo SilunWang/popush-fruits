@@ -87,7 +87,7 @@ $(document).ready(function() {
 
 	room_Construct.resize();
 
-	$(window).resize(room_Construct.resize);
+	$(window).resize(function() {room_Construct.resize();});
 	$(window).scroll(function() {
 		$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
 	});
