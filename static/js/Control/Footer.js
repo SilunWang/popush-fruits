@@ -21,6 +21,7 @@ var FooterController = can.Control.extend({
 				break;
 		}
 		this.element.append(can.view("../ejs/footer.ejs", {}));
+		this.resize();
 	},
 	'#changeStaticTheme click': function() {
 		this.changeStaticTheme();
@@ -36,6 +37,13 @@ var FooterController = can.Control.extend({
 	},
 	'#changeChn click': function() {
 		this.changeChn();
+	},
+	resize:function(){
+		$(window).resize(function() {
+			var width = $(document).width() * 0.915;
+			var margin_left = (width / 2 - 108) + "px";
+			$("#foot-information").css("margin-left", margin_left);
+		});
 	},
 	//更改主题为第一个主题
 	changetheme1: function() {
