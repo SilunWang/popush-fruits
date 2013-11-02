@@ -6,6 +6,7 @@ var RoomModel = can.Model.extend({}, {
 
 	//room.js相关的变量
 	vars: {
+
 		//标记是否处于运行状态
 		runLock: false,
 		//标记是否处于调试状态
@@ -111,4 +112,5 @@ var RoomModel = can.Model.extend({}, {
 		}
 		return false;
 	}
+	
 });
