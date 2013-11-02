@@ -217,6 +217,11 @@ var NewFileController = can.Control.extend({
 		this.newfile();
 	},
 
+	'#newfile-inputName keydown': function() {
+		if (event.keyCode == 13)
+			this.newfile();
+	},
+
 	//business
 	newfile: function() {
 		var name = $('#newfile-inputName').val();
