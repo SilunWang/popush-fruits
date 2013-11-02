@@ -28,11 +28,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		this.socket_on_bpsok(socket);
 		this.socket_on_bps(socket);
 		
-		//初始化expressionList
-		var expressionlist = this.globalModel.expressionlist;
-		expressionlist.renameExpression = this.expressionlist_renameExpression;
-		expressionlist.renameExpressionDone = this.expressionlist_renameExpressionDone;
-		expressionlist.removeExpression = this.expressionlist_removeExpression;
+		
 	},
 	
 	//根据扩展名（ext）设置代码编辑器左边边栏的点击事件
@@ -456,7 +452,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 				$('#editor-debug').attr('title', strings['debug-title']);
 				localThis.runtoline(-1);
 				for (var k in localThis.globalModel.expressionlist.elements) {
-					localThis.globalModel.expressionlist.setValue(localThis.expressionlist.elements[k].expression, null);
+					localThis.globalModel.expressionlist.setValue(localThis.globalModel.expressionlist.elements[k].expression, null);
 				}
 				vars.debugLock = false;
 			}
@@ -577,7 +573,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
 		var vars = this.roomModel.vars;
 
-		this.globalModel.expressionlist.r.doneall();
+		this.globalModel.expressionlist.doneall();
 		if (vars.debugLock && !vars.waiting)
 			return;
 		var input = this.globalModel.expressionlist.elements[id].elem.find('input');
@@ -588,7 +584,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		input.show();
 		input.focus();
 		input.select();
-		this.globalModel.expressionlist.r.seteditingelem(id);
+		this.globalModel.expressionlist.seteditingelem(id);
 	},
 
 	//修改监视列表完成时的处理工作，在按下回车或者点击空白时发生
@@ -601,22 +597,30 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		var span = expList.elements[id].elem.find('span');
 		var expression = $.trim(input.val());
 
-		if (vars.debugLock && !vars.waiting) {
-			if (!expList.elements[id].notnew) {
+		if (vars.debugLock && !vars.waiting) 
+		{
+			if (!expList.elements[id].notnew) 
+			{
 				expList.elements[id].elem.remove();
 				delete expList.elements[id];
-			} else {
+			} 
+			else 
+			{
 				input.hide();
 				span.show();
 			}
-		} else {
-			if (expList.elements[id].notnew) {
+		} 
+		else 
+		{
+			if (expList.elements[id].notnew) 
+			{
 				this.globalModel.socket.emit('rm-expr', {
 					expr: expList.elements[id].expression
 				});
 			}
 
-			if (expression != '') {
+			if (expression != '') 
+			{
 				this.globalModel.socket.emit('add-expr', {
 					expr: expression
 				});
@@ -625,13 +629,13 @@ var RunCodeConstruct = can.Construct.extend({}, {
 			expList.elements[id].elem.remove();
 			delete expList.elements[id];
 		}
-		expList.r.seteditingelem(null);
+		expList.seteditingelem(null);
 	},
 
 	//删除监视的变量
 	expressionlist_removeExpression: function(id) {
 		var expList = this.globalModel.expressionlist;
-		expList.r.doneall();
+		expList.doneall();
 		this.globalModel.socket.emit('rm-expr', {
 			expr: expList.elements[id].expression
 		});
