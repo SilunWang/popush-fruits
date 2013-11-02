@@ -67,6 +67,7 @@ textarea {resize:none;}
 .CodeMirror {height:392px;border:1px solid #ccc;-webkit-border-radius:4px;-moz-border-radius:4px;border-radius:4px;}
 .CodeMirror-fullscreen {display:block;position:absolute;top:0;left:0;width:100%;z-index:9999;background:#fff;}
 .CodeMirror {line-height: 1.5}
+.CodeMirror-scroll{overflow-x:hidden;}
 
 .CodeMirror *, #varlist-table  *, #console-input, #console-inner, #console-inner * {font-family:"monaco", "consolas", "Mono";}
 #console span.message {font-family:"ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande","Hiragino Sans GB","Hiragino Sans GB W3","Microsoft YaHei","WenQuanYi Micro Hei", sans-serif;}
