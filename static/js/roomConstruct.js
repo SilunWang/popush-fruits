@@ -94,7 +94,6 @@ var RoomConstruct = can.Construct.extend ({}, {
                         }
                         return r;
                 }
-                
                 //将修改入队的函数
                 this.roomModel.vars.q._push = this.roomModel.vars.q.push;
                 this.roomModel.vars.q._push = function(element) {
@@ -118,7 +117,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 
         //新建一个光标
         newcursor: function(content) {
-
+                
                 var cursor = $(
                         '<div class="cursor">' +
                         '<div class="cursor-not-so-inner">' +

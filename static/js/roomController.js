@@ -15,7 +15,7 @@ var ToolbarController = can.Control.extend({
 		msgObj = this.options.msgObj;
 		runObj = this.options.runObj;
 		editorObj = this.options.editorObj;
-		this.element.append(can.view("../ejs/toolbar.ejs", {}));
+		this.element.append(can.view("../ejs/editor-toolbar.ejs", {}));
 	},
 
 	'#togglechat click': function() {
@@ -73,7 +73,7 @@ var ChatboxController = can.Control.extend({
 		roomObj = this.options.roomObj;
 		runObj = this.options.runObj;
 		msgObj = this.options.msgObj;
-		this.element.append(can.view("../ejs/chatbox.ejs", {}));
+		this.element.append(can.view("../ejs/room-chatbox.ejs", {}));
 	},
 
 	'#chat click': function() {
