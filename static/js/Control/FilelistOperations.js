@@ -220,7 +220,7 @@ var ShareController = can.Control.extend({
 		this.unshare();
 	},
 	'#share-inputName keydown': function() {
-		m_global_v.pressenter(arguments[0], this.share);
+		//m_global_v.pressenter(arguments[0], this.share);
 	},
 
 	unshare: function() {
