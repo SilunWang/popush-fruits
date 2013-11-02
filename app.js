@@ -793,7 +793,7 @@ io.sockets.on('connection', function(socket) {
 					});
 					runner.run(function(err) {
 						
-						delete pro.runner;
+						delete room.runner;
 						err.time = new Date().getTime();
 						_broadcast(room.id, 'exit', err);
 					});
