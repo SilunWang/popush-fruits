@@ -1,3 +1,10 @@
+/**
+ *version:2.0
+ *program language: node.js
+ *the project use websocket to communicate with web client.
+ *the project use mongodb as the database.
+ *the project use gdb to debug project.
+ */
 var VERSION = require('./package.json').version;
 var crypto = require('crypto');
 var fs = require('fs');
@@ -12,7 +19,7 @@ var session = {};
 var users = {};
 var rooms = {};
 var projects = {};
-
+//write log file in format
 function log() {
 	function formatDate(t) {
 		var y = t.getFullYear();
@@ -27,7 +34,7 @@ function log() {
 	console.log('\n[' + formatDate(new Date()) + ']');
 	console.log.apply(console.log, arguments);
 }
-
+//catch exception
 (function() {
 	var sig = [
 		'SIGHUP', 'SIGINT', 'SIGQUIT', 'SIGILL',
@@ -48,11 +55,11 @@ function log() {
 })();
 
 log('server start');
-
+//create socket.
 var io = require('socket.io').listen(require('./package.json').port, {
 	log: false
 });
-
+//broad msg to all clients in group.
 function _broadcast(id, msg, data) {
 	if (DEBUG) {
 		if (data) {
@@ -63,7 +70,7 @@ function _broadcast(id, msg, data) {
 	}
 	io.sockets. in (id).emit(msg, data);
 }
-
+//initial socket connection
 io.sockets.on('connection', function(socket) {
 
 	(function() {
@@ -98,17 +105,18 @@ io.sockets.on('connection', function(socket) {
 			$emit.apply(socket, arguments);
 		};
 	})();
-
+//user model: the interface to users table
 	var userDAO = new UserDAO();
+//doc model: the interface to doc table
 	var docDAO = new DocDAO();
-
+//
 	var ip = socket.handshake.headers['x-real_ip'];
 	if (!ip) {
 		ip = socket.handshake.address.address;
 	}
 
 	log('[' + ip + ']', 'connect "socket begin"');
-
+//check whether data contain some key, data is an object
 	function check(data) {
 		if (data === undefined) {
 			return false;
@@ -120,19 +128,19 @@ io.sockets.on('connection', function(socket) {
 		}
 		return true;
 	};
-
+//disconnect the socket
 	socket.on('disconnect', function() {
 		if (socket.session) {
 			_leave();
 		}
 	});
-	//huode version
+//get the version
 	socket.on('version', function() {
 		socket.emit('version', {
 			version: VERSION
 		});
 	});
-	//register new user
+//register new user
 	socket.on('register', function(data) { // name, password
 		if (!check(data, 'name', 'password')) {
 			return;
@@ -156,7 +164,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		});
 	});
-	//relogin 
+//relogin 
 	socket.on('relogin', function(data) { // sid
 		if (!check(data, 'sid')) {
 			return;
@@ -182,7 +190,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		}
 	});
-	//
+	//login
 	socket.on('login', function(data) { // name, password
 		if (!check(data, 'name', 'password')) {
 			return;
@@ -198,6 +206,7 @@ io.sockets.on('connection', function(socket) {
 				if (!session[sid])
 					break;
 			}
+//add session
 			socket.session = session[sid] = {
 				user: user,
 				sid: sid
@@ -235,7 +244,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		});
 	});
-
+//change avatar
 	socket.on('avatar', function(data) { // avatar, type
 		if (!check(data, 'avatar', 'type')) {
 			return;
@@ -285,7 +294,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		});
 	});
-
+//new file, new directory, new project
 	socket.on('new', function(data) { // path, type
 		if (!check(data, 'path', 'type')) {
 			return;
@@ -294,7 +303,8 @@ io.sockets.on('connection', function(socket) {
 			return socket.emit('unauthorized');
 		}
 		var user = socket.session.user;
-		if (data.type == 'dir' && data.path.match(".*\.pro$") != null) {
+//create a project, a project contains a Makefile and Readme file	
+	if (data.type == 'dir' && data.path.match(".*\.pro$") != null) {
 			docDAO.createDoc(user._id, data.path, data.type, "", function(err) {
 				if (err) {
 					socket.emit('new', {
@@ -302,6 +312,7 @@ io.sockets.on('connection', function(socket) {
 						type: 'new'
 					});
 				} else {
+//add Makefile
 					docDAO.createDoc(user._id, data.path + "/Makefile", "doc", "", function(err) {
 						if (err) {
 							socket.emit('new', {
@@ -309,6 +320,7 @@ io.sockets.on('connection', function(socket) {
 								type: 'new'
 							});
 						} else {
+//add readme
 							var content = "#You are welcome to use popush to manage your project.\r\n"
 							content = content + "#You can edit C, C++, Java, Javascript, lua, perl, ruby, python,node in your project.\r\n";
 							content = content + "#You are offered gcc, java, g++, lua, perl, ruby, python, node as your compliers.\r\n";
@@ -330,6 +342,7 @@ io.sockets.on('connection', function(socket) {
 
 			})
 		} else {
+
 			docDAO.createDoc(user._id, data.path, data.type, "", function(err) {
 				socket.emit('new', {
 					err: err,
@@ -338,7 +351,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		}
 	});
-
+//delete file
 	socket.on('delete', function(data) { // path	
 		if (!check(data, 'path')) {
 			return;
@@ -365,7 +378,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		});
 	});
-
+//move file
 	socket.on('move', function(data) { // path, newPath
 		if (!check(data, 'path', 'newPath')) {
 			return;
@@ -390,7 +403,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		});
 	});
-
+//share file
 	socket.on('share', function(data) { // path, name
 		if (!check(data, 'path', 'name')) {
 			return;
@@ -417,7 +430,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		});
 	});
-
+//cancel share
 	socket.on('unshare', function(data) { // path, name
 		if (!check(data, 'path', 'name')) {
 			return;
@@ -462,7 +475,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		});
 	});
-
+//get information of doc
 	socket.on('doc', function(data) { // path
 		if (!check(data, 'path')) {
 			return;
@@ -482,7 +495,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		});
 	});
-
+//leave the room 
 	function _leave() {
 		if (socket.session && socket.session.room) {
 			var user = socket.session.user;
@@ -507,7 +520,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		}
 	}
-
+// join the room
 	socket.on('join', function(data) { // path
 		if (!check(data, 'path')) {
 			return;
@@ -544,7 +557,7 @@ io.sockets.on('connection', function(socket) {
 				});
 			}
 			var pro = null;
-			//if the room is a projects
+			//if the room is a projects, add room to project
 			if (data.path.match(".*\.pro.*") != null) {
 				var paths = data.path.split('/');
 				var project = "/" + paths[1] + "/" + paths[2];
@@ -592,7 +605,7 @@ io.sockets.on('connection', function(socket) {
 			socket.emit('set', r);
 		});
 	});
-
+//leave room 
 	socket.on('leave', function(data) { //
 		if (!data) return;
 		if (!socket.session) {
@@ -600,7 +613,7 @@ io.sockets.on('connection', function(socket) {
 		}
 		_leave();
 	});
-
+//change socket
 	socket.on('change', function(data) { // version, from, to, text
 		if (!check(data, 'version', 'from', 'to', 'text')) {
 			return;
@@ -621,7 +634,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		}
 	});
-
+//add bps
 	socket.on('bps', function(data) { // version, from, to, text
 		if (!check(data, 'version', 'from', 'to', 'text')) {
 			return;
@@ -653,7 +666,7 @@ io.sockets.on('connection', function(socket) {
 			}
 		}
 	});
-
+//get the revision
 	socket.on('revision', function(data) { // path, revision
 		if (!check(data, 'path', 'revision')) {
 			return;
@@ -664,7 +677,7 @@ io.sockets.on('connection', function(socket) {
 		var user = socket.session.user;
 		socket.emit('not supported');
 	});
-
+//commit
 	socket.on('commit', function() {
 		if (!socket.session) {
 			return socket.emit('unauthorized');
@@ -672,7 +685,7 @@ io.sockets.on('connection', function(socket) {
 		var user = socket.session.user;
 		socket.emit('not supported');
 	});
-
+//chat 
 	socket.on('chat', function(data) { // text
 		if (!check(data, 'text')) {
 			return;
@@ -688,7 +701,7 @@ io.sockets.on('connection', function(socket) {
 			_broadcast(room.id, 'chat', data);
 		}
 	});
-
+//run 
 	socket.on('run', function(data) { // type, version
 		if (!check(data, 'type', 'version')) {
 			return;
@@ -698,6 +711,7 @@ io.sockets.on('connection', function(socket) {
 		}
 		var user = socket.session.user;
 		var room = socket.session.room;
+//if the room is in a project
 		if (room.path.match(".*\.pro.*") != null) {
 
 			var pro;
@@ -708,12 +722,18 @@ io.sockets.on('connection', function(socket) {
 			socket.emit('log', projects);
 			if (pro.running == false && pro.debugging == false) {
 				var user = socket.session.user;
-				socket.emit('log', project);
+				//socket.emit('log', project);
+//get the all file in an project
 				docDAO.getnewestRevision(user._id, project, function(data, name) {
-					socket.emit('log', data);
+					//socket.emit('log', data);
+//create a new runner which type is "make"
 					var runner = new Runner(paths[2], "make", data.result);
 					if (runner.ready()) {
 						pro.runner = runner;
+						for(var r in pro.rooms){
+							pro.rooms[r].runner = runner;			
+						}
+						
 						socket.emit('log', runner);
 						for (var key in pro.rooms) {
 							var room = pro.rooms[key];
@@ -766,6 +786,7 @@ io.sockets.on('connection', function(socket) {
 			}
 
 		} else {
+//general room
 			if (room && !room.runner && !room.dbger && room.version == data.version) {
 
 				var runner = new Runner(room.path.substr(room.path.lastIndexOf('/') + 1), data.type, room.buffer.toString());
@@ -801,21 +822,21 @@ io.sockets.on('connection', function(socket) {
 			}
 		}
 	});
-
+//kill the process
 	socket.on('kill', function() {
 		if (!socket.session) {
 			return socket.emit('unauthorized');
 		}
 		var user = socket.session.user;
 		var room = socket.session.room;
+		
 		if (room) {
-			if (room.runner) {
 				socket.emit('log', room.runner);
 				room.runner.kill();
-			} else if (room.dbger) {
+			} else if (room.dbger){
 				room.dbger.kill();
 			}
-		}
+		
 	});
 
 	socket.on('stdin', function(data) { // data
@@ -1025,6 +1046,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		}
 	});
+//download file, can download either file or file directory in tree format.
 	socket.on('download', function(data) {
 		var userID = socket.session.user._id;
 		var path = data.path;
@@ -1038,6 +1060,7 @@ io.sockets.on('connection', function(socket) {
 		});
 
 	});
+//upload file.
 	socket.on('upload', function(data) {
 		var type = data.type;
 		var path = data.path;
@@ -1057,6 +1080,7 @@ io.sockets.on('connection', function(socket) {
 		});
 
 	});
+//on git function 
 	socket.on('git', function(data) {
 		var types = data.types;
 		var paths = data.names;
@@ -1067,6 +1091,7 @@ io.sockets.on('connection', function(socket) {
 		}
 		var user = socket.session.user;
 		var l = types.length;
+//add file recursely
 		function addfile(_i) {
 
 			var path = data.names[_i];
@@ -1097,6 +1122,7 @@ io.sockets.on('connection', function(socket) {
 		
 
 });
+//upload zip file
 	socket.on('uploadzip', function(data) {
 		if (!check(data, 'names', 'types', 'contents')) {
 
@@ -1136,64 +1162,6 @@ io.sockets.on('connection', function(socket) {
 		}
 		addfile(0);
 	});
-	socket.on('download', function(data){
-		var userID = socket.session.user._id;
-		var path = data.path;
-		docDAO.getnewestRevision(userID, path, function(data, name){
-			return socket.emit('download', {r:data, n:name});
-		});
-
-});
-	socket.on('upload', function(data){
-		var type = data.type;
-		var path = data.path;
-		var content = data.content;
-		if(!check(data, 'path', 'type', 'content')){
-			return;
-		}
-		if(!socket.session){
-			return socket.emit('unauthorized');
-		}
-		var user = socket.session.user;
-		docDAO.createDoc(user._id, path, type, content, function(err){
-			socket.emit('new', {err:err, type:'upload'});
-		});
-
-	});
-	socket.on('uploadzip', function(data){
-		if(!check(data, 'names', 'types', 'contents')){
-
-			return;
-		}
-		if(!socket.session){
-			return socket.emit('unauthorized');
-		}
-		//return socket.emit('uploadzip', {e:data.types.length});
-		var user = socket.session.user;
-		var index = 0;
-		var l = data.names.length;
-		var error = 0;
-		function addfile(_i){
-
-			var path = data.names[_i];
-			var type = data.types[_i];
-			var content = data.contents[_i];
-		
-			docDAO.createDoc(user._id, path, type, content, function(err){
-				if(err){
-						error ++;
-					}
-				if(_i == l - 1){
-					socket.emit('uploadzip', {e:error});
-					return;
-				}else{
-					
-					addfile(_i + 1);	
-				}
-				
-			});
-		
-	}
-	addfile(0);
-	});
+//
+	
 });
