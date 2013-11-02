@@ -39,7 +39,6 @@ function listInit(){
 	global_v.memberlist = userListAvatar('#member-list');
 	global_v.memberlistdoc = userListAvatar('#member-list-doc');
 
-	global_v.docshowfilter = {};
 }
 
 function controlInit(){
@@ -127,11 +126,6 @@ function mainResize(){
 	$(window).resize(function() {room_Construct.resize();});
 	$(window).scroll(function() {
 		$('#editormain-inner').css('left', (-$(window).scrollLeft()) + 'px');
-	});
-	$(window).resize(function() {
-		var width = $(document).width() * 0.915;
-		var margin_left = (width / 2 - 108) + "px";
-		$("#foot-information").css("margin-left", margin_left);
 	});
 }
 
