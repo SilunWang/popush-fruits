@@ -279,7 +279,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
 	//接收服务器发送过来的添加监视的信息
 	socket_on_add_expr: function(socket) {
-		var localThis = self;
+		var localThis = this;
 		socket.on('add-expr', function(data) {
 			if (data.expr) {
 				localThis.globalModel.expressionlist.addExpression(data.expr);
@@ -373,7 +373,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 			}
 			//依次设定表达式的值
 			for (var k in data.exprs) {
-				localThis.roomModel.expressionlist.setValue(k, data.exprs[k]);
+				localThis.globalModel.expressionlist.setValue(k, data.exprs[k]);
 			}
 			$('.debugandwait').removeClass('disabled');
 			if (typeof data.line === 'number')
@@ -505,7 +505,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	socket_on_bps: function(socket) {
 
 		var vars = this.roomModel.vars;
-		var localThis = self;
+		var localThis = this;
 
 
 		socket.on('bps', function(data) {
@@ -555,18 +555,18 @@ var RunCodeConstruct = can.Construct.extend({}, {
 			if (data.to == data.from + 1) {
 				if (data.text == "1") {
 					var element = $('<div><img src="images/breakpoint.png" /></div>').get(0);
-					this.roomModel.vars.editor.setGutterMarker(data.from, 'breakpoints', element);
+					localThis.roomModel.vars.editor.setGutterMarker(data.from, 'breakpoints', element);
 				} else if (data.text == "0") {
-					var info = this.roomModel.vars.editor.lineInfo(data.from);
+					var info = localThis.roomModel.vars.editor.lineInfo(data.from);
 					if (info.gutterMarkers && info.gutterMarkers["breakpoints"]) {
-						this.roomModel.vars.editor.setGutterMarker(data.from, 'breakpoints', null);
+						localThis.roomModel.vars.editor.setGutterMarker(data.from, 'breakpoints', null);
 					}
 				}
 			}
 			vars.doc.version++
 			vars.doc.version = vars.doc.version % 65536;
 			if (vars.bq.length > 0) {
-				this.globalModel.socket.emit('bps', vars.bq[0]);
+				localThis.globalModel.socket.emit('bps', vars.bq[0]);
 			}
 		});
 	},
@@ -592,11 +592,11 @@ var RunCodeConstruct = can.Construct.extend({}, {
 	//修改监视列表完成时的处理工作，在按下回车或者点击空白时发生
 	expressionlist_renameExpressionDone: function(id) {
 
-		var expThis = this.globalModel.expressionlist;
+		var expList = this.globalModel.expressionlist;
 		var vars = this.roomModel.vars;
 
-		var input = expThis.elements[id].elem.find('input');
-		var span = expThis.elements[id].elem.find('span');
+		var input = expList.elements[id].elem.find('input');
+		var span = expList.elements[id].elem.find('span');
 		var expression = $.trim(input.val());
 
 		if (vars.debugLock && !vars.waiting) 
@@ -617,7 +617,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 			if (expList.elements[id].notnew) 
 			{
 				this.globalModel.socket.emit('rm-expr', {
-					expr: expThis.elements[id].expression
+					expr: expList.elements[id].expression
 				});
 			}
 
@@ -628,8 +628,8 @@ var RunCodeConstruct = can.Construct.extend({}, {
 				});
 			}
 
-			expThis.elements[id].elem.remove();
-			delete expThis.elements[id];
+			expList.elements[id].elem.remove();
+			delete expList.elements[id];
 		}
 		expList.seteditingelem(null);
 	},
@@ -639,7 +639,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		var expList = this.globalModel.expressionlist;
 		expList.doneall();
 		this.globalModel.socket.emit('rm-expr', {
-			expr: expThis.elements[id].expression
+			expr: expList.elements[id].expression
 		});
 	}
 });
