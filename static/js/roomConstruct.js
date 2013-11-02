@@ -117,6 +117,7 @@ var RoomConstruct = can.Construct.extend ({}, {
 
         //新建一个光标
         newcursor: function(content) {
+                
                 var cursor = $(
                         '<div class="cursor">' +
                         '<div class="cursor-not-so-inner">' +
@@ -127,6 +128,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                         '</div>' +
                         '</div>'
                 ).get(0);
+
                 $(cursor).find('.cursor-inner').popover({
                         html: true,
                         content: '<b>' + content + '</b>',
@@ -149,26 +151,27 @@ var RoomConstruct = can.Construct.extend ({}, {
         },
 
         togglechat: function(o) {
+                var roomVars = this.roomModel.vars;
                 if (this.globalModel.viewswitchLock)
                         return;
-                if (this.roomModel.vars.chatstate) {
+                if (roomVars.chatstate) {
                         $('#editormain').parent().removeClass('span12');
                         $('#editormain').parent().addClass('span9');
                         $('#chatbox').show();
                         $(o).html('<i class="icon-forward"></i>');
-                        $(o).attr('title', strings['hide-title']);
+                        $(o).attr('title', this.globalModel.strings['hide-title']);
                 } else {
                         $('#chatbox').hide();
                         $('#editormain').parent().removeClass('span9');
                         $('#editormain').parent().addClass('span12');
                         $(o).html('<i class="icon-backward"></i>');
-                        $(o).attr('title', strings['show-title']);
+                        $(o).attr('title', this.globalModel.strings['show-title']);
                 }
                 var o = $('#chat-show').get(0);
                 o.scrollTop = o.scrollHeight;
-                this.roomModel.vars.editor.refresh();
+                roomVars.editor.refresh();
                 this.resize();
-                this.roomModel.vars.chatstate = !this.roomModel.vars.chatstate;
+                roomVars.chatstate = !roomVars.chatstate;
         },
 
         //将聊天的内容显示到屏幕上
@@ -521,7 +524,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                         localThis.changelanguage(vars.ext);
                         localThis.runObj.checkrunanddebug(vars.ext);
 
-                        localThis.roomModel.vars.editor.refresh();
+                        vars.editor.refresh();
 
                         if (localThis.globalModel.currentDir.length == 1) {
                                 localThis.globalModel.memberlistdoc.fromdoc(vars.docobj);

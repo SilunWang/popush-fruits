@@ -1,10 +1,12 @@
 /**********************Filelist**********************/
 
 var FileListController = can.Control.extend({
+	
 	m_global_v: '',
 	m_fileModel:'',
 	m_object: '',
 	m_room_Construct: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		m_room_Construct = this.options.m_room_Construct;
