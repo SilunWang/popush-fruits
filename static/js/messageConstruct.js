@@ -83,6 +83,8 @@ var MessageConstruct = can.Construct.extend({}, {
 	//data : {name, time}
 	socket_on_join: function(socket){
 		var mother = this;
+		var vars = this.roomModel.vars;
+		var strings = this.globalModel.strings;
 
 		socket.on('join', function(data) {
 			if (data.err) {
@@ -94,9 +96,9 @@ var MessageConstruct = can.Construct.extend({}, {
 				mother.globalModel.memberlistdoc.sort();
 				mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
 				var cursor = mother.roomConstruct.newcursor(data.name);
-				if (cursors[data.name] && cursors[data.name].element)
-					$(cursors[data.name].element).remove();
-				cursors[data.name] = {
+				if (vars.cursors[data.name] && vars.cursors[data.name].element)
+					$(vars.cursors[data.name].element).remove();
+					vars.cursors[data.name] = {
 					element: cursor,
 					pos: 0
 				};
@@ -108,15 +110,16 @@ var MessageConstruct = can.Construct.extend({}, {
 	//data : {name, time}
 	socket_on_leave: function(socket){
 		var mother = this;
-
+		var vars = this.roomModel.vars;
+		var strings = this.globalModel.strings;
 		socket.on('leave', function(data) {
 			mother.globalModel.memberlistdoc.setonline(data.name, false);
 			mother.globalModel.memberlistdoc.sort();
 			mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
-			if (cursors[data.name]) {
-				if (cursors[data.name].element)
-					$(cursors[data.name].element).remove();
-				delete cursors[data.name];
+			if (vars.cursors[data.name]) {
+				if (vars.cursors[data.name].element)
+					$(vars.cursors[data.name].element).remove();
+				delete vars.cursors[data.name];
 			}
 		});
 	},
@@ -136,6 +139,10 @@ var MessageConstruct = can.Construct.extend({}, {
 
 	//语音控制
 	voice: function() {
+
+		var vars = this.roomModel.vars;
+		var localThis = this;
+
 		if (novoice)
 			return;
 		if (window.voiceLock) {
@@ -155,11 +162,11 @@ var MessageConstruct = can.Construct.extend({}, {
 			$('#voice-on').addClass('active');
 			try {
 				var username = $('#nav-user-name').html();
-				var dataRef = new Firebase('https://popush.firebaseIO.com/' + doc.id);
+				var dataRef = new Firebase('https://popush.firebaseIO.com/' + vars.doc.id);
 				dataRef.once('value', function(snapShot) {
 					delete dataRef;
 					if (snapShot.val() == null) {
-						var connection = new RTCMultiConnection(doc.id);
+						var connection = new RTCMultiConnection(vars.doc.id);
 						window.voiceConnection = connection;
 						connection.session = "audio-only";
 						connection.autoCloseEntireSession = true;
@@ -198,7 +205,7 @@ var MessageConstruct = can.Construct.extend({}, {
 						});
 					} else {
 						//?什么时候调用的？snapShot为何不为空
-						var connection = new RTCMultiConnection(doc.id);
+						var connection = new RTCMultiConnection(vars.doc.id);
 						window.voiceConnection = connection;
 						connection.session = "audio-only";
 						connection.autoCloseEntireSession = true;

@@ -106,7 +106,7 @@ function fileList(table) {
 		},
 		
 		//增加一个文件，o:已经格式化好的文件相关信息，包括path,name,showname,type,shared
-		add: function(o) {
+		add: function(o,htmlescape) {
 			//移除没有文件这几个字
 			obj.find('.no-file').remove();
 			var i = elements.length;
@@ -199,7 +199,7 @@ function fileList(table) {
 			});
 			for(i=0; i<all.length; i++) {
 				var o = all[i];
-				this.add(o);
+				this.add(o,filter.htmlescape);
 			}
 		},
 		

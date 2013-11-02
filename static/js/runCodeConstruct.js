@@ -28,11 +28,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		this.socket_on_bpsok(socket);
 		this.socket_on_bps(socket);
 		
-		//初始化expressionList
-		var expressionlist = this.globalModel.expressionlist;
-		expressionlist.renameExpression = this.expressionlist_renameExpression;
-		expressionlist.renameExpressionDone = this.expressionlist_renameExpressionDone;
-		expressionlist.removeExpression = this.expressionlist_removeExpression;
+		
 	},
 	
 	//根据扩展名（ext）设置代码编辑器左边边栏的点击事件
@@ -271,7 +267,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		var text = $('#console-input').val();
 		//当处于运行等待状态时，发送输入框数据到服务器
 		if (vars.runLock || vars.debugLock) {
-			globalModel.socket.emit('stdin', {
+			this.globalModel.socket.emit('stdin', {
 				data: text + '\n'
 			});
 			//在发送之后，也在控制台输出了内容，应当是别的函数调用了appendtoconsole
@@ -456,7 +452,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 				$('#editor-debug').attr('title', strings['debug-title']);
 				localThis.runtoline(-1);
 				for (var k in localThis.globalModel.expressionlist.elements) {
-					localThis.globalModel.expressionlist.setValue(localThis.expressionlist.elements[k].expression, null);
+					localThis.globalModel.expressionlist.setValue(localThis.globalModel.expressionlist.elements[k].expression, null);
 				}
 				vars.debugLock = false;
 			}
@@ -579,7 +575,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
 		var vars = this.roomModel.vars;
 
-		this.globalModel.expressionlist.r.doneall();
+		this.globalModel.expressionlist.doneall();
 		if (vars.debugLock && !vars.waiting)
 			return;
 		var input = this.globalModel.expressionlist.elements[id].elem.find('input');
@@ -590,7 +586,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		input.show();
 		input.focus();
 		input.select();
-		this.globalModel.expressionlist.r.seteditingelem(id);
+		this.globalModel.expressionlist.seteditingelem(id);
 	},
 
 	//修改监视列表完成时的处理工作，在按下回车或者点击空白时发生
@@ -603,22 +599,30 @@ var RunCodeConstruct = can.Construct.extend({}, {
 		var span = expThis.elements[id].elem.find('span');
 		var expression = $.trim(input.val());
 
-		if (vars.debugLock && !vars.waiting) {
-			if (!expThis.elements[id].notnew) {
-				expThis.elements[id].elem.remove();
-				delete expThis.elements[id];
-			} else {
+		if (vars.debugLock && !vars.waiting) 
+		{
+			if (!expList.elements[id].notnew) 
+			{
+				expList.elements[id].elem.remove();
+				delete expList.elements[id];
+			} 
+			else 
+			{
 				input.hide();
 				span.show();
 			}
-		} else {
-			if (expThis.elements[id].notnew) {
+		} 
+		else 
+		{
+			if (expList.elements[id].notnew) 
+			{
 				this.globalModel.socket.emit('rm-expr', {
 					expr: expThis.elements[id].expression
 				});
 			}
 
-			if (expression != '') {
+			if (expression != '') 
+			{
 				this.globalModel.socket.emit('add-expr', {
 					expr: expression
 				});
@@ -627,13 +631,13 @@ var RunCodeConstruct = can.Construct.extend({}, {
 			expThis.elements[id].elem.remove();
 			delete expThis.elements[id];
 		}
-		expThis.r.seteditingelem(null);
+		expList.seteditingelem(null);
 	},
 
 	//删除监视的变量
 	expressionlist_removeExpression: function(id) {
-		var expThis = this.globalModel.expressionlist;
-		expThis.r.doneall();
+		var expList = this.globalModel.expressionlist;
+		expList.doneall();
 		this.globalModel.socket.emit('rm-expr', {
 			expr: expThis.elements[id].expression
 		});
