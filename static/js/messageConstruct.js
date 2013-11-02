@@ -98,7 +98,7 @@ var MessageConstruct = can.Construct.extend({}, {
 				var cursor = mother.roomConstruct.newcursor(data.name);
 				if (vars.cursors[data.name] && vars.cursors[data.name].element)
 					$(vars.cursors[data.name].element).remove();
-				cursors[data.name] = {
+					vars.cursors[data.name] = {
 					element: cursor,
 					pos: 0
 				};
