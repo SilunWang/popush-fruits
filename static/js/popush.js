@@ -22,12 +22,6 @@ $(document).ready(function() {
 		m_global_v: global_v
 	});
 
-	//login
-	var login_information = new LoginInformation({
-		login_name: '',
-		login_password: ''
-	});
-
 	//创建Model和Controller
 	room_Model = new RoomModel({});
 	room_Construct = new RoomConstruct({
@@ -51,10 +45,7 @@ $(document).ready(function() {
 
 	global_v.docshowfilter = {};
 
-	///*********************data init area**********************///
 
-
-	
 
 	///******************data init area end**********************///
 
@@ -138,8 +129,7 @@ $(document).ready(function() {
 	});
 	var login_control = new LoginControl('#login-box', {
 		m_global_v: global_v,
-		m_fileModel: fileModel,
-		m_login_information: login_information
+		m_fileModel: fileModel
 	});
 	var load_control = new DownloadControl('', {
 		m_global_v: global_v,

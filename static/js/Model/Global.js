@@ -3,8 +3,9 @@ GlobalVariables = can.Model.extend({},{
 	self:this,
 
 	init:function(global_data){
+		this.currentDir = [];
 		this.currentDirString = '';
-		this.dirMode = global_data.g_dirMode;
+		this.dirMode = 'owned';
 
 		this.newfiletype = 'doc';
 		this.filelisterror = function(){;};
@@ -108,7 +109,8 @@ GlobalVariables = can.Model.extend({},{
 			$('#big-one').removeAttr('style');
 			$('#big-one .container').css('margin', 'auto');
 			$('#login-inputName').focus();
-			//resize();
+			var w = $('#login-box').parent('*').width();
+			$('#login-box').css('left', ((w - 420) / 2 - 30) + 'px');
 		});
 		$('#nav-head').fadeOut('fast');
 		$('#filecontrol').hide();
