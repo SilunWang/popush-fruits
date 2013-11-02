@@ -1,166 +1,158 @@
 var ToolbarController = can.Control.extend({
 
-	m_global_v: '',
-	m_room_v: '',
-	m_room_c: '',
-	m_message_c: '',
+	globalModel: '',
+	roomModel: '',
+	roomObj: '',
+	msgObj: '',
+	runObj: '',
+	editorObj: '',
 
 	init: function(element, options) {
 		
-		m_global_v = this.options.m_global_v;
-		m_room_v = this.options.m_room_v;
-		m_room_c = this.options.m_room_c;
-		m_message_c = this.options.m_message_c;
-
+		globalModel = this.options.globalModel;
+		roomModel = this.options.roomModel;
+		roomObj = this.options.roomObj;
+		msgObj = this.options.msgObj;
+		runObj = this.options.runObj;
+		editorObj = this.options.editorObj;
 		this.element.append(can.view("../ejs/editor-toolbar.ejs", {}));
 	},
 
 	'#togglechat click': function() {
-		m_room_c.togglechat(this);
+		roomObj.togglechat(this);
 	},
 
 	'#editor-debug click': function() {
-		if (!m_room_v.debugenabled())
+		if (!roomModel.debugenabled())
 			return;
-		if (m_global_v.operationLock)
+		if (globalModel.operationLock)
 			return;
-		m_global_v.operationLock = true;
-		if (m_room_v.vars.debugLock) {
-			m_global_v.socket.emit('kill');
+		globalModel.operationLock = true;
+		if (roomModel.vars.debugLock) {
+			globalModel.socket.emit('kill');
 		} else {
-			m_global_v.socket.emit('debug', {
-				version: m_room_v.vars.doc.version,
-				type: m_room_v.vars.ext
+			globalModel.socket.emit('debug', {
+				version: roomModel.vars.doc.version,
+				type: roomModel.vars.ext
 			});
 		}
 	},
 
 	'#editor-console click': function() {
-		if (m_room_v.vars.consoleopen) {
-			m_room_c.closeconsole();
-		} else {
-			m_room_c.openconsole();
-		}
+		roomObj.toggleconsole();
 	},
 
 	'#editor-back click': function() {
 		$('#editor').hide();
 		$('#filecontrol').show();
 		$('#footer').show();
-
-		m_global_v.socket.emit('leave', {});
-
-		m_global_v.backhome.refreshfilelist(function() 
-			{;}, function() {
-			$("body").animate({
-				scrollTop: m_room_v.vars.oldscrolltop
-			});
-		});
-
-		m_message_c.leaveVoiceRoom();
+		roomObj.closeeditor();
 	},
 
 	'#editor-run click': function() {
-		m_room_c.runCodeConstruct.run();
+		runObj.run();
 	},
 
 	'#setFullScreen click': function() {
-		m_room_c.editorConstruct.setFullScreen(m_room_v.vars.editor, true);
+		editorObj.setFullScreen(roomModel.vars.editor, true);
 	}
 
 });
 
 var ChatboxController = can.Control.extend({
 
-	m_global_v: '',
-	m_room_v: '',
-	m_room_c: '',
-	m_rundebug_c: '',
-	m_message_c: '',
-	m_fullscreen: '',
-	m_togglechat: '',
+	globalModel: '',
+	roomModel: '',
+	roomObj: '',
+	runObj: '',
+	msgObj: '',
+
 	init: function(element, options) {
-		m_global_v = this.options.m_global_v;
-		m_room_v = this.options.m_room_v;
-		m_room_c = this.options.m_room_c;
-		m_rundebug_c = this.options.m_rundebug_c;
-		m_message_c = this.options.m_message_c;
+		globalModel = this.options.globalModel;
+		roomModel = this.options.roomModel;
+		roomObj = this.options.roomObj;
+		runObj = this.options.runObj;
+		msgObj = this.options.msgObj;
 		this.element.append(can.view("../ejs/room-chatbox.ejs", {}));
 	},
+
 	'#chat click': function() {
 		var text = $('#chat-input').val();
 		if (text == '')
 			return;
 
-		m_global_v.socket.emit('chat', {
+		globalModel.socket.emit('chat', {
 			text: text
 		});
 		$('#chat-input').val('');
 	},
+
 	'#voice-on click': function() {
-		m_message_c.voice();
+		msgObj.voice();
 	},
+
 	'#chat-input keydown': function(){
 		if(event.keyCode == 13){
 			var text = $('#chat-input').val();
 		if (text == '')
 			return;
 
-		m_global_v.socket.emit('chat', {
+		globalModel.socket.emit('chat', {
 			text: text
 		});
 		$('#chat-input').val('');
 		}
 	}
+
 });
 
 var ConsoleController = can.Control.extend({
 
-	m_global_v: '',
-	m_room_v: '',
-	m_room_c: '',
-	m_fullscreen: '',
-	m_rundebug_c: '',
+	globalModel: '',
+	roomModel: '',
+	roomObj: '',
+	runObj: '',
 
 	init: function(element, options){
-		m_global_v = this.options.m_global_v;
-		m_room_v = this.options.m_room_v;
-		m_room_c = this.options.m_room_c;
-		m_rundebug_c = this.options.m_rundebug_c;
+		globalModel = this.options.globalModel;
+		roomModel = this.options.roomModel;
+		roomObj = this.options.roomObj;
+		runObj = this.options.runObj;
 		this.element.append(can.view("../ejs/console.ejs", {}));
 	},
 	
 	'#console-input keydown': function() {
 		if (event.keyCode == 13)
-			m_rundebug_c.stdin();
+			runObj.stdin();
 	}
 
 });
 
 var VarlistController = can.Control.extend({
 
-	m_global_v: '',
-	m_room_v: '',
-	m_room_c: '',
-	m_rundebug_c: '',
-	m_message_c: '',
+	globalModel: '',
+	roomModel: '',
+	roomObj: '',
+	runObj: '',
+	msgObj: '',
 	m_fullscreen: '',
 	self: this,
+
 	init: function(element, options) {
 
-		m_global_v = this.options.m_global_v;
-		m_room_v = this.options.m_room_v;
-		m_room_c = this.options.m_room_c;
-		m_rundebug_c = this.options.m_rundebug_c;
-		m_message_c = this.options.m_message_c;
+		globalModel = this.options.globalModel;
+		roomModel = this.options.roomModel;
+		roomObj = this.options.roomObj;
+		runObj = this.options.runObj;
+		msgObj = this.options.msgObj;
 
 		this.element.append(can.view("../ejs/varlist.ejs", {}));
 		//expressionlist init
-		m_global_v.expressionlist = expressionList('#varlist-table');
+		globalModel.expressionlist = expressionList('#varlist-table');
 		
 		//初始化expressionList
-		expressionlist = m_global_v.expressionlist;
-		var localRunDebugC = m_rundebug_c;
+		expressionlist = globalModel.expressionlist;
+		var localRunDebugC = runObj;
 
 		expressionlist.renameExpression = function(id) {
 			localRunDebugC.expressionlist_renameExpression(id);
@@ -177,23 +169,27 @@ var VarlistController = can.Control.extend({
 	},
 
 	'#debugstep click': function() {
-		if (m_room_v.vars.debugLock && m_room_v.vars.waiting) {
-			m_global_v.socket.emit('step', {});
+		if (roomModel.vars.debugLock && roomModel.vars.waiting) {
+			globalModel.socket.emit('step', {});
 		}
 	},
+
 	'#debugnext click': function() {
-		if (m_room_v.vars.debugLock && m_room_v.vars.waiting) {
-			m_global_v.socket.emit('next', {});
+		if (roomModel.vars.debugLock && roomModel.vars.waiting) {
+			globalModel.socket.emit('next', {});
 		}
 	},
+
 	'#debugfinish click': function() {
-		if (m_room_v.vars.debugLock && m_room_v.vars.waiting) {
-			m_global_v.socket.emit('finish', {});
+		if (roomModel.vars.debugLock && roomModel.vars.waiting) {
+			globalModel.socket.emit('finish', {});
 		}
 	},
+
 	'#debugcontinue click': function() {
-		if (m_room_v.vars.debugLock && m_room_v.vars.waiting) {
-			m_global_v.socket.emit('resume', {});
+		if (roomModel.vars.debugLock && roomModel.vars.waiting) {
+			globalModel.socket.emit('resume', {});
 		}
 	}
+
 });

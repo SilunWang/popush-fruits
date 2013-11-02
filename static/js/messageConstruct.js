@@ -3,7 +3,7 @@
 /************************************************************************
 |    函数名称： SocketController                                                
 |    函数功能： 包装了与系统消息、聊天、语音有关的socket.on和相关函数                                            
-|    引用： globalModel roomModel roomConstruct     
+|    引用： globalModel roomModel roomObj     
 |	 Author: SilunWang              
 *************************************************************************/
 
@@ -11,13 +11,13 @@ var MessageConstruct = can.Construct.extend({}, {
 
 	globalModel: undefined,
 	roomModel: undefined,
-	roomConstruct: undefined,
+	roomObj: undefined,
 
 	init: function(options) {
 
 		this.globalModel = options.globalModel;
 		this.roomModel = options.roomModel;
-		this.roomConstruct = options.roomConstruct;
+		this.roomObj = options.roomObj;
 		
 		this.socket_on_chat(this.globalModel.socket);
 		this.socket_on_deleted(this.globalModel.socket);
@@ -37,7 +37,7 @@ var MessageConstruct = can.Construct.extend({}, {
 			var text = mother.globalModel.htmlescape(data.text);
 			var time = new Date(data.time);
 
-			mother.roomConstruct.appendtochatbox(data.name, (data.name == mother.globalModel.currentUser.name ? 'self' : ''), text, time);
+			mother.roomObj.appendtochatbox(data.name, (data.name == mother.globalModel.currentUser.name ? 'self' : ''), text, time);
 		});
 	},
 
@@ -46,7 +46,7 @@ var MessageConstruct = can.Construct.extend({}, {
 		var mother = this;
 		
 		socket.on('deleted', function(data) {
-			mother.roomConstruct.closeeditor();
+			mother.roomObj.closeeditor();
 			mother.globalModel.showmessagebox('info', 'deleted', 1);
 		});
 	},
@@ -57,11 +57,11 @@ var MessageConstruct = can.Construct.extend({}, {
 
 		socket.on('unshared', function(data) {
 			if (data.name == currentUser.name) {
-				mother.roomConstruct.closeeditor();
+				mother.roomObj.closeeditor();
 				mother.globalModel.showmessagebox('info', 'you unshared', 1);
 			} else {
 				mother.globalModel.memberlistdoc.remove(data.name);
-				mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['unshared'], new Date(data.time));
+				mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['unshared'], new Date(data.time));
 			}
 		});
 	},
@@ -74,7 +74,7 @@ var MessageConstruct = can.Construct.extend({}, {
 			mother.globalModel.memberlistdoc.add(data);
 			mother.globalModel.memberlistdoc.setonline(data.name, false);
 			mother.globalModel.memberlistdoc.sort();
-			mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
+			mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
 		});
 	},
 
@@ -94,8 +94,8 @@ var MessageConstruct = can.Construct.extend({}, {
 			} else {
 				mother.globalModel.memberlistdoc.setonline(data.name, true);
 				mother.globalModel.memberlistdoc.sort();
-				mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
-				var cursor = mother.roomConstruct.newcursor(data.name);
+				mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
+				var cursor = mother.roomObj.newcursor(data.name);
 				if (vars.cursors[data.name] && vars.cursors[data.name].element)
 					$(vars.cursors[data.name].element).remove();
 					vars.cursors[data.name] = {
@@ -115,7 +115,7 @@ var MessageConstruct = can.Construct.extend({}, {
 		socket.on('leave', function(data) {
 			mother.globalModel.memberlistdoc.setonline(data.name, false);
 			mother.globalModel.memberlistdoc.sort();
-			mother.roomConstruct.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
+			mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
 			if (vars.cursors[data.name]) {
 				if (vars.cursors[data.name].element)
 					$(vars.cursors[data.name].element).remove();

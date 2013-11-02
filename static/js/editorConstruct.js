@@ -3,7 +3,7 @@
 /************************************************************************
 |    函数名称： EditorController                                                
 |    函数功能： 包装了与代码编辑和socket.on相关函数                                            
-|    引用： globalModel roomModel roomConstruct     
+|    引用： globalModel roomModel roomObj     
 |	 Author: SilunWang             
 *************************************************************************/
 
@@ -13,13 +13,13 @@ var EditorConstruct = can.Construct.extend({}, {
 	//room Model
 	roomModel: undefined,
 	//room Construct
-	roomConstruct: undefined,
+	roomObj: undefined,
 
 	init: function(options){
 		//init
 		this.globalModel = options.globalModel;
 		this.roomModel = options.roomModel;
-		this.roomConstruct = options.roomConstruct;
+		this.roomObj = options.roomObj;
 		this.InitEditor();
 		//socket on
 		this.socket_on_ok(this.globalModel.socket);
@@ -42,7 +42,7 @@ var EditorConstruct = can.Construct.extend({}, {
 			$('#editor-back').popover('destroy');
 			$('#editor-back').attr('title', this.globalModel.strings['back']);
 			this.roomModel.vars.issaving = false;
-			this.roomConstruct.setrunanddebugstate();
+			this.roomObj.setrunanddebugstate();
 		}
 	},
 
@@ -61,7 +61,7 @@ var EditorConstruct = can.Construct.extend({}, {
 		});
 		vars.savetimestamp = 0;
 		vars.savetimestamp = true;
-		this.roomConstruct.setrunanddebugstate();
+		this.roomObj.setrunanddebugstate();
 	},
 
 	//将自己修改的一段文字发送给服务器
@@ -162,8 +162,8 @@ var EditorConstruct = can.Construct.extend({}, {
 			indentWithTabs: true,
 			extraKeys: {
 				"Esc": function(cm) {
-					if (localThis.roomConstruct.isFullScreen(cm)) localThis.setFullScreen(cm, false);
-					localThis.roomConstruct.resize();
+					if (localThis.roomObj.isFullScreen(cm)) localThis.setFullScreen(cm, false);
+					localThis.roomObj.resize();
 				},
 				"Ctrl-S": function(cm) {
 					var vars = localThis.roomModel.vars;
@@ -176,10 +176,10 @@ var EditorConstruct = can.Construct.extend({}, {
 		});
 
 		this.roomModel.vars.editor.on("gutterClick", function(cm, n) {
-			localThis.roomConstruct.gutterclick(cm, n);
+			localThis.roomObj.gutterclick(cm, n);
 		});
 
-		this.roomConstruct.gutterclick = function(cm, n) {};
+		this.roomObj.gutterclick = function(cm, n) {};
 	},
 
 	
