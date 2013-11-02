@@ -147,13 +147,17 @@ var DeleteControl = can.Control.extend({
 		m_fileModel = this.options.m_fileModel;
 		this.element.html(can.view("../ejs/deletefile.ejs", {}));
 		this.socket_io();
+		this.keydown();
 	},
 	'#delete-ok click': function() {
 		this.deletefile();
 	},
-	'#delete keydown': function() {
-		if (event.keyCode == 13)
-			this.deletefile();
+
+	keydown:function(){
+		var self = this;
+		$('#delete').keydown(function(){
+			self.deletefile();		
+		});
 	},
 	deletefile: function() {
 		if (m_global_v.operationLock)
@@ -200,8 +204,7 @@ var ShareController = can.Control.extend({
 	".close-share click": function() {
 		if (m_global_v.operationLock)
 			return;
-		m_fileModel.refreshfilelist(function() {;
-		});
+		m_fileModel.refreshfilelist(function() {;});
 		$('#share').modal('hide');
 	},
 
@@ -263,7 +266,7 @@ var ShareController = can.Control.extend({
 				m_global_v.operationLock = false;
 				m_global_v.removeloading('share-buttons');
 			} else {
-				m_global_v.dochandler = self.sharedone;
+				m_fileModel.dochandler = self.sharedone;
 				m_global_v.socket.emit('doc', {
 					path: m_global_v.currentsharedoc.path
 				});
@@ -276,7 +279,7 @@ var ShareController = can.Control.extend({
 				m_global_v.operationLock = false;
 				m_global_v.removeloading('share-buttons');
 			} else {
-				m_global_v.dochandler = self.sharedone;
+				m_fileModel.dochandler = self.sharedone;
 				m_global_v.socket.emit('doc', {
 					path: m_global_v.currentsharedoc.path
 				});
@@ -290,7 +293,7 @@ var ShareController = can.Control.extend({
 		$('#share-message').hide();
 		m_global_v.removeloading('share-buttons');
 		m_global_v.operationLock = false;
-	},
+	}
 });
 /****************************************************/
 
