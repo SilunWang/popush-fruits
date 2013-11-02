@@ -1,25 +1,34 @@
 /**********************************************************************/
 
 
-/////////////////////// initialize ///////////////////////////
+/////////////////////// document ready ///////////////////////////
 
 $(document).ready(function() {
 
+	//init models
 	modelInit();
 
+	//init filelist,userlist,memberlist
 	listInit();
 
+	//init controls
 	controlInit();
-
-    	setTimeout('global_v.loadfailed()', 10000);
 	
+	//init debug display
 	debug();
 
-	browser();	
+	//indentify browser for voice
+	browser();
 
+	//replace 
+	replaceLanguage();	
+
+	//show body
 	$('body').show();
 
-	mainResize();
+	//set timeout
+    	setTimeout('global_v.loadfailed()', 10000);
 
-	replaceLanguage();
+	//resize
+	mainResize();
 });

@@ -9,7 +9,7 @@ GlobalVariables = can.Model.extend({},{
 
 		this.newfiletype = 'doc';
 		this.filelisterror = function(){;};
-		this.docshowfilter = function(o){ return true; };
+		this.docshowfilter = {};
 		this.filelist = global_data.g_filelist;
 
 		this.userlist = '';
@@ -85,7 +85,7 @@ GlobalVariables = can.Model.extend({},{
 			if (p.length > 1)
 				t = p[1] + '@' + p[0];
 			if(i == 0 && this.dirMode == 'shared')
-				s += ' / <a href="javascript:;" onclick="' + before + 'global_v.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
+				s += ' / <a href="javascript:;" onclick="' + before + 'fileModel.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
 				s += ' / <a href="javascript:;" onclick="' + before + 'fileModel.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
 		}
