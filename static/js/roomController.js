@@ -99,6 +99,18 @@ var ChatboxController = can.Control.extend({
 	},
 	'#voice-on click': function() {
 		m_message_c.voice();
+	},
+	'#chat-input keydown': function(){
+		if(event.keyCode == 13){
+			var text = $('#chat-input').val();
+		if (text == '')
+			return;
+
+		m_global_v.socket.emit('chat', {
+			text: text
+		});
+		$('#chat-input').val('');
+		}
 	}
 });
 

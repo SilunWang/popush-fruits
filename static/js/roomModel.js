@@ -69,7 +69,7 @@ var RoomModel = can.Model.extend({}, {
 		//标记当前是否正在保存
 		issaving: false,
 		//从本地完全出队到更新视图的延时，用途待定
-		savetimeout: 5000,
+		savetimeout: 500,
 
 		chatstate:undefined,
 
