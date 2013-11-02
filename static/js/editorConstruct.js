@@ -27,16 +27,11 @@ var EditorConstruct = can.Construct.extend({}, {
 	},
 
 	//标记已经保存
-	setsave: function() {
-		this.roomModel.vars.savetimestamp = new Date().getTime();
-		setTimeout(this.setsavedthen(this.roomModel.vars.savetimestamp), this.roomModel.vars.savetimeout);
-		this.roomModel.vars.savetimeout = 5000;
-	},
-
 	setsaved: function(){
+		var localThis = this;
         this.roomModel.vars.savetimestamp = new Date().getTime();
-        setTimeout(this.setsavedthen(this.roomModel.vars.savetimestamp), this.roomModel.vars.savetimeout);
-        this.roomModel.vars.savetimeout = 5000;
+        setTimeout( function() { localThis.setsavedthen(localThis.roomModel.vars.savetimestamp); }, this.roomModel.vars.savetimeout);
+        this.roomModel.vars.savetimeout = 500;
 	},
 
 	//在页面上标记已经保存
@@ -116,11 +111,12 @@ var EditorConstruct = can.Construct.extend({}, {
 	//没找到什么时候调用
 	save: function() {
 		var vars = this.roomModel.vars;
+		var localThis = this;
 		this.setsaving();
 		if (vars.timer != null) {
 			clearTimeout(vars.timer);
 		}
-		vars.timer = setTimeout(this.sendbuffer(), vars.buffertimeout);
+		vars.timer = setTimeout( function() { localThis.sendbuffer(); }, vars.buffertimeout);
 	},
 
 	winHeight: function() {
