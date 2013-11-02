@@ -1702,6 +1702,8 @@ DocDAO.prototype.save = function(userId, docId, content, callback) {
 		});
 	});
 };
+//get newest revision of file forder
+//add by Xu Wang
 DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 	var that = this;
 	var paths = path.split('/');
@@ -1740,6 +1742,12 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 			}
 			//console.log("2"+"hele");
 			//debugger;
+		//if the path means a folder, get the folder object
+		//define folder object:{
+		//				file_path:content,
+		//				folder_path:folder_object,
+		//				...
+		//                     }
 			if (result.type == "dir") {
 				var get_dir_files = function(dir, flag, result) {
 					var docs = dir.docs;
@@ -1782,7 +1790,7 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 									} else if (!result) {
 										return callback("unauthorized");
 									}
-									console.log(name + "hello");
+									//console.log(name + "hello");
 									result[name] = data.content;
 									if (flag && curIndex == docs.length - 1) {
 										return callback({result:res, type:"dir"}, paths[2] + ".zip");
