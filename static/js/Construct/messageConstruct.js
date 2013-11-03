@@ -54,14 +54,13 @@ var MessageConstruct = can.Construct.extend({}, {
         //当文件的拥有者更改共享管理时，给编辑的人的提示处理，data存有被取消权限的用户
         socket_on_unshared: function(socket){
                 var mother = this;
-
                 socket.on('unshared', function(data) {
                         if (data.name == currentUser.name) {
                                 mother.roomObj.closeeditor();
                                 mother.globalModel.showmessagebox('info', 'you unshared', 1);
                         } else {
                                 mother.globalModel.memberlistdoc.remove(data.name);
-                                mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['unshared'], new Date(data.time));
+                                mother.roomObj.appendtochatbox(mother.globalModel.strings['systemmessage'], 'system', data.name + '&nbsp;' + mother.globalModel.strings['unshared'], new Date(data.time));
                         }
                 });
         },
@@ -69,12 +68,11 @@ var MessageConstruct = can.Construct.extend({}, {
         //当文件的拥有者更改共享管理时，给编辑的人的提示处理，调用时机待确认?
         socket_on_shared: function(socket){
                 var mother = this;
-
                 socket.on('shared', function(data) {
                         mother.globalModel.memberlistdoc.add(data);
                         mother.globalModel.memberlistdoc.setonline(data.name, false);
                         mother.globalModel.memberlistdoc.sort();
-                        mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['gotshared'], new Date(data.time));
+                        mother.roomObj.appendtochatbox(mother.globalModel.strings['systemmessage'], 'system', data.name + '&nbsp;' + mother.globalModel.strings['gotshared'], new Date(data.time));
                 });
         },
 
@@ -84,7 +82,6 @@ var MessageConstruct = can.Construct.extend({}, {
         socket_on_join: function(socket){
                 var mother = this;
                 var vars = this.roomModel.vars;
-                var strings = this.globalModel.strings;
 
                 socket.on('join', function(data) {
                         if (data.err) {
@@ -94,7 +91,7 @@ var MessageConstruct = can.Construct.extend({}, {
                         } else {
                                 mother.globalModel.memberlistdoc.setonline(data.name, true);
                                 mother.globalModel.memberlistdoc.sort();
-                                mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['join'], new Date(data.time));
+                                mother.roomObj.appendtochatbox(mother.globalModel.strings['systemmessage'], 'system', data.name + '&nbsp;' + mother.globalModel.strings['join'], new Date(data.time));
                                 var cursor = mother.roomObj.newcursor(data.name);
                                 if (vars.cursors[data.name] && vars.cursors[data.name].element)
                                         $(vars.cursors[data.name].element).remove();
@@ -111,11 +108,10 @@ var MessageConstruct = can.Construct.extend({}, {
         socket_on_leave: function(socket){
                 var mother = this;
                 var vars = this.roomModel.vars;
-                var strings = this.globalModel.strings;
                 socket.on('leave', function(data) {
                         mother.globalModel.memberlistdoc.setonline(data.name, false);
                         mother.globalModel.memberlistdoc.sort();
-                        mother.roomObj.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;' + strings['leave'], new Date(data.time));
+                        mother.roomObj.appendtochatbox(mother.globalModel.strings['systemmessage'], 'system', data.name + '&nbsp;' + mother.globalModel.strings['leave'], new Date(data.time));
                         if (vars.cursors[data.name]) {
                                 if (vars.cursors[data.name].element)
                                         $(vars.cursors[data.name].element).remove();
