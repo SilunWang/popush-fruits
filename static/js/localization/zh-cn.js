@@ -92,6 +92,7 @@ var strings_cn = {
 	'ok'                            :'确定',
 	'cancel'                        :'取消',
 	'name'                          :'名称',
+	'url'				:'链接',
 	'clicktochange'                 :'点击图片以更换头像（支持jpg，png格式）：',
 	'add'                           :'增加',
 	'newuser:'                      :'新用户名：',

@@ -92,6 +92,7 @@ var strings_en = {
 	'ok'                            :'Ok',
 	'cancel'                        :'Cancel',
 	'name'                          :'name',
+	'url'				:'Url',
 	'clicktochange'                 :'click to change avatar(supporting jpg，png format):',
 	'add'                           :'add',
 	'newuser:'                      :'new username：',
