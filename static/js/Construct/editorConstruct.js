@@ -3,7 +3,7 @@
 /************************************************************************
 |    函数名称： EditorController                                                
 |    函数功能： 包装了与代码编辑和socket.on相关函数                                            
-|    引用： globalModel roomModel roomConstruct     
+|    引用： globalModel roomModel roomObj     
 |	 Author: SilunWang             
 *************************************************************************/
 
@@ -13,13 +13,13 @@ var EditorConstruct = can.Construct.extend({}, {
 	//room Model
 	roomModel: undefined,
 	//room Construct
-	roomConstruct: undefined,
+	roomObj: undefined,
 
 	init: function(options){
 		//init
 		this.globalModel = options.globalModel;
 		this.roomModel = options.roomModel;
-		this.roomConstruct = options.roomConstruct;
+		this.roomObj = options.roomObj;
 		this.InitEditor();
 		//socket on
 		this.socket_on_ok(this.globalModel.socket);
@@ -27,16 +27,11 @@ var EditorConstruct = can.Construct.extend({}, {
 	},
 
 	//标记已经保存
-	setsave: function() {
-		this.roomModel.vars.savetimestamp = new Date().getTime();
-		setTimeout(this.setsavedthen(this.roomModel.vars.savetimestamp), this.roomModel.vars.savetimeout);
-		this.roomModel.vars.savetimeout = 5000;
-	},
-
 	setsaved: function(){
+		var localThis = this;
         this.roomModel.vars.savetimestamp = new Date().getTime();
-        setTimeout(this.setsavedthen(this.roomModel.vars.savetimestamp), this.roomModel.vars.savetimeout);
-        this.roomModel.vars.savetimeout = 5000;
+        setTimeout( function() { localThis.setsavedthen(localThis.roomModel.vars.savetimestamp); }, this.roomModel.vars.savetimeout);
+        this.roomModel.vars.savetimeout = 500;
 	},
 
 	//在页面上标记已经保存
@@ -47,7 +42,7 @@ var EditorConstruct = can.Construct.extend({}, {
 			$('#editor-back').popover('destroy');
 			$('#editor-back').attr('title', this.globalModel.strings['back']);
 			this.roomModel.vars.issaving = false;
-			this.roomConstruct.setrunanddebugstate();
+			this.roomObj.setrunanddebugstate();
 		}
 	},
 
@@ -66,7 +61,7 @@ var EditorConstruct = can.Construct.extend({}, {
 		});
 		vars.savetimestamp = 0;
 		vars.savetimestamp = true;
-		this.roomConstruct.setrunanddebugstate();
+		this.roomObj.setrunanddebugstate();
 	},
 
 	//将自己修改的一段文字发送给服务器
@@ -116,11 +111,12 @@ var EditorConstruct = can.Construct.extend({}, {
 	//没找到什么时候调用
 	save: function() {
 		var vars = this.roomModel.vars;
+		var localThis = this;
 		this.setsaving();
 		if (vars.timer != null) {
 			clearTimeout(vars.timer);
 		}
-		vars.timer = setTimeout(this.sendbuffer(), vars.buffertimeout);
+		vars.timer = setTimeout( function() { localThis.sendbuffer(); }, vars.buffertimeout);
 	},
 
 	winHeight: function() {
@@ -166,8 +162,8 @@ var EditorConstruct = can.Construct.extend({}, {
 			indentWithTabs: true,
 			extraKeys: {
 				"Esc": function(cm) {
-					if (localThis.roomConstruct.isFullScreen(cm)) localThis.setFullScreen(cm, false);
-					localThis.roomConstruct.resize();
+					if (localThis.roomObj.isFullScreen(cm)) localThis.setFullScreen(cm, false);
+					localThis.roomObj.resize();
 				},
 				"Ctrl-S": function(cm) {
 					var vars = localThis.roomModel.vars;
@@ -180,10 +176,10 @@ var EditorConstruct = can.Construct.extend({}, {
 		});
 
 		this.roomModel.vars.editor.on("gutterClick", function(cm, n) {
-			localThis.roomConstruct.gutterclick(cm, n);
+			localThis.roomObj.gutterclick(cm, n);
 		});
 
-		this.roomConstruct.gutterclick = function(cm, n) {};
+		this.roomObj.gutterclick = function(cm, n) {};
 	},
 
 	

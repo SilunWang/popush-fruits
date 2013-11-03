@@ -125,7 +125,7 @@ var FileTabsContorl = can.Control.extend({
 		$('#newfile-inputName').val('');
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['newfolder']);
+		$('#newfileLabel').text(strings['createproject']);
 		m_global_v.newfiletype = 'pro';
 		return true;
 	},
@@ -137,7 +137,7 @@ var FileTabsContorl = can.Control.extend({
 		$('#newfile-inputName').val('');
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['newfolder']);
+		$('#newfileLabel').text(strings['GitFolder']);
 		m_global_v.newfiletype = 'git';
 	},
 	'#ownedfileex click': function() {
@@ -219,6 +219,11 @@ var NewFileController = can.Control.extend({
 	'#newfile-submit click': function() {
 		this.m_filename = $(this.m_filenameId).val();
 		this.newfile();
+	},
+
+	'#newfile-inputName keydown': function() {
+		if (event.keyCode == 13)
+			this.newfile();
 	},
 
 	//business

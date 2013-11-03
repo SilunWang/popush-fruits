@@ -1,3 +1,7 @@
+/**
+ *can support C and C++ debug.
+ *
+ */
 module.exports = Debugger;
 
 var MAX_BREAK_TIMES = 1024;

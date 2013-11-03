@@ -1,10 +1,13 @@
 /**********************navhead***********************/
 var NavHeadControl = can.Control.extend({
+
 	m_global_v: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/navhead.ejs", {}));
 	},
+
 	'#changepasswordopen click': function() {
 		$('#changepassword-old').val('');
 		$('#changepassword-new').val('');
@@ -12,30 +15,60 @@ var NavHeadControl = can.Control.extend({
 		$('#changepassword .control-group').removeClass('error');
 		$('#changepassword .help-inline').text('');
 	},
+
 	'#changeavataropen click': function() {
 		$('#changeavatar-message').hide();
 		$('#changeavatar-img').attr('src', m_global_v.currentUser.avatar);
 	},
+
 	'#logout click': function() {
 		m_global_v.socket.emit('logout', {});
 		$.removeCookie('sid');
 		m_global_v.backtologin();
 	},
+
 });
 /****************************************************/
 
 
 /******************changepassword********************/
 var ChangePassControl = can.Control.extend({
+
 	m_global_v: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/changepass.ejs", {}));
 		$('#changepassword').on('shown', function() {
 			$('#changepassword-old').focus();
 		});
+		this.socket_io();
 	},
+
 	'#changepass-ok click': function() {
+		this.changePassword();
+	},
+
+	'#changeavatarbtn click': function(){
+		$('#changeavatar-message').slideUp()
+	},
+	
+	'#changepassword-old keydown': function() {
+		if (event.keyCode == 13)
+			$("#changepassword-new").focus();
+	},
+
+	'#changepassword-new keydown': function(){
+		if (event.keyCode == 13)
+			$("#changepassword-confirm").focus();
+	},
+
+	'#changepassword-confirm keydown': function(){
+		if (event.keyCode == 13)
+			this.changePassword();
+	},
+
+	changePassword:function(){
 		var old = $('#changepassword-old').val();
 		var pass = $('#changepassword-new').val();
 		var confirm = $('#changepassword-confirm').val();
@@ -52,23 +85,41 @@ var ChangePassControl = can.Control.extend({
 		m_global_v.socket.emit('password', {
 			password: old,
 			newPassword: pass
-		});
+		});		
 	},
+
+	socket_io:function(){
+		m_global_v.socket.on('password', function(data) {
+			if (data.err) {
+				m_global_v.showmessageindialog('changepassword', data.err, 0);
+			} else {
+				$('#changepassword').modal('hide');
+				m_global_v.showmessagebox('changepassword', 'changepassworddone', 1);
+			}
+			m_global_v.removeloading('changepassword-buttons');
+			m_global_v.operationLock = false;
+		});
+	}
+
 });
 /****************************************************/
 
 
 /********************changeavatar********************/
 var ChangeAvatarControl = can.Control.extend({
+
 	m_global_v: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/changeavatar.ejs", {}));
 		this.socket_io();
 	},
+
 	'#changeavatar-input change': function() {
 		this.changeavatar($('#changeavatar-input')[0]);
 	},
+
 	changeavatar: function(o) {
 		if (o.files.length < 0) {
 			m_global_v.showmessage('changeavatar-message', 'selectuser', 'error');

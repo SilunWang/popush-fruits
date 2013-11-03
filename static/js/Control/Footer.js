@@ -1,6 +1,8 @@
 /************************Footer**********************/
 var FooterController = can.Control.extend({
+
 	m_global_v: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		//strings: choose language pack initially By SilunWang
@@ -21,41 +23,61 @@ var FooterController = can.Control.extend({
 				break;
 		}
 		this.element.append(can.view("../ejs/footer.ejs", {}));
+		this.resize();
 	},
+
 	'#changeStaticTheme click': function() {
 		this.changeStaticTheme();
 	},
+
 	'#changetheme1 click': function() {
 		this.changetheme1();
 	},
+
 	'#changetheme2 click': function() {
 		this.changetheme2();
 	},
+
 	'#changeEng click': function() {
 		this.changeEng();
 	},
+
 	'#changeChn click': function() {
 		this.changeChn();
 	},
+
+	resize:function(){
+		$(window).resize(function() {
+			var width = $(document).width() * 0.915;
+			var margin_left = (width / 2 - 108) + "px";
+			$("#foot-information").css("margin-left", margin_left);
+		});
+	},
+
 	//更改主题为第一个主题
 	changetheme1: function() {
 		this.setCookie('fruits-theme-selection', 'fruits_theme_1');
 		this.removejscssfile("anotherTheme.css", "css");
 		this.loadjscssfile("css/changebootstrap.css", "css");
 	},
+
 	changetheme2: function() {
 		this.setCookie('fruits-theme-selection', 'fruits_theme_2');
 		this.removejscssfile("changebootstrap.css", "css");
 		this.loadjscssfile("css/anotherTheme.css", "css");
 	},
+
 	changeStaticTheme: function() {
 		this.setCookie('fruits-theme-selection', 'fruits_theme_static');
 		this.removejscssfile("anotherTheme.css", "css");
 		this.removejscssfile("changebootstrap.css", "css");
 	},
+
 	//更改语言为English
 	changeEng: function() {
+		
 		this.setCookie('fruits-language-selection', 'fruits-english-selection');
+
 		m_global_v.strings = m_global_v.strings_en;
 		m_global_v.attr("g_strings", m_global_v.strings);
 		$('[localization]').html(function(index, oldcontent) {
@@ -65,6 +87,7 @@ var FooterController = can.Control.extend({
 			}
 			return oldcontent;
 		});
+
 		$('[title]').attr('title', function(index, oldcontent) {
 			for (var iter in m_global_v.strings_cn) {
 				if (oldcontent == m_global_v.strings_cn[iter])
@@ -73,6 +96,7 @@ var FooterController = can.Control.extend({
 			return oldcontent;
 		});
 	},
+
 	//更改语言为中文
 	changeChn: function() {
 		this.setCookie('fruits-language-selection', 'fruits-chinese-selection');
@@ -93,6 +117,7 @@ var FooterController = can.Control.extend({
 			return oldcontent;
 		});
 	},
+
 	setCookie: function(name, value) {
 		var argv = this.setCookie.arguments;
 		var argc = this.setCookie.arguments.length;
@@ -103,6 +128,7 @@ var FooterController = can.Control.extend({
 		}
 		document.cookie = name + "=" + escape(value) + ((expires == null) ? "" : ("; expires=" + LargeExpDate.toGMTString()));
 	},
+
 	getCookie: function(name) {
 		var search = name + "="
 		if (document.cookie.length > 0) {
@@ -115,11 +141,13 @@ var FooterController = can.Control.extend({
 			} else return ""
 		}
 	},
+
 	deleteCookie: function(name) {
 		var expdate = new Date();
 		expdate.setTime(expdate.getTime() - (86400 * 1000 * 1));
 		this.setCookie(name, "", expdate);
 	},
+
 	loadjscssfile: function(filename, filetype) {
 		if (filetype == "js") {
 			var fileref = document.createElement('script');
@@ -134,6 +162,7 @@ var FooterController = can.Control.extend({
 		if (typeof fileref != "undefined")
 			document.getElementsByTagName("head")[0].appendChild(fileref);
 	},
+
 	removejscssfile: function(filename, filetype) {
 		var targetelement;
 		var targetattr;
@@ -155,6 +184,7 @@ var FooterController = can.Control.extend({
 				allsuspects[i].parentNode.removeChild(allsuspects[i]);
 		}
 	}
+
 });
 /****************************************************/
 

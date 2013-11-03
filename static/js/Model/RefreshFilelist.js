@@ -5,7 +5,8 @@ var RefreshFilelist = can.Construct({},{
 
 	init:function(data){
 		this.m_global_v = data.m_global_v;
-		this.m_filelist = data.m_filelist;
+		this.dochandler = '';
+		this.doccallback = '';
 		this.doc_on();
 		this.m_global_v.backhome = this;
 	},
@@ -28,16 +29,18 @@ var RefreshFilelist = can.Construct({},{
 			this.m_global_v.currentDirString = this.m_global_v.getdirstring();
 		});
 	},
+
 	refreshfilelist: function(error, callback) {
 		this.m_global_v.operationLock = true;
 		this.m_global_v.filelist.loading();
-		this.m_global_v.dochandler = this.refreshlistdone;
-		this.m_global_v.doccallback = callback;
+		this.dochandler = this.refreshlistdone;
+		this.doccallback = callback;
 		this.m_global_v.socket.emit('doc', {
 			path: this.m_global_v.currentDirString
 		});
 		this.m_global_v.filelisterror = error;
 	},
+
 	refreshlistdone: function(data) {
 		this.m_global_v.filelist.removeloading();
 		this.m_global_v.attr("model_mode" ,this.m_global_v.filelist.getmode());
@@ -73,6 +76,7 @@ var RefreshFilelist = can.Construct({},{
 		}
 		this.m_global_v.operationLock = false;
 	},
+
 	doc_on: function() {
 		var self = this;
 		this.m_global_v.socket.on('doc', function(data) {
@@ -80,4 +84,5 @@ var RefreshFilelist = can.Construct({},{
 			self.refreshlistdone(data);
 		});
 	}
+	
 });
