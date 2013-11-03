@@ -8,6 +8,7 @@ var FooterController = can.Control.extend({
 		//strings: choose language pack initially By SilunWang
 		m_global_v.strings = this.getCookie('fruits-language-selection') == 'fruits-english-selection' ? m_global_v.strings_en : m_global_v.strings_cn;
 		m_global_v.myTheme = this.getCookie('fruits-theme-selection');
+		//初始化主题
 		switch (m_global_v.myTheme) {
 			case 'fruits_theme_static':
 				this.changeStaticTheme();
@@ -26,26 +27,31 @@ var FooterController = can.Control.extend({
 		this.resize();
 	},
 
+	///////////////////////////////////////////////events/////////////////////////////////////////
+
+	//更改为默认主题
 	'#changeStaticTheme click': function() {
 		this.changeStaticTheme();
 	},
-
+	//更改为第一个主题
 	'#changetheme1 click': function() {
 		this.changetheme1();
 	},
-
+	//更改为第二个主题
 	'#changetheme2 click': function() {
 		this.changetheme2();
 	},
-
+	//更改语言为英文
 	'#changeEng click': function() {
 		this.changeEng();
 	},
-
+	//更改语言为中文
 	'#changeChn click': function() {
 		this.changeChn();
 	},
 
+
+	////////////////////////////////////////////resize of this ejs////////////////////////////////////
 	resize:function(){
 		$(window).resize(function() {
 			var width = $(document).width() * 0.915;
@@ -54,31 +60,34 @@ var FooterController = can.Control.extend({
 		});
 	},
 
+	//////////////////////////////////////bussiness and logic/////////////////////////////////////
+
+	//更改为默认主题
+	changeStaticTheme: function() {
+		this.setCookie('fruits-theme-selection', 'fruits_theme_static');
+		this.removejscssfile("anotherTheme.css", "css");
+		this.removejscssfile("changebootstrap.css", "css");
+	},
 	//更改主题为第一个主题
 	changetheme1: function() {
 		this.setCookie('fruits-theme-selection', 'fruits_theme_1');
 		this.removejscssfile("anotherTheme.css", "css");
 		this.loadjscssfile("css/changebootstrap.css", "css");
 	},
-
+	//更改为第二个主题
 	changetheme2: function() {
 		this.setCookie('fruits-theme-selection', 'fruits_theme_2');
 		this.removejscssfile("changebootstrap.css", "css");
 		this.loadjscssfile("css/anotherTheme.css", "css");
 	},
 
-	changeStaticTheme: function() {
-		this.setCookie('fruits-theme-selection', 'fruits_theme_static');
-		this.removejscssfile("anotherTheme.css", "css");
-		this.removejscssfile("changebootstrap.css", "css");
-	},
-
-	//更改语言为English
+	//更改语言为英文
 	changeEng: function() {
 		
 		this.setCookie('fruits-language-selection', 'fruits-english-selection');
 
 		m_global_v.strings = m_global_v.strings_en;
+		m_global_v.attr("g_strings", m_global_v.strings);
 		$('[localization]').html(function(index, oldcontent) {
 			for (var iter in m_global_v.strings_cn) {
 				if (oldcontent == m_global_v.strings_cn[iter])
@@ -100,6 +109,7 @@ var FooterController = can.Control.extend({
 	changeChn: function() {
 		this.setCookie('fruits-language-selection', 'fruits-chinese-selection');
 		m_global_v.strings = m_global_v.strings_cn;
+		m_global_v.attr("g_strings", m_global_v.strings);
 		$('[localization]').html(function(index, oldcontent) {
 			for (var iter in m_global_v.strings_en) {
 				if (oldcontent == m_global_v.strings_en[iter])
@@ -116,6 +126,7 @@ var FooterController = can.Control.extend({
 		});
 	},
 
+	//设置cookie
 	setCookie: function(name, value) {
 		var argv = this.setCookie.arguments;
 		var argc = this.setCookie.arguments.length;
@@ -127,6 +138,7 @@ var FooterController = can.Control.extend({
 		document.cookie = name + "=" + escape(value) + ((expires == null) ? "" : ("; expires=" + LargeExpDate.toGMTString()));
 	},
 
+	//得到cookie
 	getCookie: function(name) {
 		var search = name + "="
 		if (document.cookie.length > 0) {
@@ -139,13 +151,15 @@ var FooterController = can.Control.extend({
 			} else return ""
 		}
 	},
-
+	
+	//删除cookie
 	deleteCookie: function(name) {
 		var expdate = new Date();
 		expdate.setTime(expdate.getTime() - (86400 * 1000 * 1));
 		this.setCookie(name, "", expdate);
 	},
 
+	//加载外部js/css文件
 	loadjscssfile: function(filename, filetype) {
 		if (filetype == "js") {
 			var fileref = document.createElement('script');
@@ -161,6 +175,7 @@ var FooterController = can.Control.extend({
 			document.getElementsByTagName("head")[0].appendChild(fileref);
 	},
 
+	//移除外部js/css文件
 	removejscssfile: function(filename, filetype) {
 		var targetelement;
 		var targetattr;
