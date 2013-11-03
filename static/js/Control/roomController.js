@@ -49,9 +49,6 @@ var ToolbarController = can.Control.extend({
         },
 
         '#editor-back click': function() {
-                $('#editor').hide();
-                $('#filecontrol').show();
-                $('#footer').show();
                 roomObj.closeeditor();
         },
 

@@ -41,7 +41,7 @@ var MessageConstruct = can.Construct.extend({}, {
                 });
         },
 
-        //当文件的拥有着删除这个文件时，给编辑的人的提示处理，data=undefined？
+        //当文件的拥有着删除这个文件时，给编辑的人的提示处理
         socket_on_deleted: function(socket){
                 var mother = this;
                 
@@ -55,7 +55,7 @@ var MessageConstruct = can.Construct.extend({}, {
         socket_on_unshared: function(socket){
                 var mother = this;
                 socket.on('unshared', function(data) {
-                        if (data.name == mother.currentUser.name) {
+                        if (data.name == mother.globalModel.currentUser.name) {
                                 mother.roomObj.closeeditor();
                                 mother.globalModel.showmessagebox('info', 'you unshared', 1);
                         } else {

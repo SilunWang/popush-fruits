@@ -448,6 +448,9 @@ var RoomConstruct = can.Construct.extend ({}, {
 
         //关闭编辑界面后的相关操作
         closeeditor: function() {
+                $('#editor').hide();
+                $('#filecontrol').show();
+                $('#footer').show();
                 var localThis = this;
                 this.globalModel.socket.emit('leave', {});
 

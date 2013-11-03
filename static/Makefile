@@ -7,7 +7,7 @@ static:split
 	@mv split.html index.html
 
 inline:inline.html
-	@rm -rf indexx.html index.css anotherTheme.css changebootstrap.css index.js split.html
+	@rm -rf indexx.html index.css anotherTheme.css changebootstrap.css wheelmenu.css index.js split.html
 
 split:split.html
 	@rm -rf indexx.html inline.html
