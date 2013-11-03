@@ -129,6 +129,7 @@ var LoginControl = can.Control.extend({
 
 				//currenDir修改为当前user的name
 				m_global_v.currentDir = [data.user.name];
+				m_global_v.attr("model_currentDir", m_global_v.currentDir);
 				m_global_v.currentDirString = m_global_v.getdirstring();
 				//初始化渲染文件列表所需的参数
 				m_global_v.docshowfilter = {
@@ -138,11 +139,11 @@ var LoginControl = can.Control.extend({
 					htmlescape:m_global_v.htmlescape
 				};
 				//获取当前的link
-				$('#current-dir').html(m_global_v.getdirlink());
-				//设置文件列表为拥有者模式
+				//$('#current-dir').html(m_global_v.getdirlink());
+				//
 				m_global_v.filelist.setmode(3);
-				//渲染文件列表
-				m_global_v.filelist.formdocs(data.user.docs, m_global_v.docshowfilter);
+				m_global_v.attr("model_mode",3);
+				m_global_v.attr("model_filelist",m_global_v.filelist.formdocs(data.user.docs, m_global_v.docshowfilter));
 
 				//清空成员列表
 				m_global_v.memberlist.clear();

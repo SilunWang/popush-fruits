@@ -147,6 +147,8 @@ var FileTabsContorl = can.Control.extend({
 		m_global_v.dirMode = 'owned';
 
 		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.attr("model_currentDir", m_global_v.currentDir);
+		//m_global_v.save();
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		m_global_v.docshowfilter = {
 			flag: 1,
@@ -154,7 +156,7 @@ var FileTabsContorl = can.Control.extend({
 			currentUser: m_global_v.currentUser,
 			htmlescape:m_global_v.htmlescape
 		};
-		$('#current-dir').html(m_global_v.getdirlink());
+		//$('#current-dir').html(m_global_v.getdirlink());
 		m_fileModel.refreshfilelist(function() {;
 		});
 
@@ -171,6 +173,8 @@ var FileTabsContorl = can.Control.extend({
 		m_global_v.dirMode = 'shared';
 
 		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.attr("model_currentDir", m_global_v.currentDir);
+		//m_global_v.save();
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		m_global_v.docshowfilter = {
 			flag: 0,
@@ -179,7 +183,7 @@ var FileTabsContorl = can.Control.extend({
 			htmlescape:m_global_v.htmlescape
 		};
 
-		$('#current-dir').html(m_global_v.getdirlink());
+		//$('#current-dir').html(m_global_v.getdirlink());
 		m_fileModel.refreshfilelist(function() {;
 		});
 
