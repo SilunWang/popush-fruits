@@ -1,5 +1,7 @@
-var FilelistModel = can.Model.extend({},{});
 
+///这是一个更新文件列表的model
+///用于更新文件列表
+///负责单向对filelist对象传递数据，初始化
 
 var RefreshFilelist = can.Construct({},{
 
@@ -11,6 +13,7 @@ var RefreshFilelist = can.Construct({},{
 		this.m_global_v.backhome = this;
 	},
 
+	//返回当前列表n级的目录
 	backto: function(n) {
 		if (this.m_global_v.operationLock)
 			return;
@@ -30,9 +33,11 @@ var RefreshFilelist = can.Construct({},{
 		});
 	},
 
+	//客户端发送请求更新文件列表
 	refreshfilelist: function(error, callback) {
 		this.m_global_v.operationLock = true;
 		this.m_global_v.filelist.loading();
+		//更改回调函数指向的值
 		this.dochandler = this.refreshlistdone;
 		this.doccallback = callback;
 		this.m_global_v.socket.emit('doc', {
@@ -41,6 +46,7 @@ var RefreshFilelist = can.Construct({},{
 		this.m_global_v.filelisterror = error;
 	},
 
+	//服务器返回请求，回调“更新文件列表”
 	refreshlistdone: function(data) {
 		this.m_global_v.filelist.removeloading();
 		this.m_global_v.attr("model_mode" ,this.m_global_v.filelist.getmode());
@@ -77,11 +83,12 @@ var RefreshFilelist = can.Construct({},{
 		this.m_global_v.operationLock = false;
 	},
 
+	//服务器返回，调用dochandler
+	//dochandler大多数时候是refreshfilelist，但有时候是完成共享和取消共享的回调函数
 	doc_on: function() {
 		var self = this;
 		this.m_global_v.socket.on('doc', function(data) {
 			self.dochandler(data);
-			//self.refreshlistdone(data);
 		});
 	}
 	

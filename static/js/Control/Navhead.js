@@ -1,3 +1,7 @@
+
+///这个文件封装了文件列表页面顶端的navbar，及其相关模块
+///包括nav，changepassowrd和changeavartar
+
 /**********************navhead***********************/
 var NavHeadControl = can.Control.extend({
 
@@ -7,6 +11,8 @@ var NavHeadControl = can.Control.extend({
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/navhead.ejs", {}));
 	},
+
+	/////////////////////////////////////////////////events//////////////////////////////////////////
 
 	'#changepasswordopen click': function() {
 		$('#changepassword-old').val('');
@@ -32,6 +38,9 @@ var NavHeadControl = can.Control.extend({
 
 
 /******************changepassword********************/
+
+//修改密码模块，对应的view为修改密码对话框
+
 var ChangePassControl = can.Control.extend({
 
 	m_global_v: '',
@@ -44,6 +53,8 @@ var ChangePassControl = can.Control.extend({
 		});
 		this.socket_io();
 	},
+
+	/////////////////////////////////////////////////events//////////////////////////////////////////
 
 	'#changepass-ok click': function() {
 		this.changePassword();
@@ -68,6 +79,9 @@ var ChangePassControl = can.Control.extend({
 			this.changePassword();
 	},
 
+	//////////////////////////////////logic and business////////////////////////////////
+
+	//客户修改密码的逻辑
 	changePassword:function(){
 		var old = $('#changepassword-old').val();
 		var pass = $('#changepassword-new').val();
@@ -88,6 +102,9 @@ var ChangePassControl = can.Control.extend({
 		});		
 	},
 
+	////////////////////////////////////////////socket reaction/////////////////////////////////////
+
+	//服务器响应密码修改
 	socket_io:function(){
 		m_global_v.socket.on('password', function(data) {
 			if (data.err) {
@@ -106,6 +123,9 @@ var ChangePassControl = can.Control.extend({
 
 
 /********************changeavatar********************/
+
+//修改头像模块，对应修改头像对话框
+
 var ChangeAvatarControl = can.Control.extend({
 
 	m_global_v: '',
@@ -116,10 +136,15 @@ var ChangeAvatarControl = can.Control.extend({
 		this.socket_io();
 	},
 
+	/////////////////////////////////////////////////events//////////////////////////////////////////
+
 	'#changeavatar-input change': function() {
 		this.changeavatar($('#changeavatar-input')[0]);
 	},
 
+	//////////////////////////////////logic and business////////////////////////////////
+
+	//客户修改头像的逻辑
 	changeavatar: function(o) {
 		if (o.files.length < 0) {
 			m_global_v.showmessage('changeavatar-message', 'selectuser', 'error');
@@ -149,6 +174,10 @@ var ChangeAvatarControl = can.Control.extend({
 		}
 		reader.readAsDataURL(file);
 	},
+
+	////////////////////////////////////////////socket reaction/////////////////////////////////////
+
+	//服务器返回更新头像的数据与回调函数
 	socket_io: function() {
 		m_global_v.socket.on('avatar', function(data) {
 			if (data.err) {
