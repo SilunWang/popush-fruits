@@ -29,7 +29,6 @@ var LoginControl = can.Control.extend({
 
 	//business
 	login: function() {
-		console.log("a");
 		//获取输入框的数据
 		var login_name = $('#login-inputName').val();
 		var login_pass = $('#login-inputPassword').val();
