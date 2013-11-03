@@ -834,7 +834,7 @@ io.sockets.on('connection', function(socket) {
 		var room = socket.session.room;
 		
 		if (room) {
-				socket.emit('log', room.runner);
+				//socket.emit('log', room.runner);
 				room.runner.kill();
 			} else if (room.dbger){
 				room.dbger.kill();
