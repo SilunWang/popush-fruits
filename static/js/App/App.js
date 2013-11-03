@@ -10,14 +10,10 @@ function modelInit(){
 		g_strings_en: strings_en,
 		g_strings_cn: strings_cn,
 		///////////////////////theme related//////// //////////////
-		g_myTheme: myTheme
+		g_myTheme: myTheme,
 		model_currentDir:[],
 		model_filelist:[],
-		model_mode:'',
-	});
-
-	var filelist_model = new FilelistModel({
-		filelist:""
+		model_mode:''
 	});
 
 	fileModel = new RefreshFilelist({

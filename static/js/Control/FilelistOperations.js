@@ -369,8 +369,8 @@ var DownloadControl = can.Control.extend({
 
 var CurrentdirController = can.Control.extend({
 	m_global_v: '',
-	self:this,
 	init: function(element, options) {
+		var self = this;
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/currentdir.ejs", {
 			m_global_v:self.options.m_global_v
