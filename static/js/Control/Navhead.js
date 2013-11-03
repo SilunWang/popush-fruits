@@ -1,10 +1,13 @@
 /**********************navhead***********************/
 var NavHeadControl = can.Control.extend({
+
 	m_global_v: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/navhead.ejs", {}));
 	},
+
 	'#changepasswordopen click': function() {
 		$('#changepassword-old').val('');
 		$('#changepassword-new').val('');
@@ -12,22 +15,27 @@ var NavHeadControl = can.Control.extend({
 		$('#changepassword .control-group').removeClass('error');
 		$('#changepassword .help-inline').text('');
 	},
+
 	'#changeavataropen click': function() {
 		$('#changeavatar-message').hide();
 		$('#changeavatar-img').attr('src', m_global_v.currentUser.avatar);
 	},
+
 	'#logout click': function() {
 		m_global_v.socket.emit('logout', {});
 		$.removeCookie('sid');
 		m_global_v.backtologin();
 	},
+
 });
 /****************************************************/
 
 
 /******************changepassword********************/
 var ChangePassControl = can.Control.extend({
+
 	m_global_v: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/changepass.ejs", {}));
@@ -36,22 +44,30 @@ var ChangePassControl = can.Control.extend({
 		});
 		this.socket_io();
 	},
+
 	'#changepass-ok click': function() {
 		this.changePassword();
+	},
+
+	'#changeavatarbtn click': function(){
+		$('#changeavatar-message').slideUp()
 	},
 	
 	'#changepassword-old keydown': function() {
 		if (event.keyCode == 13)
 			$("#changepassword-new").focus();
 	},
+
 	'#changepassword-new keydown': function(){
 		if (event.keyCode == 13)
 			$("#changepassword-confirm").focus();
 	},
+
 	'#changepassword-confirm keydown': function(){
 		if (event.keyCode == 13)
 			this.changePassword();
 	},
+
 	changePassword:function(){
 		var old = $('#changepassword-old').val();
 		var pass = $('#changepassword-new').val();
@@ -71,6 +87,7 @@ var ChangePassControl = can.Control.extend({
 			newPassword: pass
 		});		
 	},
+
 	socket_io:function(){
 		m_global_v.socket.on('password', function(data) {
 			if (data.err) {
@@ -83,18 +100,22 @@ var ChangePassControl = can.Control.extend({
 			m_global_v.operationLock = false;
 		});
 	}
+
 });
 /****************************************************/
 
 
 /********************changeavatar********************/
 var ChangeAvatarControl = can.Control.extend({
+
 	m_global_v: '',
+
 	init: function(element, options) {
 		m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/changeavatar.ejs", {}));
 		this.socket_io();
 	},
+
 	'#changeavatar-input change': function() {
 		this.changeavatar($('#changeavatar-input')[0]);
 	},
