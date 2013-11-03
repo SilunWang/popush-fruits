@@ -21,6 +21,60 @@ var FileTabsContorl = can.Control.extend({
 		m_global_v.newfiletype = 'doc';
 	},
 
+	//点击查看拥有的文件
+	'#ownedfileex click': function() {
+		if (m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.dirMode = 'owned';
+
+		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.attr("model_currentDir", m_global_v.currentDir);
+
+		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {
+			flag: 1,
+			currentDir: m_global_v.currentDir,
+			currentUser: m_global_v.currentUser,
+			htmlescape:m_global_v.htmlescape
+		};
+
+		m_fileModel.refreshfilelist(function() {;
+		});
+
+		$('#ownedfile').show();
+		$('#ownedfileex').hide();
+		$('#sharedfile').removeClass('active');
+	},
+
+	//点击查看共享的文件
+	'#sharedfile click': function() {
+		if (m_global_v.dirMode == 'shared')
+			return;
+		if (m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.dirMode = 'shared';
+
+		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.attr("model_currentDir", m_global_v.currentDir);
+
+		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {
+			flag: 0,
+			currentDir: m_global_v.currentDir,
+			currentUser: m_global_v.currentUser,
+			htmlescape:m_global_v.htmlescape
+		};
+
+		m_fileModel.refreshfilelist(function() {;
+		});
+
+		$('#ownedfile').hide();
+		$('#ownedfileex').show();
+		$('#sharedfile').addClass('active');
+	},
+
 	//点击新建文件夹
 	'#new-file-folder click': function() {
 		$('#newfile-inputName').val('');
@@ -154,56 +208,6 @@ var FileTabsContorl = can.Control.extend({
 		$('#newfile .help-inline').text('');
 		$('#newfileLabel').text(strings['GitFolder']);
 		m_global_v.newfiletype = 'git';
-	},
-	'#ownedfileex click': function() {
-		if (m_global_v.operationLock)
-			return;
-		m_global_v.operationLock = true;
-		m_global_v.dirMode = 'owned';
-
-		m_global_v.currentDir = [m_global_v.currentUser.name];
-		m_global_v.attr("model_currentDir", m_global_v.currentDir);
-
-		m_global_v.currentDirString = m_global_v.getdirstring();
-		m_global_v.docshowfilter = {
-			flag: 1,
-			currentDir: m_global_v.currentDir,
-			currentUser: m_global_v.currentUser,
-			htmlescape:m_global_v.htmlescape
-		};
-
-		m_fileModel.refreshfilelist(function() {;
-		});
-
-		$('#ownedfile').show();
-		$('#ownedfileex').hide();
-		$('#sharedfile').removeClass('active');
-	},
-	'#sharedfile click': function() {
-		if (m_global_v.dirMode == 'shared')
-			return;
-		if (m_global_v.operationLock)
-			return;
-		m_global_v.operationLock = true;
-		m_global_v.dirMode = 'shared';
-
-		m_global_v.currentDir = [m_global_v.currentUser.name];
-		m_global_v.attr("model_currentDir", m_global_v.currentDir);
-
-		m_global_v.currentDirString = m_global_v.getdirstring();
-		m_global_v.docshowfilter = {
-			flag: 0,
-			currentDir: m_global_v.currentDir,
-			currentUser: m_global_v.currentUser,
-			htmlescape:m_global_v.htmlescape
-		};
-
-		m_fileModel.refreshfilelist(function() {;
-		});
-
-		$('#ownedfile').hide();
-		$('#ownedfileex').show();
-		$('#sharedfile').addClass('active');
 	}
 });
 /****************************************************/
