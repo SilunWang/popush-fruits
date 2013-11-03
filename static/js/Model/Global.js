@@ -1,4 +1,10 @@
-/********************全局变量Model*********************/
+
+///这个文件封装了全局的Model，主要封装一些公共的变量和函数
+///协助相互独立的Control进行通信
+///在整个网站运行的生命周期中，只有一个model的实例存在
+
+
+/********************全局Model*********************/
 GlobalVariables = can.Model.extend({},{
 	self:this,
 
@@ -92,26 +98,6 @@ GlobalVariables = can.Model.extend({},{
 			return r;
 		}
 	},
-	//获取链接
-	/*getdirlink: function(before) {
-		var s = '';
-		if (!before) {
-			before = '';
-		}
-		//拆分成link的格式
-		for (var i = 0, j = this.currentDir.length - 1; i < this.currentDir.length; i++, j--) {
-			var t = this.currentDir[i];
-			var p = t.split('/');
-			if (p.length > 1)
-				t = p[1] + '@' + p[0];
-			//添加tab标签,share或者own
-			if(i == 0 && this.dirMode == 'shared')
-				s += ' / <a href="javascript:;" onclick="' + before + 'fileModel.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
-			else
-				s += ' / <a href="javascript:;" onclick="' + before + 'fileModel.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
-		}
-		return s;
-	},*/
 	htmlescape: function(text) {
 		return text.
 		replace(/&/gm, '&amp;').
