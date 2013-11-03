@@ -771,6 +771,9 @@ io.sockets.on('connection', function(socket) {
 						runner.run(function(err) {
 							socket.emit('log', err);
 							delete pro.runner;
+							for(var key in pro.rooms){
+								delete pro.rooms[key].runner;
+							}
 
 							err.time = new Date().getTime();
 							for (var key in pro.rooms) {
