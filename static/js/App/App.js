@@ -92,7 +92,7 @@ function controlInit(){
 		m_global_v: global_v,
 		m_fileModel: fileModel
 	});
-	var login_control = new LoginControl('#login-box', {
+	var login_control = new LoginControl('#login', {
 		m_global_v: global_v,
 		m_fileModel: fileModel
 	});
