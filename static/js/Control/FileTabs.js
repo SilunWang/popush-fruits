@@ -193,7 +193,7 @@ var FileTabsContorl = can.Control.extend({
 	//点击新建工程
 	'#newprojectopen click': function() {
 		if(m_global_v.currentDirString.split('/').length > 2){
-			alert("cannot new project in this dir");
+			m_global_v.showmessagebox('error','projecterr',1.5);
 			return false;
 		}
 		$('#newfile-inputName').val('');

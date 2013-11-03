@@ -1,10 +1,10 @@
 //chinese language
 var strings_cn = {
-	'language'			:'选择语言: ',
-	'theme'				:'主题',
-	'defaultTheme'			:'默认',
-	'classicSky'			:'蔚蓝',
-	'elegantLife'			:'雅致',
+	'language'						:'选择语言: ',
+	'theme'							:'主题',
+	'defaultTheme'					:'默认',
+	'classicSky'					:'蔚蓝',
+	'elegantLife'					:'雅致',
 	'hide-title'                    :'收起',
 	'show-title'                    :'展开',
 	'pleaseinput'                   :'请输入用户名',
@@ -21,10 +21,10 @@ var strings_cn = {
 	'conflict'                      :'文件已存在',
 	'newfile'                       :'新建文件',
 	'newfolder'                     :'新建文件夹',
-	'uploadfile'			:'上传文件',
-	'uploadzip'			:'上传压缩包(zip)',
-	'createproject'			:'新建工程',
-	'GitFolder'			:'从Github导入',
+	'uploadfile'					:'上传文件',
+	'uploadzip'						:'上传压缩包(zip)',
+	'createproject'					:'新建工程',
+	'GitFolder'						:'从Github导入',
 	'inputpass'                     :'请输入密码',
 	'password incorrect'            :'旧密码错误',
 	'createfilesuccess'             :'创建文件成功',
@@ -93,7 +93,7 @@ var strings_cn = {
 	'ok'                            :'确定',
 	'cancel'                        :'取消',
 	'name'                          :'名称',
-	'url'				:'链接',
+	'url'							:'链接',
 	'clicktochange'                 :'点击图片以更换头像（支持jpg，png格式）：',
 	'add'                           :'增加',
 	'newuser:'                      :'新用户名：',
@@ -120,5 +120,6 @@ var strings_cn = {
 	'finish-title'                  :'跳出过程',
 	'voice'                         :'语音',
 	'removeexpression'              :'删除监视',
-	'novoice'                       :'该浏览器不支持语音，请使用<br />Chrome 18+或Opera 12+'
+	'novoice'                       :'该浏览器不支持语音，请使用<br />Chrome 18+或Opera 12+',
+	'projecterr'					:'无法在当前目录下新建工程'
 };
