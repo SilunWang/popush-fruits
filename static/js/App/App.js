@@ -11,6 +11,13 @@ function modelInit(){
 		g_strings_cn: strings_cn,
 		///////////////////////theme related//////// //////////////
 		g_myTheme: myTheme
+		model_currentDir:[],
+		model_filelist:[],
+		model_mode:'',
+	});
+
+	var filelist_model = new FilelistModel({
+		filelist:""
 	});
 
 	fileModel = new RefreshFilelist({
@@ -46,8 +53,8 @@ function controlInit(){
 		m_global_v: global_v
 	});
 	var file_list_control = new FileListController('#file-list-table', {
-		m_room_Construct: room_Construct,
 		m_global_v: global_v,
+		m_room_Construct: room_Construct,
 		m_fileModel: fileModel
 	});
 	var new_file_control = new NewFileController('#newfile', {
@@ -78,10 +85,6 @@ function controlInit(){
 	var rename_controller = new ReNameControl('#rename', {
 		m_global_v: global_v
 	});
-	var load_control = new DownloadControl('', {
-		m_global_v: global_v,
-		m_fileModel: fileModel
-	});
 	var register_control = new RegisterController('#register', {
 		m_global_v: global_v,
 		m_fileModel: fileModel
@@ -89,6 +92,13 @@ function controlInit(){
 	var login_control = new LoginControl('#login-box', {
 		m_global_v: global_v,
 		m_fileModel: fileModel
+	});
+	var load_control = new DownloadControl('', {
+		m_global_v: global_v,
+		m_fileModel: fileModel
+	});
+	var currentdir_controller = new CurrentdirController('#current-dir', {
+		m_global_v:global_v
 	});
 }
 
