@@ -1,3 +1,6 @@
+
+///这个文件封装了登陆与注册的模块
+
 /*********************Login part*********************/
 
 var LoginControl = can.Control.extend({

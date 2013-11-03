@@ -302,7 +302,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
                 var localRoom = this.roomObj;
                 var localThis = this;
                 socket.on('run', function(data) {
-                        localRoom.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['runsaprogram'], new Date(data.time));
+                        localRoom.appendtochatbox(localThis.globalModel.strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + localThis.globalModel.strings['runsaprogram'], new Date(data.time));
                         localRoom.setrun();
                         localThis.globalModel.operationLock = false;
                 });
@@ -314,9 +314,8 @@ var RunCodeConstruct = can.Construct.extend({}, {
         socket_on_debug: function(socket) {
                 var localThis = this;
                 var localRoom = this.roomObj;
-                var strings = this.globalModel.strings;
                 socket.on('debug', function(data) {
-                        localRoom.appendtochatbox(strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + strings['startdebug'], new Date(data.time));
+                        localRoom.appendtochatbox(localThis.globalModel.strings['systemmessage'], 'system', data.name + '&nbsp;&nbsp;' + localThis.globalModel.strings['startdebug'], new Date(data.time));
 
                         localRoom.setdebug();
 
@@ -349,7 +348,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
                         vars.waiting = false;
                         localThis.runtoline(-1);
                         $('.debugandwait').addClass('disabled');
-                        $('#console-title').text(strings['console']);
+                        $('#console-title').text(localThis.globalModel.strings['console']);
                 });
         },
 
@@ -360,7 +359,6 @@ var RunCodeConstruct = can.Construct.extend({}, {
 
                 var vars = this.roomModel.vars;
                 var localThis = this;
-                var strings = this.globalModel.strings;
 
                 socket.on('waiting', function(data) {
                         if (!vars.debugLock)
@@ -377,11 +375,11 @@ var RunCodeConstruct = can.Construct.extend({}, {
                         }
                         $('.debugandwait').removeClass('disabled');
                         if (typeof data.line === 'number')
-                                $('#console-title').text(strings['console'] + strings['waiting']);
+                                $('#console-title').text(localThis.globalModel.strings['console'] + localThis.globalModel.strings['waiting']);
                         else if (data.line !== null)
-                                $('#console-title').text(strings['console'] + strings['waiting'] + '[' + data.line + ']');
+                                $('#console-title').text(localThis.globalModel.strings['console'] + localThis.globalModel.strings['waiting'] + '[' + data.line + ']');
                         else
-                                $('#console-title').text(strings['console'] + strings['waiting'] + strings['nosource']);
+                                $('#console-title').text(localThis.globalModel.strings['console'] + localThis.globalModel.strings['waiting'] + localThis.globalModel.strings['nosource']);
                 });
         },
 
@@ -416,21 +414,20 @@ var RunCodeConstruct = can.Construct.extend({}, {
                 var localThis = this;
                 var localRoom = this.roomObj;
                 var vars = this.roomModel.vars;
-                var strings = this.globalModel.strings;
 
                 socket.on('exit', function(data) {
 
                         localThis.globalModel.operationLock = false;
 
                         if (data.err.code !== undefined)
-                                localRoom.appendtochatbox(strings['systemmessage'], 'system', strings['programfinish'] + '&nbsp;' + data.err.code, new Date(data.time));
+                                localRoom.appendtochatbox(localThis.globalModel.strings['systemmessage'], 'system', localThis.globalModel.strings['programfinish'] + '&nbsp;' + data.err.code, new Date(data.time));
                         else
-                                localRoom.appendtochatbox(strings['systemmessage'], 'system', strings['programkilledby'] + '&nbsp;' + data.err.signal, new Date(data.time));
+                                localRoom.appendtochatbox(localThis.globalModel.strings['systemmessage'], 'system', localThis.globalModel.strings['programkilledby'] + '&nbsp;' + data.err.signal, new Date(data.time));
 
                         //运行时退出
                         if (vars.runLock) {
                                 $('#editor-run').html('<i class="icon-play"></i>');
-                                $('#editor-run').attr('title', strings['run-title']);
+                                $('#editor-run').attr('title', localThis.globalModel.strings['run-title']);
                                 vars.runLock = false;
                         }
                         //调试时退出
@@ -449,7 +446,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
                                         localThis.globalModel.socket.emit('change', vars.q[0]);
                                 }
                                 $('#editor-debug').html('<i class="icon-eye-open"></i>');
-                                $('#editor-debug').attr('title', strings['debug-title']);
+                                $('#editor-debug').attr('title', localThis.globalModel.strings['debug-title']);
                                 localThis.runtoline(-1);
                                 for (var k in localThis.globalModel.expressionlist.elements) {
                                         localThis.globalModel.expressionlist.setValue(localThis.globalModel.expressionlist.elements[k].expression, null);
@@ -457,7 +454,7 @@ var RunCodeConstruct = can.Construct.extend({}, {
                                 vars.debugLock = false;
                         }
                         localRoom.setrunanddebugstate();
-                        $('#console-title').text(strings['console'] + strings['finished']);
+                        $('#console-title').text(localThis.globalModel.strings['console'] + localThis.globalModel.strings['finished']);
                 });
         },
 

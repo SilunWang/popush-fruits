@@ -1,3 +1,8 @@
+///这个文件主要将一系列同类的初始化操作封装在一起
+///负责model（construct）,control的初始化，list的初始化，页面整体的resize(),根据浏览器初始化模式选择，是否可调试，替换语言变量
+
+
+///初始化model和construct
 function modelInit(){
 	//global data
 	global_v = new GlobalVariables({
@@ -16,10 +21,6 @@ function modelInit(){
 		model_mode:'',
 	});
 
-	var filelist_model = new FilelistModel({
-		filelist:""
-	});
-
 	fileModel = new RefreshFilelist({
 		m_global_v: global_v
 	});
@@ -32,7 +33,7 @@ function modelInit(){
 	});
 } 
 
-
+//初始化filelist,userlsit,memberlist
 function listInit(){
 	//filelist init
 	global_v.filelist = fileList('#file-list-table');
@@ -48,6 +49,8 @@ function listInit(){
 
 }
 
+//各类control的初始化，在这里通过实例化control，渲染ejs，从而渲染出整个页面的dom
+//实例化control需要model的实例
 function controlInit(){
 	var footer_control = new FooterController('#footer', {
 		m_global_v: global_v
@@ -89,7 +92,7 @@ function controlInit(){
 		m_global_v: global_v,
 		m_fileModel: fileModel
 	});
-	var login_control = new LoginControl('#login-box', {
+	var login_control = new LoginControl('#login', {
 		m_global_v: global_v,
 		m_fileModel: fileModel
 	});
@@ -102,6 +105,7 @@ function controlInit(){
 	});
 }
 
+//根据配置文件确定是否可调试
 function debug(){
 	if (!ENABLE_RUN) {
 		$('#editor-run').remove();
@@ -115,6 +119,7 @@ function debug(){
 	}
 }
 
+//根据浏览器种类和版本确定语音支持
 function browser(){
 	if((!Browser.chrome || parseInt(Browser.chrome) < 18) &&
 		(!Browser.opera || parseInt(Browser.opera) < 12)) {
@@ -131,6 +136,7 @@ function browser(){
 	}
 }
 
+//主界面的size调整
 function mainResize(){
 	room_Construct.resize();
 	$(window).resize(function() {room_Construct.resize();});
@@ -139,6 +145,7 @@ function mainResize(){
 	});
 }
 
+//替换语言变量
 function replaceLanguage(){
 	$('[localization]').html(function(index, old) {
 		if (strings[old])

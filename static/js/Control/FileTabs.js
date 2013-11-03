@@ -1,5 +1,8 @@
-/*******************fileTabs*************************/
 
+///这个文件封装了所有的文件列表表头的操作，渲染响应的view
+///具体文件表头模块，和触发的独立的对话框模块
+
+/*******************fileTabs*************************/
 
 //文件列表标题栏的选择模式：拥有者和共享，及其下拉列表操作：新建文件，文件夹，上传文件，上传压缩包，新建工程，从git导入
 var FileTabsContorl = can.Control.extend({
@@ -12,13 +15,6 @@ var FileTabsContorl = can.Control.extend({
 		self.m_global_v = this.options.m_global_v;
 		self.m_fileModel = this.options.m_fileModel;		
 		this.element.append(can.view("../ejs/filetab.ejs", {}));
-	},
-	'#new-file click': function() {
-		$('#newfile-inputName').val('');
-		$('#newfile .control-group').removeClass('error');
-		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['newfile']);
-		m_global_v.newfiletype = 'doc';
 	},
 
 	//点击查看拥有的文件
@@ -75,12 +71,23 @@ var FileTabsContorl = can.Control.extend({
 		$('#sharedfile').addClass('active');
 	},
 
+	//点击新建文件
+	'#new-file click': function() {
+		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['name']);
+		$('#newfile .control-group').removeClass('error');
+		$('#newfile .help-inline').text('');
+		$('#newfileLabel').text(m_global_v.strings['newfile']);
+		m_global_v.newfiletype = 'doc';
+	},
+
 	//点击新建文件夹
 	'#new-file-folder click': function() {
 		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['name']);
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['newfolder']);
+		$('#newfileLabel').text(m_global_v.strings['newfolder']);
 		m_global_v.newfiletype = 'dir';
 	},
 
@@ -153,7 +160,7 @@ var FileTabsContorl = can.Control.extend({
 					  	var zip = new JSZip(evt.target.result);
 					  	$.each(zip.files, function (index, zipEntry){
 						    	if(zipEntry.options.dir == true){
-						    		names.push(currentDirString + '/' + name + '/' + zipEntry.name.substr(0, zipEntry.name.length - 1));
+						    		names.push(m_global_v.currentDirString + '/' + name + '/' + zipEntry.name.substr(0, zipEntry.name.length - 1));
 						    		types.push('dir');
 						    		contents.push('');
 						   
@@ -190,9 +197,10 @@ var FileTabsContorl = can.Control.extend({
 			return false;
 		}
 		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['name']);
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['createproject']);
+		$('#newfileLabel').text(m_global_v.strings['createproject']);
 		m_global_v.newfiletype = 'pro';
 		return true;
 	},
@@ -204,9 +212,10 @@ var FileTabsContorl = can.Control.extend({
 			return false;
 		}
 		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['url']);
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['GitFolder']);
+		$('#newfileLabel').text(m_global_v.strings['GitFolder']);
 		m_global_v.newfiletype = 'git';
 	}
 });
