@@ -1,0 +1,16 @@
+<!--上方一条 带有头像的成员列表-->
+<div id="member-list-doc">
+	<img src="images/character.png" width="40" height="40" class="pull-left shared-character" />
+</div>
+<!--聊天主体框-->
+<div id="chat-show" style="height:284px;">
+	<div id="chat-show-inner"></div>
+</div>
+<!--输入框-->
+<div class="input-append" style="margin-bottom:0">
+	<input type="text" id="chat-input" onkeydown="pressenter(arguments[0],chat)">
+	<button class="btn" type="button" id="chat" title="send"> <i class="icon-comment"></i>
+	</button>
+	<button class="btn active" type="button" id="voice-on" title="voice"> <i class="icon-volume-up"></i>
+	</button>
+</div>
