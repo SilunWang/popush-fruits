@@ -104,7 +104,9 @@ var RoomModel = can.Model.extend({}, {
         },
 
         //根据扩展名（参数ext）判断代码是否可被调试
-        isdebugable: function(ext) {
+         isdebugable: function(ext) {
+                if(this.vars.docobj.path.match(".*\.pro.*")  != null)
+                return false;
                 for (var i = 0; i < this.vars.debugableext.length; i++) {
                         if (this.vars.debugableext[i] == ext)
                                 return true;
