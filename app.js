@@ -774,7 +774,7 @@ io.sockets.on('connection', function(socket) {
 							for(var key in pro.rooms){
 								delete pro.rooms[key].runner;
 							}
-
+							log(err);
 							err.time = new Date().getTime();
 							for (var key in pro.rooms) {
 								var room = pro.rooms[key];
@@ -816,7 +816,7 @@ io.sockets.on('connection', function(socket) {
 						_broadcast(room.id, 'start');
 					});
 					runner.run(function(err) {
-						
+						log(err);
 						delete room.runner;
 						err.time = new Date().getTime();
 						_broadcast(room.id, 'exit', err);
@@ -830,11 +830,13 @@ io.sockets.on('connection', function(socket) {
 		if (!socket.session) {
 			return socket.emit('unauthorized');
 		}
+		//log("kill");
 		var user = socket.session.user;
 		var room = socket.session.room;
-		
-		if (room) {
-				//socket.emit('log', room.runner);
+		//socket.emit('log', room);
+		if (room.runner) {
+			//	log("room-kill");
+		//		socket.emit('log', room.runner);
 				room.runner.kill();
 			} else if (room.dbger){
 				room.dbger.kill();

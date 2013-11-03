@@ -1770,7 +1770,7 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 								var name = names[n - 1];
 								result[name] = {};
 								if (curIndex == docs.length - 1) {
-									get_dir_files(data, true, result[name]);
+									get_dir_files(data, flag, result[name]);
 								} else {
 									get_dir_files(data, false, result[name]);
 								}
