@@ -727,6 +727,9 @@ io.sockets.on('connection', function(socket) {
 				docDAO.getnewestRevision(user._id, project, function(data, name) {
 					//socket.emit('log', data);
 //create a new runner which type is "make"
+					
+						
+					
 					var runner = new Runner(paths[2], "make", data.result);
 					if (runner.ready()) {
 						pro.runner = runner;
@@ -782,10 +785,11 @@ io.sockets.on('connection', function(socket) {
 							}
 						});
 					}
+				
 
 				});
 
-
+			
 			}
 
 		} else {
@@ -1051,7 +1055,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		}
 	});
-//download file, can download either file or file directory in tree format.
+//download file, can download  file or file directory in tree format.
 	socket.on('download', function(data) {
 		var userID = socket.session.user._id;
 		var path = data.path;
