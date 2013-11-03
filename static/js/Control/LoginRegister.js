@@ -26,12 +26,14 @@ var LoginControl = can.Control.extend({
 	},
 	//keydown事件
 	'#login-inputName keydown': function() {
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#login-inputPassword").focus();
 	},
 	'#login-inputPassword keydown': function() {
 		if (event.keyCode == 13)
 			this.login();
+		if(event.keyCode == 38)
+			$("#login-inputName").focus();
 	},
 
 	/////////////////////////////////////logic and business/////////////////////////////////
@@ -234,16 +236,20 @@ var RegisterController = can.Control.extend({
 	},
 
 	'#register-inputName keydown': function() {
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#register-inputPassword").focus();
 	},
 	'#register-inputPassword keydown': function() {
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#register-confirmPassword").focus();
+		if(event.keyCode == 38)
+			$("#register-inputName").focus();
 	},
 	'#register-confirmPassword keydown': function() {
 		if (event.keyCode == 13)
 			this.register();
+		if(event.keyCode == 38)
+			$("#register-inputPassword").focus();
 	},
 	'#register-inputName keyup':function() {
 		this.checkusername();

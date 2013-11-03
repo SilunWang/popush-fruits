@@ -1750,6 +1750,68 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 		//				...
 		//                     }
 			if (result.type == "dir") {
+				(function(){
+					var array = new Array();
+					var parent = new Array();
+					var res = {};
+					var index = 0;
+					for(var key = 0; key < result.docs.length; key ++){
+						array.push(result.docs[key]);
+						parent.push(res);
+					}
+					var get_all_files = function(){
+						var l = array.length;
+						if(index >= l){
+							return callback({result:res, type:"dir"}, _name + ".zip");
+						}else
+						{
+							db.doc.findOne({
+									_id: array[index]
+								}, {
+									_id: 0
+								}, function(err, data) {
+									if (err) {
+										return callback("inner error");
+									}
+									if (!data) {
+										return callback("unauthorized");
+									}
+									var names = data.path.split('/');
+									var name = names[names.length - 1];
+									if (data.type == "dir") {
+										parent[index][name] = {};
+										for(var i = 0; i < data.docs.length; i ++){
+											array.push(data.docs[i]);
+											parent.push(parent[index][name]);
+										}
+										index ++;
+										get_all_files();
+
+									} else {
+										var l = data.revisions.length;
+										var versionId = data.revisions[l - 1];
+										db.revision.findOne({
+											_id: versionId
+										}, {
+											_id: 0
+										}, function(err, data) {
+											if (err) {
+												return callback("inner error");
+											} else if (!result) {
+												return callback("unauthorized");
+											}
+											parent[index][name] = data.content;
+											index ++;
+											get_all_files();
+											
+										});
+									}
+
+						});
+				}
+			}
+			get_all_files();
+		})();
 				var get_dir_files = function(dir, flag, result) {
 					var docs = dir.docs;
 					var get_file = function(docs, curIndex) {
