@@ -2,52 +2,75 @@
 GlobalVariables = can.Model.extend({},{
 	self:this,
 
+	//初始化
+	//定义popush的全局Model的类成员
 	init:function(global_data){
+		//当前目录的按'/'拆分成的数组
 		this.currentDir = [];
+		//当前目录的完整String值
 		this.currentDirString = '';
+		//当前目录的模式，拥有的文件或共享的文件
 		this.dirMode = 'owned';
-
+		//文件类型
 		this.newfiletype = 'doc';
+		//文件出错调用的函数
 		this.filelisterror = function(){;};
+		//渲染文件列表所需要传递的参数
 		this.docshowfilter = {};
-		this.filelist = global_data.g_filelist;
-
+		//文件列表
+		this.filelist = '';
+		//共享用户列表
 		this.userlist = '';
+		//当前共享的文件
 		this.currentsharedoc = '';
-
+		//编辑室在线成员
 		this.memberlist = '';
+		//当前编辑的文件
 		this.memberlistdoc = '';
-
+		//监视表达式列表
 		this.expressionlist = '';
-
+		//
 		this.movehandler = '';
-
+		//编辑室回到文件列表所用到文件列表对象的引用
 		this.backhome = '';
 
+		//是否加载完成
 		this.loadDone = false;
+		//是否失败
 		this.failed = false;
-
+		//加载的内容
 		this.loadings = {};
-
+		//是否是第一次连接
+		//指示下次是否自动登陆
 		this.firstconnect = true;
 
 		/////////////////////// locks //////////////////////////////////
+		//登录锁，为true时不能再进行登录操作，下同		
 		this.loginLock = false;
-		this.registerLock = false
-		this.viewswitchLock = false
+		//注册锁
+		this.registerLock = false;
+		//界面切换的锁
+		this.viewswitchLock = false;
+		//其他一系列操作的锁，共用一把锁，主要是文件操作
 		this.operationLock = false;
 
 		////////////////////////Socket//////////////////////
+		//用于与服务器通信的socket
 		this.socket = global_data.g_socket;
 
 		///////////////////////language related///////////////////
+		//界面中所有文字所对应的变量
 		this.strings = global_data.g_strings;
+		//变量的英文对应关系
 		this.strings_en = global_data.g_strings_en;
+		//变量的中文对应关系
 		this.strings_cn = global_data.g_strings_cn;
 		///////////////////////theme related//////////////////////
+		//当前的主题
 		this.myTheme = global_data.g_myTheme;
-
+		//通信所用，指示删除的是哪个文件
 		this.delete_obj = '';
+		//通信所用，指示重命名的是哪个文件
 		this.rename_obj = '';
 	},
 	//获得当前路径的标准路径名
@@ -81,6 +104,7 @@ GlobalVariables = can.Model.extend({},{
 			var p = t.split('/');
 			if (p.length > 1)
 				t = p[1] + '@' + p[0];
+			//添加tab标签,share或者own
 			if(i == 0 && this.dirMode == 'shared')
 				s += ' / <a href="javascript:;" onclick="' + before + 'fileModel.backto(' + j + ');">shared@' + this.htmlescape(t) + '</a>';
 			else
@@ -88,6 +112,7 @@ GlobalVariables = can.Model.extend({},{
 		}
 		return s;
 	},
+	//转义字符的处理
 	htmlescape: function(text) {
 		return text.
 		replace(/&/gm, '&amp;').
@@ -96,6 +121,8 @@ GlobalVariables = can.Model.extend({},{
 		replace(/ /gm, '&nbsp;').
 		replace(/\n/gm, '<br />');
 	},
+	//返回登陆界面
+	//由于多个独立的control调用，因此设为公共函数
 	backtologin: function() {
 		$('#big-one .container').removeAttr('style');
 		$('#big-one').animate({
@@ -121,6 +148,7 @@ GlobalVariables = can.Model.extend({},{
 
 	/********loading*******/
 
+	//更改dom元素为"加载中"的样式
 	loading: function(id) {
 		if (this.loadings[id])
 			return;
@@ -132,6 +160,7 @@ GlobalVariables = can.Model.extend({},{
 			loading: $('#' + id + '-loading')
 		};
 	},
+	//移除"加载中"的样式
 	removeloading: function(id) {
 		if (!this.loadings[id])
 			return;
@@ -139,11 +168,13 @@ GlobalVariables = can.Model.extend({},{
 		this.loadings[id].loading.remove();
 		delete this.loadings[id];
 	},
+	//清除所有正在loadings队列的元素
 	cleanloading: function() {
 		for (var k in this.loadings) {
 			this.removeloading(k);
 		}
 	},
+	//加载失败显示的样式
 	loadfailed: function() {
 		if (this.loadDone)
 			return;
@@ -154,7 +185,7 @@ GlobalVariables = can.Model.extend({},{
 
 
 	/*************show message***********/	
-
+	//在原界面显示消息
 	showmessage: function(id, stringid, type) {
 		var o = $('#' + id);
 		o.removeClass('alert-error');
@@ -168,6 +199,7 @@ GlobalVariables = can.Model.extend({},{
 			$('#' + id + ' span').html(stringid);
 		o.slideDown();
 	},
+	//在对话框中显示消息
 	showmessageindialog: function(id, stringid, index) {
 		if (index === undefined) {
 			$('#' + id + ' .control-group').addClass('error');
@@ -183,6 +215,7 @@ GlobalVariables = can.Model.extend({},{
 				$('#' + id + ' .help-inline:eq(' + index + ')').text(stringid);
 		}
 	},
+	//显示消息对话框
 	showmessagebox: function(title, content, timeout) {
 		if (strings[title])
 			$('#messagedialogLabel').html(strings[title]);
