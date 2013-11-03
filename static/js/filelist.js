@@ -19,8 +19,8 @@ var exttoicon = {
 	'json':		'json',
 	'lisp':		'lisp',
 	'lua':		'lua',
-	'md':		'md', //
-	'pas':		'pas', //
+	'md':		'md', 
+	'pas':		'pas',
 	'php':		'php',
 	'pl':		'pl',
 	'py':		'py',
@@ -36,10 +36,6 @@ function fileList(table) {
 
 	var obj = $(table);
 
-	var header = '<tr class="head"><th class="col1">&nbsp;</th>' +
-		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
-		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
-	
 	//一个用户的文件列表
 	var elements = [];
 	
@@ -83,7 +79,6 @@ function fileList(table) {
 
 		//重置，在每次登入之后
 		clear: function() {
-			obj.html(header + '<tr class="no-file"><td></td><td>' + strings['nofile'] + '</td><td></td><td></td><td></td></tr>');
 			elements = [];
 			this.elements = elements;
 		},
@@ -95,53 +90,6 @@ function fileList(table) {
 		//设定模式，当进入共享的文件时，newmode=0，当进入拥有的文件时，newmode=2
 		setmode: function(newmode) {
 			mode = newmode;
-			if(mode & 2)
-				header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
-		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3" localization>' + strings['state'] + '</th>' +
-		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
-			else
-				header = '<tr class="head"><th class="col1" localization>&nbsp;</th>' +
-		'<th class="col2" localization>' + strings['filename'] + '</th><th class="col3 owner" localization>' + strings['owner'] + '</th>' +
-		'<th class="col4" localization>' + strings['timestamp'] + '</th><th class="col5" localization>&nbsp;</th></tr>';
-		},
-		
-		//增加一个文件，o:已经格式化好的文件相关信息，包括path,name,showname,type,shared
-		add: function(o) {
-			//移除没有文件这几个字
-			obj.find('.no-file').remove();
-			var i = elements.length;
-
-			//分解文件名
-			var namesplit = o.name.split('/');
-			namesplit = namesplit[namesplit.length - 1];
-			namesplit = namesplit.split('.');
-			var ext = namesplit[namesplit.length - 1];
-			if(namesplit.length == 1)
-				ext = 'unknown';
-
-			var toAppend = '<tr>' +
-				'<td class="col1" localization><img src="' + getpic(o.type, o.shared, ext) + '" height="32" width="32" /></td>' +
-				'<td class="col2" localization><a href="javascript:;" onclick="allFileLists['+n+'].onname(allFileLists['+n+'].elements['+i+'])">' + 
-				htmlescape(o.showname) + '</a></td>' +
-				(mode & 2?('<td class="col3" localization>' + (o.shared?strings['shared']:'') + '</td>'):
-				'<td class="col3 owner" localization><img class="user-' + o.owner.name + '" src="' + o.owner.avatar + '" width="32" height="32"/>' + o.owner.name + '</td>') +
-				'<td class="col4" localization>' + o.time + '</td>' +
-				'<td class="col5" localization><div class="dropdown">' +
-				'<a href="javascript:;" class="dropdown-toggle' + (mode?'':' disabled') + ' opreation" data-toggle="dropdown">&nbsp;</a>' +
-				'<ul class="dropdown-menu">' +
-				(mode & 1?
-				'<li><a href="javascript:;" onclick="allFileLists['+n+'].onshare(allFileLists['+n+'].elements['+i+'])">' + strings['sharemanage'] + '</a></li>':'') +
-				(mode & 2?(
-				'<li><a href="javascript:;" onclick="allFileLists['+n+'].ondelete(allFileLists['+n+'].elements['+i+'])">' + strings['delete'] + '</a></li>' +
-				'<li><a href="javascript:;" onclick="allFileLists['+n+'].onrename(allFileLists['+n+'].elements['+i+'])">' + strings['rename'] + '</a></li>'/* +
-				'<li><a href="javascript:;" onclick="allFileLists['+n+'].ondownload(allFileLists['+n+'].elements['+i+'])">' + strings['export'] + '</a></li>'*/):'') +
-				'</ul>' +
-				'</div>' +
-				'</td>' +
-				'</tr>';
-
-			obj.append(toAppend);
-			return elements.push(o);
 		},
 		
 		//将原始的文档信息数据格式化成可显示的格式并显示
@@ -199,27 +147,24 @@ function fileList(table) {
 			});
 			for(i=0; i<all.length; i++) {
 				var o = all[i];
-				this.add(o);
+				elements.push(o);
 			}
+			return all;
 		},
 		
 		//加载文件
 		loading: function() {
-			oldhtml = obj.html();
 			haveloading = true;
-			setTimeout('allFileLists['+n+'].loadingthen();', 300);
-		},
-		
-		//如果加载比较慢，haveloading变量会仍然保持true，此时出现加载中的图标
-		loadingthen: function() {
-			if(haveloading) 
-				obj.html(header + '<tr class="loading"><td></td><td><img src="images/loading.gif"/></td><td></td><td></td><td></td></tr>');
+			this.setmode(mode + 10);
+			setTimeout('global_v.attr("model_mode",allFileLists['+n+'].getmode())', 300);
 		},
 		
 		//加载列表，标记加载完成？??
 		removeloading: function() {
-			obj.html(oldhtml);
-			haveloading = false;
+			if(haveloading) {
+				haveloading = false;
+				this.setmode(mode - 10);
+			}	
 		}
 	};
 	
