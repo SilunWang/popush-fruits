@@ -80,8 +80,8 @@ var RefreshFilelist = can.Construct({},{
 	doc_on: function() {
 		var self = this;
 		this.m_global_v.socket.on('doc', function(data) {
-			//self.dochandler(data);
-			self.refreshlistdone(data);
+			self.dochandler(data);
+			//self.refreshlistdone(data);
 		});
 	}
 	
