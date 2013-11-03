@@ -65,18 +65,22 @@ var ChangePassControl = can.Control.extend({
 	},
 	
 	'#changepassword-old keydown': function() {
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#changepassword-new").focus();
 	},
 
 	'#changepassword-new keydown': function(){
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#changepassword-confirm").focus();
+		if(event.keyCode == 38)
+			$("#changepassword-old").focus();
 	},
 
 	'#changepassword-confirm keydown': function(){
 		if (event.keyCode == 13)
 			this.changePassword();
+		if(event.keyCode == 38)
+			$("#changepassword-new").focus();
 	},
 
 	//////////////////////////////////logic and business////////////////////////////////
@@ -117,7 +121,6 @@ var ChangePassControl = can.Control.extend({
 			m_global_v.operationLock = false;
 		});
 	}
-
 });
 /****************************************************/
 
