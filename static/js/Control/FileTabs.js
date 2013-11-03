@@ -29,7 +29,7 @@ var FileTabsContorl = can.Control.extend({
 			var files = evt.target.files;
 			var reader = new FileReader();
 			reader.onloadend = function(evt){
-		  		 //console.log(evt.target.result);
+
 		  		var name = files[0].name;
 				name = $.trim(name);
 				if (name == '') {
@@ -148,7 +148,7 @@ var FileTabsContorl = can.Control.extend({
 
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.attr("model_currentDir", m_global_v.currentDir);
-		//m_global_v.save();
+
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		m_global_v.docshowfilter = {
 			flag: 1,
@@ -156,7 +156,7 @@ var FileTabsContorl = can.Control.extend({
 			currentUser: m_global_v.currentUser,
 			htmlescape:m_global_v.htmlescape
 		};
-		//$('#current-dir').html(m_global_v.getdirlink());
+
 		m_fileModel.refreshfilelist(function() {;
 		});
 
@@ -174,7 +174,7 @@ var FileTabsContorl = can.Control.extend({
 
 		m_global_v.currentDir = [m_global_v.currentUser.name];
 		m_global_v.attr("model_currentDir", m_global_v.currentDir);
-		//m_global_v.save();
+
 		m_global_v.currentDirString = m_global_v.getdirstring();
 		m_global_v.docshowfilter = {
 			flag: 0,
@@ -183,7 +183,6 @@ var FileTabsContorl = can.Control.extend({
 			htmlescape:m_global_v.htmlescape
 		};
 
-		//$('#current-dir').html(m_global_v.getdirlink());
 		m_fileModel.refreshfilelist(function() {;
 		});
 
@@ -299,7 +298,7 @@ var NewFileController = can.Control.extend({
 				names.push(m_global_v.currentDirString + '/' + reponame + '.pro');
 				types.push('dir');
 				contents.push("");
-				//socket.emit('git', {type:'dir', path:currentDirString + '/' + reponame, content:""});
+
 				var l = tree.length;
 				$(".help-inline").html('total:' + l + ',clone:' + 0 + '.');
 				for (var i = 0; i < l; i++) {
