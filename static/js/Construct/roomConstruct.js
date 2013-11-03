@@ -205,10 +205,10 @@ var RoomConstruct = can.Construct.extend ({}, {
 
         //点击“控制台”按钮时触发的响应函数，变更控制台的开关状态
         toggleconsole: function() {
-                if (this.roomModel.vars.consoleopen) 
+                if (this.roomModel.vars.consoleopen)
                 {
                         this.closeconsole();
-                } 
+                }
                 else{
                         this.openconsole();
                 }
@@ -444,7 +444,7 @@ var RoomConstruct = can.Construct.extend ({}, {
                 var localThis = this;
                 this.globalModel.socket.emit('leave', {});
 
-                this.globalModel.backhome.refreshfilelist(function() 
+                this.globalModel.backhome.refreshfilelist(function()
                         {;}, function() {
                         $("body").animate({
                                 scrollTop: localThis.roomModel.vars.oldscrolltop
@@ -492,7 +492,7 @@ var RoomConstruct = can.Construct.extend ({}, {
         },
 
         //进入编辑界面时，显示各种数据
-        //data : {id, users(hongyu:true, hongdashen:true), version, text, bps, exprs(监视列表的表达式{变量：值})}        
+        //data : {id, users(hongyu:true, hongdashen:true), version, text, bps, exprs(监视列表的表达式{变量：值})}
         socket_on_set: function(socket) {
 
                 var localThis = this;
@@ -616,5 +616,3 @@ var RoomConstruct = can.Construct.extend ({}, {
         gutterclick: function(cm, n) {}
         
 });
-
-

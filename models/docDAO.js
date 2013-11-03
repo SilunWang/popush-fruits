@@ -1708,6 +1708,7 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 	var that = this;
 	var paths = path.split('/');
 	var rootPath = "/" + paths[1] + "/" + paths[2];
+	var _name = paths[paths.length - 1];
 	var flag = 0;
 	var dId = userId.toString();
 	//console.log(rootPath+userId);
@@ -1793,7 +1794,7 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 									//console.log(name + "hello");
 									result[name] = data.content;
 									if (flag && curIndex == docs.length - 1) {
-										return callback({result:res, type:"dir"}, paths[2] + ".zip");
+										return callback({result:res, type:"dir"}, _name + ".zip");
 									}else{
 										get_file(docs, curIndex  + 1);
 									}
@@ -1828,7 +1829,7 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 						return callback("unauthorized");
 					}
 					//console.log("3"+versionId);
-					return callback({result:result.content, type:"file"}, paths[2]);
+					return callback({result:result.content, type:"file"}, _name);
 				});
 			}
 		});
