@@ -31,7 +31,6 @@ var FileTabsContorl = can.Control.extend({
 			currentUser: m_global_v.currentUser,
 			htmlescape:m_global_v.htmlescape
 		};
-		$('#current-dir').html(m_global_v.getdirlink());
 		m_fileModel.refreshfilelist(function() {;
 		});
 
@@ -58,7 +57,6 @@ var FileTabsContorl = can.Control.extend({
 			htmlescape:m_global_v.htmlescape
 		};
 
-		$('#current-dir').html(m_global_v.getdirlink());
 		m_fileModel.refreshfilelist(function() {;
 		});
 
