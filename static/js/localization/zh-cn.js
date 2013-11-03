@@ -1,3 +1,4 @@
+//chinese language
 var strings_cn = {
 	'language'			:'选择语言: ',
 	'theme'				:'主题',

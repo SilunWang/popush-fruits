@@ -1,4 +1,11 @@
-//Room部分的通用Controller
+//////////////////////// RoomConstruct //////////////////////////////
+
+/************************************************************************
+| 函数名称： RoomConstruct
+| 函数功能： 包装了room通用函数
+| 引用： globalModel roomModel roomObj msgObj editorObj 几个Controller
+| Author: SilunWang
+*************************************************************************/
 
 var RoomConstruct = can.Construct.extend ({}, {
 

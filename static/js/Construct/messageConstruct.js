@@ -1,10 +1,10 @@
-//////////////////////// Socket Controller //////////////////////////////
+//////////////////////// MessageConstruct //////////////////////////////
 
 /************************************************************************
-| 函数名称： SocketController
+| 函数名称： MessageConstruct
 | 函数功能： 包装了与系统消息、聊天、语音有关的socket.on和相关函数
 | 引用： globalModel roomModel roomObj
-|         Author: SilunWang
+| Author: SilunWang
 *************************************************************************/
 
 var MessageConstruct = can.Construct.extend({}, {
@@ -55,7 +55,7 @@ var MessageConstruct = can.Construct.extend({}, {
         socket_on_unshared: function(socket){
                 var mother = this;
                 socket.on('unshared', function(data) {
-                        if (data.name == currentUser.name) {
+                        if (data.name == mother.currentUser.name) {
                                 mother.roomObj.closeeditor();
                                 mother.globalModel.showmessagebox('info', 'you unshared', 1);
                         } else {

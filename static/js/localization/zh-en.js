@@ -1,3 +1,4 @@
+//english language
 var strings_en = {
 	'language'			:'Language: ',
 	'theme'				:'Theme',
