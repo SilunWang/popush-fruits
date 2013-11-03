@@ -178,8 +178,8 @@ GlobalVariables = can.Model.extend({},{
 		o.removeClass('alert-info');
 		if (type && type != '' && type != 'warning')
 			o.addClass('alert-' + type);
-		if (strings[stringid])
-			$('#' + id + ' span').html(strings[stringid]);
+		if (this.strings[stringid])
+			$('#' + id + ' span').html(this.strings[stringid]);
 		else
 			$('#' + id + ' span').html(stringid);
 		o.slideDown();
@@ -188,26 +188,26 @@ GlobalVariables = can.Model.extend({},{
 	showmessageindialog: function(id, stringid, index) {
 		if (index === undefined) {
 			$('#' + id + ' .control-group').addClass('error');
-			if (strings[stringid])
-				$('#' + id + ' .help-inline').text(strings[stringid]);
+			if (this.strings[stringid])
+				$('#' + id + ' .help-inline').text(this.strings[stringid]);
 			else
 				$('#' + id + ' .help-inline').text(stringid);
 		} else {
 			$('#' + id + ' .control-group:eq(' + index + ')').addClass('error');
-			if (strings[stringid])
-				$('#' + id + ' .help-inline:eq(' + index + ')').text(strings[stringid]);
+			if (this.strings[stringid])
+				$('#' + id + ' .help-inline:eq(' + index + ')').text(this.strings[stringid]);
 			else
 				$('#' + id + ' .help-inline:eq(' + index + ')').text(stringid);
 		}
 	},
 	//显示消息对话框
 	showmessagebox: function(title, content, timeout) {
-		if (strings[title])
-			$('#messagedialogLabel').html(strings[title]);
+		if (this.strings[title])
+			$('#messagedialogLabel').html(this.strings[title]);
 		else
 			$('#messagedialogLabel').html(title);
-		if (strings[content])
-			$('#messagedialogContent').html(strings[content]);
+		if (this.strings[content])
+			$('#messagedialogContent').html(this.strings[content]);
 		else
 			$('#messagedialogContent').html(content);
 		$('#messagedialog').modal('show');
