@@ -26,12 +26,14 @@ var LoginControl = can.Control.extend({
 	},
 	//keydown事件
 	'#login-inputName keydown': function() {
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#login-inputPassword").focus();
 	},
 	'#login-inputPassword keydown': function() {
 		if (event.keyCode == 13)
 			this.login();
+		if(event.keyCode == 38)
+			$("#login-inputName").focus();
 	},
 
 	/////////////////////////////////////logic and business/////////////////////////////////
@@ -221,7 +223,7 @@ var RegisterController = can.Control.extend({
 		self.m_global_v = this.options.m_global_v;
 		this.element.append(can.view("../ejs/register.ejs", {}));
 		this.socket_io();
-		this.checkusername();
+		this.focus();
 	},
 
 	///////////////////////////////events//////////////////////////
@@ -234,16 +236,20 @@ var RegisterController = can.Control.extend({
 	},
 
 	'#register-inputName keydown': function() {
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#register-inputPassword").focus();
 	},
 	'#register-inputPassword keydown': function() {
-		if (event.keyCode == 13)
+		if (event.keyCode == 13 || event.keyCode == 40)
 			$("#register-confirmPassword").focus();
+		if(event.keyCode == 38)
+			$("#register-inputName").focus();
 	},
 	'#register-confirmPassword keydown': function() {
 		if (event.keyCode == 13)
 			this.register();
+		if(event.keyCode == 38)
+			$("#register-inputPassword").focus();
 	},
 	'#register-inputName keyup':function() {
 		this.checkusername();
@@ -337,6 +343,47 @@ var RegisterController = can.Control.extend({
 		$('#register-check').css("background", "url('images/check.png') no-repeat scroll 0px -200px transparent");
 		$('#register-inputName').css("border-color", "rgba(82,168,236,0.8)");
 		return;
+	},
+
+	//注册时失去焦点判断用户名合法性
+	focus:function(){
+		$('#register-inputName').focus(function(){
+			$("#msg-username").html(m_global_v.strings['name invalid'] + "," + m_global_v.strings['namelength']);
+		});
+
+		$('#register-inputPassword').focus(function(){
+			var name = $('#register-inputName').val();
+			if(!/^[A-Za-z0-9]*$/.test(name)) {
+				$("#msg-username").html(m_global_v.strings['name invalid']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			if(name == "" || name.length < 6 || name.length > 20) {
+				$("#msg-username").html(m_global_v.strings['namelength']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			return;
+		});
+
+		$("#register-confirmPassword").focus(function(){
+			var name = $('#register-inputName').val();
+			if(!/^[A-Za-z0-9]*$/.test(name)) {
+				$("#msg-username").html(m_global_v.strings['name invalid']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			if(name.length < 6 || name.length > 20) {
+				$("#msg-username").html(m_global_v.strings['namelength']);
+				$('#register-check').css("background","url('images/check.png') no-repeat scroll 0px 0px transparent");
+				$('#register-inputName').css("border-color","rgba(255,0,0,0.8)");
+				return;
+			}
+			return;
+		});
 	},
 
 	///////////////////////////////////////////socket reaction////////////////////////////////////
