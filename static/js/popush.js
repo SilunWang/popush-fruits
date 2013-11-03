@@ -15,11 +15,20 @@ $(document).ready(function() {
 		g_strings_en: strings_en,
 		g_strings_cn: strings_cn,
 		///////////////////////theme related//////// //////////////
-		g_myTheme: myTheme
+		g_myTheme: myTheme,
+
+		model_currentDir:[],
+		model_filelist:[],
+		model_mode:'',
+	});
+
+	var filelist_model = new FilelistModel({
+		filelist:""
 	});
 
 	fileModel = new RefreshFilelist({
-		m_global_v: global_v
+		m_global_v: global_v,
+		m_filelist: filelist_model,
 	});
 
 	//创建Model和Controller
@@ -91,8 +100,8 @@ $(document).ready(function() {
 		m_global_v: global_v
 	});
 	var file_list_control = new FileListController('#file-list-table', {
-		m_room_Construct: room_Construct,
 		m_global_v: global_v,
+		m_room_Construct: room_Construct,
 		m_fileModel: fileModel
 	});
 	var new_file_control = new NewFileController('#newfile', {
@@ -134,6 +143,9 @@ $(document).ready(function() {
 	var load_control = new DownloadControl('', {
 		m_global_v: global_v,
 		m_fileModel: fileModel
+	});
+	var currentdir_controller = new CurrentdirController('#current-dir', {
+		m_global_v:global_v
 	});
 
 	$('[localization]').html(function(index, old) {

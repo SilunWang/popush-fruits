@@ -5,11 +5,15 @@ var FileListController = can.Control.extend({
 	m_fileModel:'',
 	m_object: '',
 	m_room_Construct: '',
+	//self:this,
 	init: function(element, options) {
+		var self = this;
 		m_global_v = this.options.m_global_v;
 		m_room_Construct = this.options.m_room_Construct;
 		m_fileModel = this.options.m_fileModel;
-		this.element.append(can.view("../ejs/filelist.ejs", {}));
+		this.element.append(can.view("../ejs/filelist.ejs", {
+			m_global_v:self.options.m_global_v
+		}));
 		this.initfilelistevent(m_global_v.filelist);
 		$('#rename').on('shown', function() {
 			$('#rename-inputName').focus();
@@ -31,9 +35,11 @@ var FileListController = can.Control.extend({
 				return;
 			if (o.type == 'dir') {
 				m_global_v.currentDir.push(o.name);
+				m_global_v.attr("model_currentDir", m_global_v.currentDir);
 				m_global_v.currentDirString = m_global_v.getdirstring();
 				m_fileModel.refreshfilelist(function() {
 					m_global_v.currentDir.pop();
+					m_global_v.attr("model_currentDir", m_global_v.currentDir);
 					m_global_v.currentDirString = m_global_v.getdirstring();
 				});
 			}
@@ -359,4 +365,20 @@ var DownloadControl = can.Control.extend({
 			});
 		});
 	},
+});
+
+/****************************************************/
+
+
+/********************currentdir**********************/
+
+var CurrentdirController = can.Control.extend({
+	m_global_v: '',
+	self:this,
+	init: function(element, options) {
+		m_global_v = this.options.m_global_v;
+		this.element.append(can.view("../ejs/currentdir.ejs", {
+			m_global_v:self.options.m_global_v
+		}));
+	}
 });

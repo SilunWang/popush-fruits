@@ -1,0 +1,9 @@
+<% 	var j = m_global_v.attr("model_currentDir.length") - 1; 
+	var i = 0;
+	$(m_global_v.model_currentDir).each( function(index,Dir) { 
+%>
+	<% var p = Dir.split('/'); %>
+	<% if (p.length > 1) {Dir = p[1] + '@' + p[0];}; %>
+	/<a href="javascript:;" <%= "onclick=fileModel.backto("+j+")" %>><%= (m_global_v.dirMode == 'shared'&& i == 0)?"shared@":"" %><%= htmlescape(Dir) %></a>
+	<% j--;i++; %>
+<% }); %>

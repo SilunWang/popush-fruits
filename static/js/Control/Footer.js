@@ -57,6 +57,7 @@ var FooterController = can.Control.extend({
 	changeEng: function() {
 		this.setCookie('fruits-language-selection', 'fruits-english-selection');
 		m_global_v.strings = m_global_v.strings_en;
+		m_global_v.attr("g_strings", m_global_v.strings);
 		$('[localization]').html(function(index, oldcontent) {
 			for (var iter in m_global_v.strings_cn) {
 				if (oldcontent == m_global_v.strings_cn[iter])
@@ -76,6 +77,7 @@ var FooterController = can.Control.extend({
 	changeChn: function() {
 		this.setCookie('fruits-language-selection', 'fruits-chinese-selection');
 		m_global_v.strings = m_global_v.strings_cn;
+		m_global_v.attr("g_strings", m_global_v.strings);
 		$('[localization]').html(function(index, oldcontent) {
 			for (var iter in m_global_v.strings_en) {
 				if (oldcontent == m_global_v.strings_en[iter])

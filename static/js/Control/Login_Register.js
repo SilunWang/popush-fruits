@@ -113,6 +113,7 @@ var LoginControl = can.Control.extend({
 
 				//currenDir修改为当前user的name
 				m_global_v.currentDir = [data.user.name];
+				m_global_v.attr("model_currentDir", m_global_v.currentDir);
 				m_global_v.currentDirString = m_global_v.getdirstring();
 				m_global_v.docshowfilter = {
 					flag: 1,
@@ -121,10 +122,11 @@ var LoginControl = can.Control.extend({
 					htmlescape:m_global_v.htmlescape
 				};
 				//获取当前的link
-				$('#current-dir').html(m_global_v.getdirlink());
+				//$('#current-dir').html(m_global_v.getdirlink());
 				//
 				m_global_v.filelist.setmode(3);
-				m_global_v.filelist.formdocs(data.user.docs, m_global_v.docshowfilter);
+				m_global_v.attr("model_mode",3);
+				m_global_v.attr("model_filelist",m_global_v.filelist.formdocs(data.user.docs, m_global_v.docshowfilter));
 
 				m_global_v.memberlist.clear();
 				m_global_v.memberlist.add(data.user);

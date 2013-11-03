@@ -73,7 +73,7 @@ GlobalVariables = can.Model.extend({},{
 		}
 	},
 	//获取链接
-	getdirlink: function(before) {
+	/*getdirlink: function(before) {
 		var s = '';
 		if (!before) {
 			before = '';
@@ -90,7 +90,7 @@ GlobalVariables = can.Model.extend({},{
 				s += ' / <a href="javascript:;" onclick="' + before + 'fileModel.backto(' + j + ');">' + this.htmlescape(t) + '</a>';
 		}
 		return s;
-	},
+	},*/
 	htmlescape: function(text) {
 		return text.
 		replace(/&/gm, '&amp;').
