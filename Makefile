@@ -15,7 +15,7 @@ all: npm $(TARGET)
 
 server: all static conf
 
-deploy: all bin conf
+deploy: all static bin conf
 
 start:
 	@echo ">  start popush"
@@ -31,7 +31,7 @@ npm:
 
 static:
 	@echo ">  make static"
-	#@cd $(STATIC_DIR) && make static 1>/dev/null 
+	@cd $(STATIC_DIR) && make static 1>/dev/null 
 
 conf:
 	@echo ">  configure"
