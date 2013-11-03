@@ -168,8 +168,10 @@ var RunCodeConstruct = can.Construct.extend({}, {
                 this.globalModel.operationLock = true;
                 //runLock：如果正在运行，则为true
                 if (vars.runLock) {
-                        this.globalModel.socket.emit('kill');
+                        //杀掉进程
+                        this.globalModel.socket.emit('kill', {});
                 } else {
+                        //执行程序
                         this.globalModel.socket.emit('run', {
                                 version: vars.doc.version,
                                 type: vars.ext

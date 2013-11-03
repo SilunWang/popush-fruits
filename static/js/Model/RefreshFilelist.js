@@ -25,6 +25,7 @@ var RefreshFilelist = can.Construct({},{
 			this.m_global_v.currentDirString = this.m_global_v.getdirstring();
 		});
 	},
+
 	refreshfilelist: function(error, callback) {
 		this.m_global_v.operationLock = true;
 		this.m_global_v.filelist.loading();
@@ -35,6 +36,7 @@ var RefreshFilelist = can.Construct({},{
 		});
 		this.m_global_v.filelisterror = error;
 	},
+
 	refreshlistdone: function(data) {
 		this.m_global_v.filelist.removeloading();
 		if (data.err) {
@@ -63,10 +65,12 @@ var RefreshFilelist = can.Construct({},{
 		}
 		this.m_global_v.operationLock = false;
 	},
+
 	doc_on: function() {
 		var self = this;
 		this.m_global_v.socket.on('doc', function(data) {
 			self.dochandler(data);
 		});
 	}
+	
 });
