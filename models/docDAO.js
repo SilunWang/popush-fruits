@@ -1750,67 +1750,70 @@ DocDAO.prototype.getnewestRevision = function(userId, path, callback) {
 		//				...
 		//                     }
 			if (result.type == "dir") {
-				var get_dir_files = function(dir, flag, result) {
-					var docs = dir.docs;
-					var get_file = function(docs, curIndex) {
-						db.doc.findOne({
-							_id: docs[curIndex]
-						}, {
-							_id: 0
-						}, function(err, data) {
-							if (err) {
-								return callback("inner error");
-							}
-							if (!data) {
-								return callback("unauthorized");
-							}
-							if (data.type == "dir") {
-								var names = data.path.split('/');
-								var n = names.length;
-								var name = names[n - 1];
-								result[name] = {};
-								if (curIndex == docs.length - 1) {
-									get_dir_files(data, true, result[name]);
-								} else {
-									get_dir_files(data, false, result[name]);
-								}
-
-							} else {
-								var names = data.path.split('/');
-								var n = names.length;
-								var name = names[n - 1];
-								var l = data.revisions.length;
-								var versionId = data.revisions[l - 1];
-								db.revision.findOne({
-									_id: versionId
+				(function(){
+					var array = new Array();
+					var parent = new Array();
+					var res = {};
+					var index = 0;
+					for(var key = 0; key < result.docs.length; key ++){
+						array.push(result.docs[key]);
+						parent.push(res);
+					}
+					var get_all_files = function(){
+						var l = array.length;
+						if(index >= l){
+							return callback({result:res, type:"dir"}, _name + ".zip");
+						}else
+						{
+							db.doc.findOne({
+									_id: array[index]
 								}, {
 									_id: 0
 								}, function(err, data) {
 									if (err) {
 										return callback("inner error");
-									} else if (!result) {
+									}
+									if (!data) {
 										return callback("unauthorized");
 									}
-									//console.log(name + "hello");
-									result[name] = data.content;
-									if (flag && curIndex == docs.length - 1) {
-										return callback({result:res, type:"dir"}, _name + ".zip");
-									}else{
-										get_file(docs, curIndex  + 1);
+									var names = data.path.split('/');
+									var name = names[names.length - 1];
+									if (data.type == "dir") {
+										parent[index][name] = {};
+										for(var i = 0; i < data.docs.length; i ++){
+											array.push(data.docs[i]);
+											parent.push(parent[index][name]);
+										}
+										index ++;
+										get_all_files();
+
+									} else {
+										var l = data.revisions.length;
+										var versionId = data.revisions[l - 1];
+										db.revision.findOne({
+											_id: versionId
+										}, {
+											_id: 0
+										}, function(err, data) {
+											if (err) {
+												return callback("inner error");
+											} else if (!result) {
+												return callback("unauthorized");
+											}
+											parent[index][name] = data.content;
+											index ++;
+											get_all_files();
+											
+										});
 									}
 
-								});
-							}
 						});
-					}
-					if(docs.length > 0){	
-						get_file(docs, 0);
-					}
-
 				}
-				var res = {};
-
-				get_dir_files(result, true, res);
+			}
+			get_all_files();
+		})();
+		return;
+				
 
 			} else {	
 

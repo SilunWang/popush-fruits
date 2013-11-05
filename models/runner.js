@@ -367,7 +367,7 @@ Runner.prototype.run = function(callback) {
 				}
 
 				function clean(err) {
-				//	exec(that.clean, function() {});
+					exec(that.clean, function() {});
 					if (that.err) {
 						err = that.err;
 					}

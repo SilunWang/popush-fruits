@@ -1,27 +1,97 @@
+
+///这个文件封装了所有的文件列表表头的操作，渲染响应的view
+///具体文件表头模块，和触发的独立的对话框模块
+
 /*******************fileTabs*************************/
+
+//文件列表标题栏的选择模式：拥有者和共享，及其下拉列表操作：新建文件，文件夹，上传文件，上传压缩包，新建工程，从git导入
 var FileTabsContorl = can.Control.extend({
+	//全局model的引用
 	m_global_v: '',
 	m_fileModel:'',
 	self: this,
+	//初始化
 	init: function(element, options) {
 		self.m_global_v = this.options.m_global_v;
 		self.m_fileModel = this.options.m_fileModel;		
 		this.element.append(can.view("../ejs/filetab.ejs", {}));
 	},
+
+	//点击查看拥有的文件
+	'#ownedfileex click': function() {
+		if (m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.dirMode = 'owned';
+
+		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.attr("model_currentDir", m_global_v.currentDir);
+
+		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {
+			flag: 1,
+			currentDir: m_global_v.currentDir,
+			currentUser: m_global_v.currentUser,
+			htmlescape:m_global_v.htmlescape
+		};
+
+		m_fileModel.refreshfilelist(function() {;
+		});
+
+		$('#ownedfile').show();
+		$('#ownedfileex').hide();
+		$('#sharedfile').removeClass('active');
+	},
+
+	//点击查看共享的文件
+	'#sharedfile click': function() {
+		if (m_global_v.dirMode == 'shared')
+			return;
+		if (m_global_v.operationLock)
+			return;
+		m_global_v.operationLock = true;
+		m_global_v.dirMode = 'shared';
+
+		m_global_v.currentDir = [m_global_v.currentUser.name];
+		m_global_v.attr("model_currentDir", m_global_v.currentDir);
+
+		m_global_v.currentDirString = m_global_v.getdirstring();
+		m_global_v.docshowfilter = {
+			flag: 0,
+			currentDir: m_global_v.currentDir,
+			currentUser: m_global_v.currentUser,
+			htmlescape:m_global_v.htmlescape
+		};
+
+		m_fileModel.refreshfilelist(function() {;
+		});
+
+		$('#ownedfile').hide();
+		$('#ownedfileex').show();
+		$('#sharedfile').addClass('active');
+	},
+
+	//点击新建文件
 	'#new-file click': function() {
 		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['name']);
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['newfile']);
+		$('#newfileLabel').text(m_global_v.strings['newfile']);
 		m_global_v.newfiletype = 'doc';
 	},
+
+	//点击新建文件夹
 	'#new-file-folder click': function() {
 		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['name']);
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['newfolder']);
+		$('#newfileLabel').text(m_global_v.strings['newfolder']);
 		m_global_v.newfiletype = 'dir';
 	},
+
+	//点击上传文件
 	'#uploadfile click': function() {
 		function handleFileSelect(evt)
 		{
@@ -29,7 +99,7 @@ var FileTabsContorl = can.Control.extend({
 			var files = evt.target.files;
 			var reader = new FileReader();
 			reader.onloadend = function(evt){
-		  		 //console.log(evt.target.result);
+
 		  		var name = files[0].name;
 				name = $.trim(name);
 				if (name == '') {
@@ -66,6 +136,8 @@ var FileTabsContorl = can.Control.extend({
 		upload.click();
 		document.body.removeChild(upload);
 	},
+
+	//点击上传文件夹
 	'#uploadzip click': function() {
 		function handleFileSelect(evt){
 			 var files = evt.target.files;
@@ -85,22 +157,22 @@ var FileTabsContorl = can.Control.extend({
 			  		contents.push("");
 					var reader = new FileReader();
 				  	reader.onloadend = function(evt){
-				  	var zip = new JSZip(evt.target.result);
-				  	$.each(zip.files, function (index, zipEntry){
-		            	if(zipEntry.options.dir == true){
-		            		names.push(currentDirString + '/' + name + '/' + zipEntry.name.substr(0, zipEntry.name.length - 1));
-		            		types.push('dir');
-		            		contents.push('');
-		           
+					  	var zip = new JSZip(evt.target.result);
+					  	$.each(zip.files, function (index, zipEntry){
+						    	if(zipEntry.options.dir == true){
+						    		names.push(m_global_v.currentDirString + '/' + name + '/' + zipEntry.name.substr(0, zipEntry.name.length - 1));
+						    		types.push('dir');
+						    		contents.push('');
+						   
 
-		            	}else{
-		            		names.push(m_global_v.currentDirString + '/' + name + '/' + zipEntry.name);
-		            		types.push('doc');
-		            		contents.push(zip.file(zipEntry.name).asText());
-		            		
-		            	}
-		          	});
-				  	m_global_v.socket.emit('uploadzip', {names:names, contents:contents, types:types});
+						    	}else{
+						    		names.push(m_global_v.currentDirString + '/' + name + '/' + zipEntry.name);
+						    		types.push('doc');
+						    		contents.push(zip.file(zipEntry.name).asText());
+						    		
+						    	}
+				  		});
+					  	m_global_v.socket.emit('uploadzip', {names:names, contents:contents, types:types});
 				  	};
 				  	reader.readAsArrayBuffer(f);
 		    }
@@ -117,82 +189,44 @@ var FileTabsContorl = can.Control.extend({
 		upload.click();
 		document.body.removeChild(upload);
 	},
+
+	//点击新建工程
 	'#newprojectopen click': function() {
 		if(m_global_v.currentDirString.split('/').length > 2){
-			alert("cannot new project in this dir");
+			m_global_v.showmessagebox('error','projecterr',1.5);
 			return false;
 		}
 		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['name']);
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['createproject']);
+		$('#newfileLabel').text(m_global_v.strings['createproject']);
 		m_global_v.newfiletype = 'pro';
 		return true;
 	},
+
+	//点击从git导入
 	'#creategitfolder click': function() {
 		if(m_global_v.currentDirString.split('/').length > 2){
 			alert("cannot new project in this dir");
 			return false;
 		}
 		$('#newfile-inputName').val('');
+		$('#newfile-lable').html(m_global_v.strings['url']);
 		$('#newfile .control-group').removeClass('error');
 		$('#newfile .help-inline').text('');
-		$('#newfileLabel').text(strings['GitFolder']);
+		$('#newfileLabel').text(m_global_v.strings['GitFolder']);
 		m_global_v.newfiletype = 'git';
-	},
-	'#ownedfileex click': function() {
-		if (m_global_v.operationLock)
-			return;
-		m_global_v.operationLock = true;
-		m_global_v.dirMode = 'owned';
-
-		m_global_v.currentDir = [m_global_v.currentUser.name];
-		m_global_v.currentDirString = m_global_v.getdirstring();
-		m_global_v.docshowfilter = {
-			flag: 1,
-			currentDir: m_global_v.currentDir,
-			currentUser: m_global_v.currentUser,
-			htmlescape:m_global_v.htmlescape
-		};
-		$('#current-dir').html(m_global_v.getdirlink());
-		m_fileModel.refreshfilelist(function() {;
-		});
-
-		$('#ownedfile').show();
-		$('#ownedfileex').hide();
-		$('#sharedfile').removeClass('active');
-	},
-	'#sharedfile click': function() {
-		if (m_global_v.dirMode == 'shared')
-			return;
-		if (m_global_v.operationLock)
-			return;
-		m_global_v.operationLock = true;
-		m_global_v.dirMode = 'shared';
-
-		m_global_v.currentDir = [m_global_v.currentUser.name];
-		m_global_v.currentDirString = m_global_v.getdirstring();
-		m_global_v.docshowfilter = {
-			flag: 0,
-			currentDir: m_global_v.currentDir,
-			currentUser: m_global_v.currentUser,
-			htmlescape:m_global_v.htmlescape
-		};
-
-		$('#current-dir').html(m_global_v.getdirlink());
-		m_fileModel.refreshfilelist(function() {;
-		});
-
-		$('#ownedfile').hide();
-		$('#ownedfileex').show();
-		$('#sharedfile').addClass('active');
 	}
 });
 /****************************************************/
 
 
 /*******************New file*************************/
-//Control
+
+//“新建文件”弹出框的业务和事件处理
+//需要处理的包括新建文件，新建文件夹，新建工程，从git导入
+//这些业务处理的逻辑不同，但是共用一$('#newfile')
 var NewFileController = can.Control.extend({
 	m_global_v: '',
 	m_fileModel:'',
@@ -211,7 +245,8 @@ var NewFileController = can.Control.extend({
 		});
 	},
 
-	//reaction area
+	/////////////////////////////////////////////////events//////////////////////////////////////////
+
 	'#newfile-submit click': function() {
 		this.m_filename = $(this.m_filenameId).val();
 		this.newfile();
@@ -222,7 +257,9 @@ var NewFileController = can.Control.extend({
 			this.newfile();
 	},
 
-	//business
+	//////////////////////////////////logic and business////////////////////////////////
+
+	//new file: 新建文件，新建文件夹，新建工程在这部分前端逻辑都一样，区别是后台的操作
 	newfile: function() {
 		var name = $('#newfile-inputName').val();
 		if(m_global_v.newfiletype == 'git')
@@ -253,13 +290,16 @@ var NewFileController = can.Control.extend({
 				name = name + '.pro';
 				m_global_v.newfiletype = 'dir';	
 			}
-		
+			
+			//三种操作不一样的在于发送的文件的类型不同，即json中的type变量
 			m_global_v.socket.emit('new', {
 				type: m_global_v.newfiletype,
 				path: m_global_v.currentDirString + '/' + name
 			});
 		}
 	},
+
+	//从github引入
 	trig_github: function(_name) {
 		var _github = new Github({
 			username: "xu-wang11",
@@ -295,7 +335,7 @@ var NewFileController = can.Control.extend({
 				names.push(m_global_v.currentDirString + '/' + reponame + '.pro');
 				types.push('dir');
 				contents.push("");
-				//socket.emit('git', {type:'dir', path:currentDirString + '/' + reponame, content:""});
+
 				var l = tree.length;
 				$(".help-inline").html('total:' + l + ',clone:' + 0 + '.');
 				for (var i = 0; i < l; i++) {
@@ -322,7 +362,11 @@ var NewFileController = can.Control.extend({
 			});
 		});
 	},
+
+	////////////////////////////////////////////socket reaction/////////////////////////////////////
+ 
 	socket_io: function() {
+		//从服务器端收到'new'请求操作对应的数据，并调用相应的函数
 		m_global_v.socket.on('new', function(data) {
 			if (data.err) {
 				m_global_v.showmessageindialog('newfile', data.err);

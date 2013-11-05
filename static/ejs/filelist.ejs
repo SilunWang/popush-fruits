@@ -1,5 +1,57 @@
-<p>
-	<span localization>currentdir:</span>
-	<span id="current-dir"></span>
-</p>
-<table class="table table-hover" id="file-list-table"></table>
+<tr class="head">
+	<th class="col1">&nbsp;</th>
+	<th class="col2" ><%= m_global_v.attr("g_strings")['filename'] %></th>
+	<th class="col3" ><%= (m_global_v.attr("model_mode") & 2)?m_global_v.attr("g_strings")['state']:m_global_v.attr("g_strings")['owner'] %></th>
+	<th class="col4" ><%= m_global_v.attr("g_strings")['timestamp'] %></th>
+	<th class="col5" >&nbsp;</th>
+</tr>
+	
+<% 	if(m_global_v.attr("model_mode") >= 10){ %>
+	<tr class="loading"><td></td><td><img src="images/loading.gif"/></td><td></td><td></td><td></td></tr>
+<%  } %>
+<%  if(m_global_v.attr("model_filelist.length") > 0 && m_global_v.attr("model_mode") < 10) {
+	var i = 0; 
+	var n = 0;
+	$(m_global_v.model_filelist).each( function(index,file) { 
+%>
+	<%
+		var namesplit = file.name.split('/');
+		namesplit = namesplit[namesplit.length - 1];
+		namesplit = namesplit.split('.');
+		var ext = namesplit[namesplit.length - 1];
+		if(namesplit.length == 1)
+			ext = 'unknown';
+	%>
+	 <tr>
+		<td class="col1" ><img src="<%= getpic(file.type, file.shared, ext) %>" height="32" width="32" /></td>
+		<td class="col2" ><a href="javascript:;" <%= "onclick=allFileLists["+n+"].onname(allFileLists["+n+"].elements["+i+"])" %>><%= htmlescape(file.showname) %></a></td>
+
+		<% if(m_global_v.attr("model_mode") & 2) {%>
+		<td class="col3" ><%= file.shared?m_global_v.attr("g_strings")['shared']:'' %></td>
+		<% }else{ %>
+		<td class="col3 owner" ><img <%= "class=user-" + file.owner.name %> <%= "src=" + file.owner.avatar %>width="32" height="32"/><%= file.owner.name %></td>
+		<% }; %>
+
+		<td class="col4" ><%= file.time %></td>
+
+		<td class="col5" >
+			<div class="dropdown">
+				<a href="javascript:;" <%= "class='" + renderclass(m_global_v.attr("model_mode")) + "'" %> data-toggle="dropdown">&nbsp;</a>
+				<ul class="dropdown-menu">
+					<% if(m_global_v.attr("model_mode") & 1) {%>
+					<li><a href="javascript:;" <%= "onclick=allFileLists["+n+"].onshare(allFileLists["+n+"].elements["+i+"])" %>><%= m_global_v.attr("g_strings")['sharemanage']%></a></li>
+					<% }; %>
+
+					<% if(m_global_v.attr("model_mode") & 2) {%>
+					<li><a href="javascript:;" <%= "onclick=allFileLists["+n+"].ondelete(allFileLists["+n+"].elements["+i+"])" %>><%= m_global_v.attr("g_strings")['delete']%></a></li>
+					<li><a href="javascript:;" <%= "onclick=allFileLists["+n+"].onrename(allFileLists["+n+"].elements["+i+"])" %>><%= m_global_v.attr("g_strings")['rename']%></a></li>
+					<li><a href="javascript:;" <%= "onclick=allFileLists["+n+"].ondownload(allFileLists["+n+"].elements["+i+"])" %>><%= m_global_v.attr("g_strings")['export']%></a></li>
+					<% }; %>		
+				</ul>
+			</div>
+		</td>
+	</tr>
+	<% i++; %>
+<% });}else if(m_global_v.attr("model_filelist.length") == 0 && m_global_v.attr("model_mode") < 10){ %>
+	<tr class="no-file"><td></td><td><%= m_global_v.attr("g_strings")['nofile'] %></td><td></td><td></td><td></td></tr>
+<% } %>

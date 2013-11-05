@@ -727,6 +727,9 @@ io.sockets.on('connection', function(socket) {
 				docDAO.getnewestRevision(user._id, project, function(data, name) {
 					//socket.emit('log', data);
 //create a new runner which type is "make"
+					
+						
+					
 					var runner = new Runner(paths[2], "make", data.result);
 					if (runner.ready()) {
 						pro.runner = runner;
@@ -771,7 +774,10 @@ io.sockets.on('connection', function(socket) {
 						runner.run(function(err) {
 							socket.emit('log', err);
 							delete pro.runner;
-
+							for(var key in pro.rooms){
+								delete pro.rooms[key].runner;
+							}
+							log(err);
 							err.time = new Date().getTime();
 							for (var key in pro.rooms) {
 								var room = pro.rooms[key];
@@ -779,10 +785,11 @@ io.sockets.on('connection', function(socket) {
 							}
 						});
 					}
+				
 
 				});
 
-
+			
 			}
 
 		} else {
@@ -813,7 +820,7 @@ io.sockets.on('connection', function(socket) {
 						_broadcast(room.id, 'start');
 					});
 					runner.run(function(err) {
-						
+						log(err);
 						delete room.runner;
 						err.time = new Date().getTime();
 						_broadcast(room.id, 'exit', err);
@@ -827,11 +834,13 @@ io.sockets.on('connection', function(socket) {
 		if (!socket.session) {
 			return socket.emit('unauthorized');
 		}
+		//log("kill");
 		var user = socket.session.user;
 		var room = socket.session.room;
-		
-		if (room) {
-				socket.emit('log', room.runner);
+		//socket.emit('log', room);
+		if (room.runner) {
+			//	log("room-kill");
+		//		socket.emit('log', room.runner);
 				room.runner.kill();
 			} else if (room.dbger){
 				room.dbger.kill();
@@ -1046,7 +1055,7 @@ io.sockets.on('connection', function(socket) {
 			});
 		}
 	});
-//download file, can download either file or file directory in tree format.
+//download file, can download  file or file directory in tree format.
 	socket.on('download', function(data) {
 		var userID = socket.session.user._id;
 		var path = data.path;

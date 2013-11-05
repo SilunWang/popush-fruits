@@ -71,12 +71,6 @@
       display: block;
     }
 
-    .wheel-button.active span{
-      transform: rotate(135deg);
-      -ms-transform: rotate(135deg); /* IE 9 */
-      -webkit-transform: rotate(135deg); /* Safari and Chrome */
-    }
-
     .wheel li a, .wheel li a:visited{
       background: rgba(20,20,20,0.5);
       border-radius: 100px;
